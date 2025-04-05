@@ -62,27 +62,24 @@ class iconsGmp extends moduleGmp {
 
 		// Load the SVG into a DOMDocument.
 		$dom = new DOMDocument();
-		libxml_use_internal_errors( true );
-		$dom->loadXML( $svg, LIBXML_NOENT | LIBXML_DTDLOAD | LIBXML_DTDATTR );
-		libxml_clear_errors();
+    libxml_use_internal_errors(true);
+    $dom->loadXML($svg, LIBXML_NOENT | LIBXML_NONET | LIBXML_NOCDATA);
+    libxml_clear_errors();
 
-		// Remove disallowed elements and attributes.
-		$elements = $dom->getElementsByTagName('*');
-		for ( $i = $elements->length - 1; $i >= 0; $i-- ) {
-			$element = $elements->item( $i );
-			if ( ! in_array( $element->nodeName, $allowed_elements ) ) {
-				$element->parentNode->removeChild( $element );
-			} else {
-				// Remove disallowed attributes.
-				foreach ( iterator_to_array( $element->attributes ) as $attribute ) {
-					if ( ! in_array( $attribute->nodeName, $allowed_attributes ) ) {
-						$element->removeAttribute( $attribute->nodeName );
-					}
-				}
-			}
-		}
+    $elements = $dom->getElementsByTagName('*');
+    for ($i = $elements->length - 1; $i >= 0; $i--) {
+        $element = $elements->item($i);
+        if (!in_array($element->nodeName, $allowed_elements)) {
+            $element->parentNode->removeChild($element);
+        } else {
+            foreach (iterator_to_array($element->attributes) as $attribute) {
+                if (!in_array($attribute->nodeName, $allowed_attributes)) {
+                    $element->removeAttribute($attribute->nodeName);
+                }
+            }
+        }
+    }
 
-		// Save the sanitized SVG.
-		return $dom->saveXML();
-	}
+    return $dom->saveXML();
+}
 }
