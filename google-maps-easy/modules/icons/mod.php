@@ -62,9 +62,11 @@ class iconsGmp extends moduleGmp {
 
 		// Load the SVG into a DOMDocument.
 		$dom = new DOMDocument();
-    libxml_use_internal_errors(true);
-    $dom->loadXML($svg, LIBXML_NOENT | LIBXML_NONET | LIBXML_NOCDATA);
-    libxml_clear_errors();
+		libxml_use_internal_errors(true);
+		$dom->resolveExternals = false;
+		$dom->substituteEntities = false;
+		$dom->loadXML($svg, LIBXML_NONET | LIBXML_NOCDATA | LIBXML_NOWARNING | LIBXML_NOERROR);
+		libxml_clear_errors();
 
     $elements = $dom->getElementsByTagName('*');
     for ($i = $elements->length - 1; $i >= 0; $i--) {
