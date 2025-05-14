@@ -4,8 +4,8 @@ Author URI: https://supsystic.com/
 Plugin URI: https://supsystic.com/plugins/google-maps-plugin
 Donate link: https://supsystic.com/plugins/google-maps-plugin
 Tags: google map, map, Google Maps, map markers, location
-Tested up to: 6.7
-Stable tag: 1.11.19
+Tested up to: 6.8
+Stable tag: 1.11.21
 License: GNU General Public License v2.0 or later
 
 Google Maps with markers, locations and clusterization, KML layers and filters. Custom Google map markers with text, images, videos, links.
@@ -290,7 +290,14 @@ Easy Google Maps Plugin admin area. Add a marker to the google map.
 
 
 == Changelog ==
-Easy Google Map Plugin v1.11.19 / 15.04.2024 =
+Easy Google Map Plugin v1.11.21 / 14.05.2025 =
+ * Minor fixes
+
+Easy Google Map Plugin v1.11.20 / 06.05.2025 =
+ * Add fix for textdomain notice
+ * Add support WP 6.8.1
+
+Easy Google Map Plugin v1.11.19 / 15.04.2025 =
  * Add security fix for XXE
 
 Easy Google Map Plugin v1.11.18 / 05.04.2024 =

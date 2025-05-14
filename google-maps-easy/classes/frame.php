@@ -99,6 +99,10 @@ class frameGmp {
         }
     }
     public function init() {
+        reqGmp::init();
+        add_action('init', array($this, '_delayedInit'), 5);
+    }
+    public function _delayedInit() {
         //$startTime = microtime(true);
         reqGmp::init();
         $this->_extractTables();
@@ -120,7 +124,7 @@ class frameGmp {
 		register_deactivation_hook(GMP_DIR. DS. GMP_MAIN_FILE, array( 'utilsGmp', 'deactivatePlugin' ) );
 
 		add_action('init', array($this, 'connectLang'));
-        //$operationTime = microtime(true) - $startTime;
+        // $operationTime = microtime(true) - $startTime;
     }
 	public function connectLang() {
 		load_plugin_textdomain(GMP_LANG_CODE, false, GMP_PLUG_NAME. '/languages/' );
