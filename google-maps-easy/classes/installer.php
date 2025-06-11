@@ -491,14 +491,17 @@ class installerGmp {
 			update_option($wpPrefix. 'gmp_db_version', GMP_VERSION_PLUGIN);
 		}
 	}
-	static public function updateIcon() {
+	static public function updateIcon()
+	{
 		global $wpdb;
-		if ($icons = $wpdb->get_results("SELECT id FROM {$wpdb->prefix}gmp_icons WHERE title IN ('marker', 'flag', 'pin', 'star')", ARRAY_A)) {
-			 if (count($icons) < 45) {
-				 frameGmp::_()->getModule('icons')->getModel()->setDefaultIcons();
-			 }
-		 } else {
-			 frameGmp::_()->getModule('icons')->getModel()->setDefaultIcons();
-		 }
+		if (!empty(frameGmp::_()->getModule('icons'))) {
+			if ($icons = $wpdb->get_results("SELECT id FROM {$wpdb->prefix}gmp_icons WHERE title IN ('marker', 'flag', 'pin', 'star')", ARRAY_A)) {
+				if (count($icons) < 45) {
+					frameGmp::_()->getModule('icons')->getModel()->setDefaultIcons();
+				}
+			} else {
+				frameGmp::_()->getModule('icons')->getModel()->setDefaultIcons();
+			}
+		}
 	}
 }
