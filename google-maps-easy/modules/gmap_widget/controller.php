@@ -1,4 +1,2 @@
 <?php
-class gmap_widgetControllerGmp extends controllerGmp {
-
-}
+class gmap_widgetControllerGmp extends controllerGmp {}

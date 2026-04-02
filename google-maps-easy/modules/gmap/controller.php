@@ -1,80 +1,88 @@
 <?php
-class gmapControllerGmp extends controllerGmp {
-	/*public function getAllMaps($withMarkers = false){
+class gmapControllerGmp extends controllerGmp
+{
+  /*public function getAllMaps($withMarkers = false){
 	   $maps = $this->getModel()->getAllMaps($withMarkers);
 	   var_dump($maps);
 	   return $maps;
 	}*/
-	protected function _prepareTextLikeSearch($val) {
-		$query = '(title LIKE "%'. $val. '%"';
-		if(is_numeric($val)) {
-			$query .= ' OR id LIKE "%'. (int) $val. '%"';
-		}
-		$query .= ')';
-		return $query;
-	}
-	public function save() {
-		$saveRes = false;
-		$data = reqGmp::get('post');
-		$res = new responseGmp();
-		$mapId = 0;
-		$edit = true;
-		if(!isset($data['map_opts'])) {
-			$res->pushError(__('Map data not found', GMP_LANG_CODE));
-			return $res->ajaxExec();
-		}
-		if(isset($data['map_opts']['id']) && !empty($data['map_opts']['id'])) {
-			$saveRes = $this->getModel()->updateMap($data['map_opts']);
-			$mapId = $data['map_opts']['id'];
-		} else {
-			$saveRes = $this->getModel()->saveNewMap($data['map_opts']);
-			$mapId = $saveRes;
-			$edit = false;
-		}
-		if($saveRes) {
-			$addMarkerIds = reqGmp::getVar('add_marker_ids');
-			if($addMarkerIds && !empty($addMarkerIds)) {
-				frameGmp::_()->getModule('marker')->getModel()->setMarkersToMap($addMarkerIds, $mapId);
-				$this->getModel()->resortMarkers(array('map_id' => $mapId));
-			}
-			if(frameGmp::_()->getModule('supsystic_promo')->isPro()) {
-				$addShapeIds = reqGmp::getVar('add_shape_ids');
-				if($addShapeIds && !empty($addShapeIds) && frameGmp::_()->getModule('shape')) {
-					frameGmp::_()->getModule('shape')->getModel()->setShapesToMap($addShapeIds, $mapId);
-					$this->getModel()->resortShapes(array('map_id' => $mapId));
-				}
-			}
-			$res->addMessage(__('Done', GMP_LANG_CODE));
-			$res->addData('map_id', $mapId);
-			$res->addData('map', $this->getModel()->getMapById( $mapId ));
-			if(!$edit) {	// For new maps
-				$fullEditUrl = $this->getModule()->getEditMapLink( $mapId );
-				$editUrlParts = explode('/', $fullEditUrl);
-				$res->addData('edit_url', $editUrlParts[ count($editUrlParts) - 1 ]);
-			}
-		} else {
-			$res->pushError( $this->getModel()->getErrors() );
-		}
-		//frameGmp::_()->getModule('supsystic_promo')->getModel()->saveUsageStat('map.edit');
-		return $res->ajaxExec();
-	}
-	public function remove() {
-		$res = new responseGmp();
-		if($this->getModel()->remove(reqGmp::getVar('id', 'post'))) {
-			$res->addMessage(__('Done', GMP_LANG_CODE));
-		} else
-			$res->pushError($this->getModel()->getErrors());
-		$res->ajaxExec();
-	}
-	public function cloneMapGroup() {
-		$res = new responseGmp();
-		if($this->getModel()->cloneMapGroup(reqGmp::getVar('listIds', 'post'))) {
-			$res->addMessage(__('Done', GMP_LANG_CODE));
-		} else
-			$res->pushError($this->getModel()->getErrors());
-		$res->ajaxExec();
-	}
-	/*public function removeMap(){
+  protected function _prepareTextLikeSearch($val)
+  {
+    $query = '(title LIKE "%' . $val . '%"';
+    if (is_numeric($val)) {
+      $query .= ' OR id LIKE "%' . (int) $val . '%"';
+    }
+    $query .= ')';
+    return $query;
+  }
+  public function save()
+  {
+    $saveRes = false;
+    $data = reqGmp::get('post');
+    $res = new responseGmp();
+    $mapId = 0;
+    $edit = true;
+    if (!isset($data['map_opts'])) {
+      $res->pushError(__('Map data not found', GMP_LANG_CODE));
+      return $res->ajaxExec();
+    }
+    if (isset($data['map_opts']['id']) && !empty($data['map_opts']['id'])) {
+      $saveRes = $this->getModel()->updateMap($data['map_opts']);
+      $mapId = $data['map_opts']['id'];
+    } else {
+      $saveRes = $this->getModel()->saveNewMap($data['map_opts']);
+      $mapId = $saveRes;
+      $edit = false;
+    }
+    if ($saveRes) {
+      $addMarkerIds = reqGmp::getVar('add_marker_ids');
+      if ($addMarkerIds && !empty($addMarkerIds)) {
+        frameGmp::_()->getModule('marker')->getModel()->setMarkersToMap($addMarkerIds, $mapId);
+        $this->getModel()->resortMarkers(['map_id' => $mapId]);
+      }
+      if (frameGmp::_()->getModule('supsystic_promo')->isPro()) {
+        $addShapeIds = reqGmp::getVar('add_shape_ids');
+        if ($addShapeIds && !empty($addShapeIds) && frameGmp::_()->getModule('shape')) {
+          frameGmp::_()->getModule('shape')->getModel()->setShapesToMap($addShapeIds, $mapId);
+          $this->getModel()->resortShapes(['map_id' => $mapId]);
+        }
+      }
+      $res->addMessage(__('Done', GMP_LANG_CODE));
+      $res->addData('map_id', $mapId);
+      $res->addData('map', $this->getModel()->getMapById($mapId));
+      if (!$edit) {
+        // For new maps
+        $fullEditUrl = $this->getModule()->getEditMapLink($mapId);
+        $editUrlParts = explode('/', $fullEditUrl);
+        $res->addData('edit_url', $editUrlParts[count($editUrlParts) - 1]);
+      }
+    } else {
+      $res->pushError($this->getModel()->getErrors());
+    }
+    //frameGmp::_()->getModule('supsystic_promo')->getModel()->saveUsageStat('map.edit');
+    return $res->ajaxExec();
+  }
+  public function remove()
+  {
+    $res = new responseGmp();
+    if ($this->getModel()->remove(reqGmp::getVar('id', 'post'))) {
+      $res->addMessage(__('Done', GMP_LANG_CODE));
+    } else {
+      $res->pushError($this->getModel()->getErrors());
+    }
+    $res->ajaxExec();
+  }
+  public function cloneMapGroup()
+  {
+    $res = new responseGmp();
+    if ($this->getModel()->cloneMapGroup(reqGmp::getVar('listIds', 'post'))) {
+      $res->addMessage(__('Done', GMP_LANG_CODE));
+    } else {
+      $res->pushError($this->getModel()->getErrors());
+    }
+    $res->ajaxExec();
+  }
+  /*public function removeMap(){
 		$data=  reqGmp::get('post');
 		$res = new responseGmp();
 		if(!isset($data['map_id']) || empty($data['map_id'])){
@@ -91,7 +99,7 @@ class gmapControllerGmp extends controllerGmp {
 		return $res->ajaxExec();
 	}*/
 
-	/*public function getListForTable() {
+  /*public function getListForTable() {
 		$res = new responseGmp();
 		$res->ignoreShellData();
 
@@ -125,7 +133,7 @@ class gmapControllerGmp extends controllerGmp {
 		return $res->ajaxExec();
 	}*/
 
-	/*public function getMapById()
+  /*public function getMapById()
 	{
 		$res = new responseGmp();
 
@@ -150,49 +158,49 @@ class gmapControllerGmp extends controllerGmp {
 		return $res->ajaxExec();
 	}*/
 
-	protected function _prepareListForTbl($data) {
-		if (!empty($data)) {
-			foreach($data as $i => $v) {
-				$mapId   = (int)$data[$i]['id'];
-				$map     = $this->getModel()->getMapById($mapId);
+  protected function _prepareListForTbl($data)
+  {
+    if (!empty($data)) {
+      foreach ($data as $i => $v) {
+        $mapId = (int) $data[$i]['id'];
+        $map = $this->getModel()->getMapById($mapId);
 
-				// Pretty date format based on the WordPress options
-				$format = get_option('date_format');
-				$createDate = date($format, strtotime($data[$i]['create_date']));
+        // Pretty date format based on the WordPress options
+        $format = get_option('date_format');
+        $createDate = date($format, strtotime($data[$i]['create_date']));
 
-				// Markers
-				$markers = $this->getView()->getListMarkers($map);
+        // Markers
+        $markers = $this->getView()->getListMarkers($map);
 
-				// Actions
-				$actions = $this->getView()->getListOperations($map);
+        // Actions
+        $actions = $this->getView()->getListOperations($map);
 
-				$data[$i]['create_date'] = $createDate;
-				$data[$i]['markers'] = preg_replace('/\s+/', ' ', trim($markers));
-				$data[$i]['actions'] = preg_replace('/\s\s+/', ' ', trim($actions));
-			}
-		}
+        $data[$i]['create_date'] = $createDate;
+        $data[$i]['markers'] = preg_replace('/\s+/', ' ', trim($markers));
+        $data[$i]['actions'] = preg_replace('/\s\s+/', ' ', trim($actions));
+      }
+    }
 
-		return $data;
-	}
-//	protected function _prepareTextLikeSearch($val) {
-//		$query = '(ip LIKE "%'. $val. '%"';
-//		if(is_numeric($val)) {
-//			$query .= ' OR id LIKE "%'. (int) $val. '%"';
-//		}
-//		$query .= ')';
-//		return $query;
-//	}
-//	protected function _prepareSortOrder($sortOrder) {
-//		switch($sortOrder) {
-//			case 'type_label':
-//				$sortOrder = 'type';
-//				break;
-//		}
-//		return $sortOrder;
-//	}
+    return $data;
+  }
+  //	protected function _prepareTextLikeSearch($val) {
+  //		$query = '(ip LIKE "%'. $val. '%"';
+  //		if(is_numeric($val)) {
+  //			$query .= ' OR id LIKE "%'. (int) $val. '%"';
+  //		}
+  //		$query .= ')';
+  //		return $query;
+  //	}
+  //	protected function _prepareSortOrder($sortOrder) {
+  //		switch($sortOrder) {
+  //			case 'type_label':
+  //				$sortOrder = 'type';
+  //				break;
+  //		}
+  //		return $sortOrder;
+  //	}
 
-
-	/*private function _convertDataForDatatable($list, $single = false) {
+  /*private function _convertDataForDatatable($list, $single = false) {
 		$returnList = array();
 		if($single) {
 			$list = array($list);
@@ -208,59 +216,66 @@ class gmapControllerGmp extends controllerGmp {
 		}
 		return $returnList;
 	}*/
-	public function getListForTbl() {
-      $res = new responseGmp();
-      $res->ignoreShellData();
-      $model = $this->getModel();
-      $page = (int)sanitize_text_field(reqGmp::getVar('page'));
-			$sord = wp_kses_post(sanitize_text_field(reqGmp::getVar('sord')));
-      $rowsLimit = (int)sanitize_text_field(reqGmp::getVar('rows'));
-      $search = reqGmp::getVar('search');
-      $search = !empty($search['text_like']) ? wp_kses_post(sanitize_text_field($search['text_like'])) : '';
-      $totalCount = $model->getTotalCountBySearch($search);
-      $totalPages = 0;
-      if ($totalCount > 0) {
-         $totalPages = ceil($totalCount / $rowsLimit);
-      }
-      if ($page > $totalPages) {
-         $page = $totalPages;
-      }
-      $limitStart = $rowsLimit * $page - $rowsLimit;
-      if ($limitStart < 0) $limitStart = 0;
-      $data = $model->getListForTblBySearch($search, $limitStart, $rowsLimit, $sord);
-      $data = $this->_prepareListForTbl($data);
-      $res->addData('page', $page);
-      $res->addData('total', $totalPages);
-      $res->addData('rows', $data);
-      $res->addData('records', $model->getLastGetCount());
-      $res = dispatcherGmp::applyFilters($this->getCode() . '_getListForTblResults', $res);
-      $res->ajaxExec();
-   }
-	public function resortMarkers() {
-		$res = new responseGmp();
-		if(!$this->getModel()->resortMarkers(reqGmp::get('post'))) {
-			$res->pushError( $this->getModel()->getErrors() );
-		}
-		return $res->ajaxExec();
-	}
-	public function resortShapes() {
-		$res = new responseGmp();
-		if(!$this->getModel()->resortShapes(reqGmp::get('post'))) {
-			$res->pushError( $this->getModel()->getErrors() );
-		}
-		return $res->ajaxExec();
-	}
-	/**
-	 * @see controller::getPermissions();
-	 */
-	public function getNoncedMethods() {
-		return array('getListForTbl', 'getAllMaps', 'save', 'clear', 'remove', 'removeGroup', 'cloneMapGroup', 'resortMarkers');
-	}
-	public function getPermissions() {
-		return array(
-			GMP_USERLEVELS => array(
-				GMP_ADMIN => array('getListForTbl', 'getAllMaps', 'save', 'clear', 'remove', 'removeGroup', 'cloneMapGroup', 'resortMarkers')
-			),
-		);
-	}
+  public function getListForTbl()
+  {
+    $res = new responseGmp();
+    $res->ignoreShellData();
+    $model = $this->getModel();
+    $page = (int) sanitize_text_field(reqGmp::getVar('page'));
+    $sord = wp_kses_post(sanitize_text_field(reqGmp::getVar('sord')));
+    $rowsLimit = (int) sanitize_text_field(reqGmp::getVar('rows'));
+    $search = reqGmp::getVar('search');
+    $search = !empty($search['text_like']) ? wp_kses_post(sanitize_text_field($search['text_like'])) : '';
+    $totalCount = $model->getTotalCountBySearch($search);
+    $totalPages = 0;
+    if ($totalCount > 0) {
+      $totalPages = ceil($totalCount / $rowsLimit);
+    }
+    if ($page > $totalPages) {
+      $page = $totalPages;
+    }
+    $limitStart = $rowsLimit * $page - $rowsLimit;
+    if ($limitStart < 0) {
+      $limitStart = 0;
+    }
+    $data = $model->getListForTblBySearch($search, $limitStart, $rowsLimit, $sord);
+    $data = $this->_prepareListForTbl($data);
+    $res->addData('page', $page);
+    $res->addData('total', $totalPages);
+    $res->addData('rows', $data);
+    $res->addData('records', $model->getLastGetCount());
+    $res = dispatcherGmp::applyFilters($this->getCode() . '_getListForTblResults', $res);
+    $res->ajaxExec();
+  }
+  public function resortMarkers()
+  {
+    $res = new responseGmp();
+    if (!$this->getModel()->resortMarkers(reqGmp::get('post'))) {
+      $res->pushError($this->getModel()->getErrors());
+    }
+    return $res->ajaxExec();
+  }
+  public function resortShapes()
+  {
+    $res = new responseGmp();
+    if (!$this->getModel()->resortShapes(reqGmp::get('post'))) {
+      $res->pushError($this->getModel()->getErrors());
+    }
+    return $res->ajaxExec();
+  }
+  /**
+   * @see controller::getPermissions();
+   */
+  public function getNoncedMethods()
+  {
+    return ['getListForTbl', 'getAllMaps', 'save', 'clear', 'remove', 'removeGroup', 'cloneMapGroup', 'resortMarkers'];
+  }
+  public function getPermissions()
+  {
+    return [
+      GMP_USERLEVELS => [
+        GMP_ADMIN => ['getListForTbl', 'getAllMaps', 'save', 'clear', 'remove', 'removeGroup', 'cloneMapGroup', 'resortMarkers'],
+      ],
+    ];
+  }
 }

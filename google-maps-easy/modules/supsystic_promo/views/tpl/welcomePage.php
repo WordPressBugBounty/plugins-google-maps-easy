@@ -73,70 +73,70 @@ jQuery(document).ready(function(){
 	<div class="supsystic-item supsystic-panel">
 		<form id="toeWelcomePageFindUsForm" method="GET">
 			<h1>
-				<?php _e('Welcome to', GMP_LANG_CODE)?>
-				<?php echo GMP_WP_PLUGIN_NAME?>
-				<?php _e('Version', GMP_LANG_CODE)?>
-				<?php echo GMP_VERSION_PLUGIN?>!
+				<?php _e('Welcome to', GMP_LANG_CODE); ?>
+				<?php echo GMP_WP_PLUGIN_NAME; ?>
+				<?php _e('Version', GMP_LANG_CODE); ?>
+				<?php echo GMP_VERSION_PLUGIN; ?>!
 			</h1>
 			<div class="clear"></div>
 			<hr />
 			<div class="about-message">
-				<?php printf(__('This is first start up of the %s plugin.', GMP_LANG_CODE), GMP_WP_PLUGIN_NAME)?><br />
-				<?php _e('If you are newbie - check all features on that page, if you are guru - please correct us.', GMP_LANG_CODE)?>
+				<?php printf(__('This is first start up of the %s plugin.', GMP_LANG_CODE), GMP_WP_PLUGIN_NAME); ?><br />
+				<?php _e('If you are newbie - check all features on that page, if you are guru - please correct us.', GMP_LANG_CODE); ?>
 			</div>
 			<div class="clear"></div>
 			<div class="spacer"></div>
 
 			<h2>Where did you find us?</h2>
-			<?php foreach($this->askOptions as $askId => $askOpt) { ?>
-				<label><?php echo htmlGmp::wpKsesHtml(htmlGmp::radiobutton('where_find_us', array('value' => esc_attr($askId))))?>&nbsp;<?php echo esc_attr($askOpt['label'])?></label>
-				<?php if($askId == 4 /*Find on the web*/) { ?>
-					<label id="toeFindUsUrlShell" style="display: none;"><?php _e('Please, post url', GMP_LANG_CODE)?>: <?php echo htmlGmp::wpKsesHtml(htmlGmp::text('find_on_web_url'))?></label>
-				<?php } elseif($askId == 5 /*Other way*/) { ?>
-					<label style="display: none;" id="toeOtherWayTextShell"><?php echo htmlGmp::wpKsesHtml(htmlGmp::textarea('other_way_desc'))?></label>
-				<?php }?>
-			<?php }?>
+			<?php foreach ($this->askOptions as $askId => $askOpt) { ?>
+				<label><?php echo htmlGmp::wpKsesHtml(htmlGmp::radiobutton('where_find_us', ['value' => esc_attr($askId)])); ?>&nbsp;<?php echo esc_attr($askOpt['label']); ?></label>
+				<?php if ($askId == 4 /*Find on the web*/) { ?>
+					<label id="toeFindUsUrlShell" style="display: none;"><?php _e('Please, post url', GMP_LANG_CODE); ?>: <?php echo htmlGmp::wpKsesHtml(htmlGmp::text('find_on_web_url')); ?></label>
+				<?php } elseif ($askId == 5 /*Other way*/) { ?>
+					<label style="display: none;" id="toeOtherWayTextShell"><?php echo htmlGmp::wpKsesHtml(htmlGmp::textarea('other_way_desc')); ?></label>
+				<?php } ?>
+			<?php } ?>
 
 			<div class="spacer"></div>
 
-			<h2><?php _e('Video tutorial', GMP_LANG_CODE)?></h2>
+			<h2><?php _e('Video tutorial', GMP_LANG_CODE); ?></h2>
 			<div class="video-wrapper">
 				<iframe width="640" height="360" src="//www.youtube.com/v/Vqp7EJ2inQ4%26feature" frameborder="0" allowfullscreen></iframe>
 			</div>
 			<div class="clear"></div>
 
-			<div class="about-message"><?php _e('What to do next? Check below section', GMP_LANG_CODE)?>:</div>
+			<div class="about-message"><?php _e('What to do next? Check below section', GMP_LANG_CODE); ?>:</div>
 			<div class="clear"></div>
 
 			<div class="col-3">
-				<h3><?php _e('Boost us', GMP_LANG_CODE)?>:</h3>
-				<p><?php printf(__("It's amazing when you boost development with your feedback and ratings. So we create special <a target='_blank' href='%s'>boost page</a> to help you to help us.", GMP_LANG_CODE), 'https://supsystic.com/boost-our-plugins/')?></p>
+				<h3><?php _e('Boost us', GMP_LANG_CODE); ?>:</h3>
+				<p><?php printf(__("It's amazing when you boost development with your feedback and ratings. So we create special <a target='_blank' href='%s'>boost page</a> to help you to help us.", GMP_LANG_CODE), 'https://supsystic.com/boost-our-plugins/'); ?></p>
 			</div>
 
 			<div class="col-3">
-				<h3><?php _e('Documentation', GMP_LANG_CODE)?>:</h3>
-				<p><?php printf(__("Check <a target='_blank' href='%s'>documentation</a> and FAQ section. If you can't solve your problems - <a target='_blank' href='%s'>contact us</a>.", GMP_LANG_CODE), 'https://supsystic.com/product/supsystic-secure/', 'https://supsystic.com/contacts/')?></p>
+				<h3><?php _e('Documentation', GMP_LANG_CODE); ?>:</h3>
+				<p><?php printf(__("Check <a target='_blank' href='%s'>documentation</a> and FAQ section. If you can't solve your problems - <a target='_blank' href='%s'>contact us</a>.", GMP_LANG_CODE), 'https://supsystic.com/product/supsystic-secure/', 'https://supsystic.com/contacts/'); ?></p>
 			</div>
 
 			<div class="col-3">
-				<h3><?php _e('Full Features List', GMP_LANG_CODE)?>:</h3>
-				<p><?php _e("There are so many features, so we can't post it here. Like", GMP_LANG_CODE)?>:</p>
+				<h3><?php _e('Full Features List', GMP_LANG_CODE); ?>:</h3>
+				<p><?php _e("There are so many features, so we can't post it here. Like", GMP_LANG_CODE); ?>:</p>
 				<ul>
-					<li><?php _e('Captcha for admin login', GMP_LANG_CODE)?></li>
-					<li><?php _e('htaccess admin protect', GMP_LANG_CODE)?></li>
-					<li><?php _e('Hide directory files listing', GMP_LANG_CODE)?></li>
-					<li><?php _e('Check files and directories write permissions', GMP_LANG_CODE)?></li>
+					<li><?php _e('Captcha for admin login', GMP_LANG_CODE); ?></li>
+					<li><?php _e('htaccess admin protect', GMP_LANG_CODE); ?></li>
+					<li><?php _e('Hide directory files listing', GMP_LANG_CODE); ?></li>
+					<li><?php _e('Check files and directories write permissions', GMP_LANG_CODE); ?></li>
 				</ul>
-				<p><?php printf(__("So check full features list <a target='_blank' href='%s'>here</a>.", GMP_LANG_CODE), 'http://worgmpess.org/plugins/supsystic-secure/')?></p>
+				<p><?php printf(__("So check full features list <a target='_blank' href='%s'>here</a>.", GMP_LANG_CODE), 'http://worgmpess.org/plugins/supsystic-secure/'); ?></p>
 			</div>
 			<div class="clear"></div>
 
-			<?php echo htmlGmp::wpKsesHtml(htmlGmp::hidden('pl', array('value' => GMP_CODE)))?>
-			<?php echo htmlGmp::wpKsesHtml(htmlGmp::hidden('page', array('value' => 'supsystic_promo')))?>
-			<?php echo htmlGmp::wpKsesHtml(htmlGmp::hidden('action', array('value' => 'welcomePageSaveInfo')))?>
+			<?php echo htmlGmp::wpKsesHtml(htmlGmp::hidden('pl', ['value' => GMP_CODE])); ?>
+			<?php echo htmlGmp::wpKsesHtml(htmlGmp::hidden('page', ['value' => 'supsystic_promo'])); ?>
+			<?php echo htmlGmp::wpKsesHtml(htmlGmp::hidden('action', ['value' => 'welcomePageSaveInfo'])); ?>
 			<?php echo htmlGmp::defaultNonceForAdminPanel(); ?>
-			<?php echo htmlGmp::wpKsesHtml(htmlGmp::submit('gonext', array('value' => 'Thank for check info. Start using plugin.', 'attrs' => 'class="button button-primary button-hero"')))?>
-			<?php echo htmlGmp::wpKsesHtml(htmlGmp::hidden('original_page', array('value' => $this->originalPage)))?>
+			<?php echo htmlGmp::wpKsesHtml(htmlGmp::submit('gonext', ['value' => 'Thank for check info. Start using plugin.', 'attrs' => 'class="button button-primary button-hero"'])); ?>
+			<?php echo htmlGmp::wpKsesHtml(htmlGmp::hidden('original_page', ['value' => $this->originalPage])); ?>
 
 			<span id="toeWelcomePageFindUsMsg"></span>
 		</form>

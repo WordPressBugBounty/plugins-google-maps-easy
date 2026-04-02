@@ -1,23 +1,26 @@
 .gmpErrorMsg {
-    color: #fa4e7f;
+  color: #fa4e7f;
 }
 .gmpSuccessMsg {
-    color: #4ae8ea;
+  color: #4ae8ea;
 }
 .gmpInputError {
-    border: 1px #fa4e7f solid !important;
+  border: 1px #fa4e7f solid !important;
 }
-.toeUpdateQtyButtonsWrapper {float:left; margin:4px 0 0 -22px;}
+.toeUpdateQtyButtonsWrapper {
+  float: left;
+  margin: 4px 0 0 -22px;
+}
 
 .toeIncDecButton {
-    width: 8px;
-    height: 7px;
-    background: url("../img/toeIncDec.png") top right no-repeat;
-    text-decoration:none;
-    cursor: pointer;
-    text-indent: -9999px;
+  width: 8px;
+  height: 7px;
+  background: url('../img/toeIncDec.png') top right no-repeat;
+  text-decoration: none;
+  cursor: pointer;
+  text-indent: -9999px;
 }
 .toeIncButton {
-    margin-bottom:5px;
-    background-position: top left;
+  margin-bottom: 5px;
+  background-position: top left;
 }

@@ -1,4 +1,2 @@
 <?php
-class shortcodesGmp extends moduleGmp {
-
-}
+class shortcodesGmp extends moduleGmp {}

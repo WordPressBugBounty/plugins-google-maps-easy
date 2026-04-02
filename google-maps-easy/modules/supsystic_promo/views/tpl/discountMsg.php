@@ -34,7 +34,7 @@
 </style>
 <div class="bundleMessageShell">
 	<div class="bundleMessage">
-		<span class="text"><?php echo sprintf(__('Upgrade to bundle and get an access to <a href="%s" target="_blank">all 11 plugins</a> more than 80%% off!', GMP_LANG_CODE), $this->bundlePageLink);?></span>
-		<a href="<?php echo esc_attr($this->buyLink); ?>" class="button" target="_blank"><?php _e('Buy Now', GMP_LANG_CODE)?></a>
+		<span class="text"><?php echo sprintf(__('Upgrade to bundle and get an access to <a href="%s" target="_blank">all 11 plugins</a> more than 80%% off!', GMP_LANG_CODE), $this->bundlePageLink); ?></span>
+		<a href="<?php echo esc_attr($this->buyLink); ?>" class="button" target="_blank"><?php _e('Buy Now', GMP_LANG_CODE); ?></a>
 	</div>
 </div>
