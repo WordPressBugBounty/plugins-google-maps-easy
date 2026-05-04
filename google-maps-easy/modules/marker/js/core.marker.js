@@ -1,7 +1,96 @@
 // Markers
+function gmpCanUseAdvancedMarkers() {
+  return !!(window.google && google.maps && google.maps.marker && google.maps.marker.AdvancedMarkerElement);
+}
+function gmpGetMarkerMapInstance(map) {
+  return map && typeof map.getRawMapInstance == 'function' ? map.getRawMapInstance() : null;
+}
+function gmpNormalizeMarkerPosition(position) {
+  if (!position) {
+    return position;
+  }
+  if (typeof position.lat === 'function' && typeof position.lng === 'function') {
+    return position;
+  }
+  if (typeof position.lat !== 'undefined' && typeof position.lng !== 'undefined') {
+    return new google.maps.LatLng(position.lat, position.lng);
+  }
+  return position;
+}
+function gmpCreateAdvancedMarkerContent(icon) {
+  if (!icon || typeof icon !== 'string') {
+    return null;
+  }
+  var markerContent = document.createElement('img');
+
+  markerContent.src = icon;
+  markerContent.alt = '';
+  markerContent.className = 'gmp-advanced-marker-icon';
+  markerContent.style.maxWidth = 'none';
+  markerContent.style.position = 'absolute';
+  markerContent.style.transform = 'translate(-50%, -100%)';
+  markerContent.title = '';
+
+  return markerContent;
+}
+function gmpPatchAdvancedMarker(marker) {
+  if (!marker || marker._gmpPatched) {
+    return marker;
+  }
+  marker._gmpPatched = true;
+  marker._gmpNativeSetMap = typeof marker.setMap === 'function' ? marker.setMap.bind(marker) : null;
+  marker._gmpNativeGetMap = typeof marker.getMap === 'function' ? marker.getMap.bind(marker) : null;
+  marker._gmpVisible = marker._gmpNativeGetMap ? marker._gmpNativeGetMap() !== null : marker.map !== null;
+  marker._gmpIcon = marker.content && marker.content.tagName === 'IMG' ? marker.content.src : null;
+  marker.getPosition = function () {
+    return gmpNormalizeMarkerPosition(this.position);
+  };
+  marker.setPosition = function (position) {
+    this.position = gmpNormalizeMarkerPosition(position);
+  };
+  marker.getMap = function () {
+    return this._gmpNativeGetMap ? this._gmpNativeGetMap() : this.map || null;
+  };
+  marker.setMap = function (map) {
+    if (this._gmpNativeSetMap) {
+      this._gmpNativeSetMap(map);
+    } else {
+      this.map = map;
+    }
+    this._gmpVisible = map !== null;
+  };
+  marker.getVisible = function () {
+    return this._gmpVisible;
+  };
+  marker.setVisible = function (state) {
+    this._gmpVisible = !!state;
+    if (this._gmpNativeSetMap) {
+      this._gmpNativeSetMap(state ? this._gmpOwnerMap : null);
+    } else {
+      this.map = state ? this._gmpOwnerMap : null;
+    }
+  };
+  marker.getIcon = function () {
+    return this._gmpIcon;
+  };
+  marker.setIcon = function (icon) {
+    this._gmpIcon = icon;
+    this.content = gmpCreateAdvancedMarkerContent(icon);
+  };
+  marker.setTitle = function (title) {
+    this.title = title;
+    if (this.content) {
+      this.content.title = '';
+      this.content.setAttribute('aria-label', title || '');
+    }
+  };
+  return marker;
+}
 function gmpGoogleMarker(map, params) {
   this._map = map;
   this._markerObj = null;
+  this._useAdvancedMarker = false;
+  this._hoverInfoWndTimeout = null;
   var defaults = {
     // Empty for now
   };
@@ -24,6 +113,66 @@ function gmpGoogleMarker(map, params) {
 gmpGoogleMarker.prototype.infoWndOpened = function () {
   return this._infoWndOpened;
 };
+gmpGoogleMarker.prototype._clearHoverInfoWndTimeout = function () {
+  if (this._hoverInfoWndTimeout) {
+    clearTimeout(this._hoverInfoWndTimeout);
+    this._hoverInfoWndTimeout = null;
+  }
+};
+gmpGoogleMarker.prototype._canUseAdvancedMarker = function () {
+  var mapId = this._map.getParam('mapId');
+
+  return gmpCanUseAdvancedMarkers() && !!this._map.getRawMapInstance() && !!mapId;
+};
+gmpGoogleMarker.prototype._prepareAdvancedMarkerParams = function (params) {
+  var markerParams = {
+    map: gmpGetMarkerMapInstance(this._map),
+    position: gmpNormalizeMarkerPosition(params.position),
+    gmpDraggable: !!params.draggable,
+  };
+
+  if (params.zIndex) {
+    markerParams.zIndex = params.zIndex;
+  }
+  if (typeof params.gmpClickable !== 'undefined') {
+    markerParams.gmpClickable = !!params.gmpClickable;
+  }
+  if (typeof params.collisionBehavior !== 'undefined') {
+    markerParams.collisionBehavior = params.collisionBehavior;
+  }
+  markerParams.content = gmpCreateAdvancedMarkerContent(params.icon);
+
+  return markerParams;
+};
+gmpGoogleMarker.prototype._bindMarkerListener = function (eventName, callback) {
+  if (!this._markerObj) {
+    return;
+  }
+  if (this._useAdvancedMarker) {
+    if (eventName === 'click') {
+      eventName = 'gmp-click';
+    }
+    if ((eventName === 'mouseover' || eventName === 'mouseout') && this._markerObj.content && typeof this._markerObj.content.addEventListener === 'function') {
+      this._markerObj.content.addEventListener(eventName, callback);
+      return;
+    }
+  }
+  if (typeof this._markerObj.addListener == 'function') {
+    this._markerObj.addListener(eventName, callback);
+  } else {
+    google.maps.event.addListener(this._markerObj, eventName, callback);
+  }
+};
+gmpGoogleMarker.prototype._openInfoWindow = function () {
+  if (this._useAdvancedMarker) {
+    this._infoWindow.open({
+      map: this._map.getRawMapInstance(),
+      anchor: this._markerObj,
+    });
+  } else {
+    this._infoWindow.open(this._map.getRawMapInstance(), this._markerObj);
+  }
+};
 gmpGoogleMarker.prototype.init = function () {
   var markerParamsForCreate = this._markerParams,
     openInfoWndEvent = 'click',
@@ -34,19 +183,25 @@ gmpGoogleMarker.prototype.init = function () {
     this._markerParams.marker_title = this._markerParams.title;
     delete markerParamsForCreate.title;
   }
-  this._markerObj = new google.maps.Marker(markerParamsForCreate);
+  if (this._canUseAdvancedMarker()) {
+    this._markerObj = gmpPatchAdvancedMarker(new google.maps.marker.AdvancedMarkerElement(this._prepareAdvancedMarkerParams(markerParamsForCreate)));
+    this._markerObj._gmpOwnerMap = this._map.getRawMapInstance();
+    this._markerObj.params = this._markerParams.params || {};
+    this._markerObj.marker_group_id = this._markerParams.marker_group_id || 0;
+    this._markerObj.draggable = !!this._markerParams.draggable;
+    this._useAdvancedMarker = true;
+  } else {
+    this._markerObj = new google.maps.Marker(markerParamsForCreate);
+    if (typeof this._markerObj.setTitle === 'function') {
+      this._markerObj.setTitle('');
+    }
+  }
   if (this._markerParams.dragend) {
-    this._markerObj.addListener('dragend', jQuery.proxy(this._markerParams.dragend, this));
+    this._bindMarkerListener('dragend', jQuery.proxy(this._markerParams.dragend, this));
   }
   if (this._markerParams.click) {
-    this._markerObj.addListener('click', jQuery.proxy(this._markerParams.click, this));
+    this._bindMarkerListener('click', jQuery.proxy(this._markerParams.click, this));
   }
-  this._markerObj.addListener(
-    'domready',
-    jQuery.proxy(function () {
-      changeInfoWndBgColor(this._map);
-    }, this)
-  );
   if (this._markerParams.params && !(window.ontouchstart === null || navigator.msMaxTouchPoints)) {
     if (parseInt(this._markerParams.params.description_mouse_hover)) {
       openInfoWndEvent = 'mouseover';
@@ -55,11 +210,20 @@ gmpGoogleMarker.prototype.init = function () {
       }
     }
   }
-  this._markerObj.addListener(
+  this._bindMarkerListener(
     openInfoWndEvent,
     jQuery.proxy(function () {
       if (this._markerParams.params && !parseInt(this._markerParams.params.description_mouse_hover) && parseInt(this._markerParams.params.marker_link)) {
         return;
+      } else if (openInfoWndEvent === 'mouseover') {
+        this._clearHoverInfoWndTimeout();
+        this._hoverInfoWndTimeout = setTimeout(
+          jQuery.proxy(function () {
+            this.showInfoWnd();
+            this._hoverInfoWndTimeout = null;
+          }, this),
+          500
+        );
       } else {
         this.showInfoWnd();
       }
@@ -67,12 +231,14 @@ gmpGoogleMarker.prototype.init = function () {
     }, this)
   );
   if (closeInfoWndEvent) {
-    this._markerObj.addListener(
+    this._bindMarkerListener(
       closeInfoWndEvent,
       jQuery.proxy(function () {
         var self = this,
           infoWndDiv = jQuery('.gm-style-iw').parent(),
           timeout = 300;
+
+        self._clearHoverInfoWndTimeout();
 
         infoWndDiv.on('mouseover', function () {
           // Mouse is on infowindow content
@@ -94,7 +260,7 @@ gmpGoogleMarker.prototype.init = function () {
     );
   }
   if (this._markerParams.params && parseInt(this._markerParams.params.marker_link)) {
-    this._markerObj.addListener(
+    this._bindMarkerListener(
       openLinkEvent,
       jQuery.proxy(function () {
         var isLink = /http/gi,
@@ -134,12 +300,13 @@ gmpGoogleMarker.prototype.showInfoWnd = function (forceUpdateInfoWnd, forceShow)
     if (this._map.getParam('marker_infownd_type') == 'slide' && typeof this.showInfoWndSlide == 'function') {
       this.showInfoWndSlide();
     } else {
-      this._infoWindow.open(this._map.getRawMapInstance(), this._markerObj);
+      this._openInfoWindow();
     }
     this._infoWndOpened = true;
   }
 };
 gmpGoogleMarker.prototype.hideInfoWnd = function () {
+  this._clearHoverInfoWndTimeout();
   if (this._infoWindow && this._infoWndOpened) {
     this._infoWindow.close();
     this._infoWndOpened = false;
@@ -161,6 +328,7 @@ gmpGoogleMarker.prototype.getIcon = function () {
 };
 gmpGoogleMarker.prototype.setIcon = function (iconPath) {
   this._markerObj.setIcon(iconPath);
+  this._markerParams.icon = iconPath;
 };
 gmpGoogleMarker.prototype.setTitle = function (title, noRefresh) {
   if (!parseInt(this._map._mapParams.hide_marker_tooltip)) this._markerObj.setTitle(title);
@@ -174,7 +342,9 @@ gmpGoogleMarker.prototype.getPosition = function () {
   return this._markerObj.getPosition();
 };
 gmpGoogleMarker.prototype.setPosition = function (lat, lng) {
-  this._markerObj.setPosition(new google.maps.LatLng(lat, lng));
+  var position = new google.maps.LatLng(lat, lng);
+  this._markerObj.setPosition(position);
+  this._markerParams.position = position;
 };
 gmpGoogleMarker.prototype.lat = function () {
   return this.getPosition().lat();
@@ -354,6 +524,9 @@ gmpGoogleMarker.prototype.getMarkerParam = function (key) {
   return this._markerParams[key];
 };
 gmpGoogleMarker.prototype.setMap = function (map) {
+  if (this._useAdvancedMarker && map) {
+    this._markerObj._gmpOwnerMap = map;
+  }
   this.getRawMarkerInstance().setMap(map);
 };
 gmpGoogleMarker.prototype.getMap = function () {
@@ -362,8 +535,8 @@ gmpGoogleMarker.prototype.getMap = function () {
 gmpGoogleMarker.prototype.setVisible = function (state) {
   this.getRawMarkerInstance().setVisible(state);
 };
-gmpGoogleMarker.prototype.getVisible = function (state) {
-  this.getRawMarkerInstance().getVisible(state);
+gmpGoogleMarker.prototype.getVisible = function () {
+  return this.getRawMarkerInstance().getVisible();
 };
 // Common functions
 function _gmpPrepareMarkersList(markers, params) {

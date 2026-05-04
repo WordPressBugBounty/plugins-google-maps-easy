@@ -16,7 +16,17 @@ class gmapViewGmp extends viewGmp
   {
     if (empty($this->_gmapApiUrl)) {
       $apiDomain = $this->getApiDomain();
-      $urlParams = dispatcherGmp::applyFilters('gApiUrlParams', ['key' => $this->getApiKey()]);
+      $urlParams = dispatcherGmp::applyFilters(
+        'gApiUrlParams',
+        [
+          'key' => $this->getApiKey(),
+          'v' => 'weekly',
+        ],
+      );
+      if (!empty($urlParams['libraries'])) {
+        $libraries = array_filter(array_map('trim', explode(',', $urlParams['libraries'])));
+        $urlParams['libraries'] = implode(',', array_unique($libraries));
+      }
       $this->_gmapApiUrl = $apiDomain . 'maps/api/js?' . http_build_query($urlParams);
     }
     return $this->_gmapApiUrl;
@@ -187,7 +197,9 @@ class gmapViewGmp extends viewGmp
     }
     // Connect map assets
     $this->connectMapsAssets($mapObj['params']);
-    frameGmp::_()->addScript('frontend.gmap', $this->getModule()->getModPath() . 'js/frontend.gmap.js', ['jquery'], false, true);
+    $frontendGmapPath = $this->getModule()->getModPath() . 'js/frontend.gmap.js';
+    $frontendGmapFile = $this->getModule()->getModDir() . 'js' . DS . 'frontend.gmap.js';
+    frameGmp::_()->addScript('frontend.gmap', $frontendGmapPath, ['jquery'], filemtime($frontendGmapFile), true);
     // Add styles if they were not added yet
     $content = '';
     if (!in_array($mapObj['view_id'], $this->_mapStyles)) {
@@ -358,7 +370,9 @@ class gmapViewGmp extends viewGmp
     frameGmp::_()->addScript('jquery-ui-sortable');
     frameGmp::_()->addScript('wp.tabs', GMP_JS_PATH . 'wp.tabs.js');
     frameGmp::_()->addScript('admin.gmap', $this->getModule()->getModPath() . 'js/admin.gmap.js');
-    frameGmp::_()->addScript('admin.gmap.edit', $this->getModule()->getModPath() . 'js/admin.gmap.edit.js');
+    $adminGmapEditPath = $this->getModule()->getModPath() . 'js/admin.gmap.edit.js';
+    $adminGmapEditFile = $this->getModule()->getModDir() . 'js' . DS . 'admin.gmap.edit.js';
+    frameGmp::_()->addScript('admin.gmap.edit', $adminGmapEditPath, [], filemtime($adminGmapEditFile));
     frameGmp::_()->addScript('admin.marker.edit', frameGmp::_()->getModule('marker')->getModPath() . 'js/admin.marker.edit.js');
 
     frameGmp::_()->addStyle('admin.gmap', $this->getModule()->getModPath() . 'css/admin.gmap.css');
@@ -479,12 +493,18 @@ class gmapViewGmp extends viewGmp
     } else {
       $params['language'] = isset($params['language']) && !empty($params['language']) ? $params['language'] : utilsGmp::getLangCode2Letter();
 
+      $coreGmapPath = $this->getModule()->getModPath() . 'js/core.gmap.js';
+      $coreGmapFile = $this->getModule()->getModDir() . 'js' . DS . 'core.gmap.js';
+      $coreMarkerPath = frameGmp::_()->getModule('marker')->getModPath() . 'js/core.marker.js';
+      $coreMarkerFile = frameGmp::_()->getModule('marker')->getModDir() . 'js' . DS . 'core.marker.js';
       frameGmp::_()->addScript('google_maps_api', $this->getApiUrl() . '&language=' . $params['language']);
-      frameGmp::_()->addScript('core.gmap', $this->getModule()->getModPath() . 'js/core.gmap.js');
-      frameGmp::_()->addScript('core.marker', frameGmp::_()->getModule('marker')->getModPath() . 'js/core.marker.js');
+      frameGmp::_()->addScript('core.gmap', $coreGmapPath, [], filemtime($coreGmapFile));
+      frameGmp::_()->addScript('core.marker', $coreMarkerPath, [], filemtime($coreMarkerFile));
       if ((isset($params['marker_clasterer']) && $params['marker_clasterer'] != 'none') || $forAdminArea) {
         //frameGmp::_()->addScript('core.markerclusterer', $this->getModule()->getModPath(). 'js/core.markerclusterer.min.js');
-        frameGmp::_()->addScript('core.markerclusterer', $this->getModule()->getModPath() . 'js/core.markerclusterer.js', [], '1.0');
+        $coreMarkerClustererPath = $this->getModule()->getModPath() . 'js/core.markerclusterer.js';
+        $coreMarkerClustererFile = $this->getModule()->getModDir() . 'js' . DS . 'core.markerclusterer.js';
+        frameGmp::_()->addScript('core.markerclusterer', $coreMarkerClustererPath, [], filemtime($coreMarkerClustererFile));
       }
 
       frameGmp::_()->addStyle('core.gmap', $this->getModule()->getModPath() . 'css/core.gmap.css');

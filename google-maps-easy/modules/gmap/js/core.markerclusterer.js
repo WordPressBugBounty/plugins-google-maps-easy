@@ -734,6 +734,9 @@ MarkerClusterer.prototype.createClusters_ = function () {
   if (!this.ready_) {
     return;
   }
+  if (!this.map_ || !this.map_.getBounds || !this.map_.getBounds()) {
+    return;
+  }
 
   // Get our current map view bounds.
   // Create a new bounds object so we don't affect the map.
@@ -851,6 +854,9 @@ Cluster.prototype.getMarkerClusterer = function () {
 Cluster.prototype.getBounds = function () {
   var bounds = new google.maps.LatLngBounds(this.center_, this.center_);
   var markers = this.getMarkers();
+  if (!markers || !markers.length) {
+    return bounds;
+  }
   for (var i = 0, marker; (marker = markers[i]); i++) {
     bounds.extend(marker.getPosition());
   }
@@ -861,9 +867,11 @@ Cluster.prototype.getBounds = function () {
  * Removes the cluster
  */
 Cluster.prototype.remove = function () {
+  this.clusterIcon_.hide();
   this.clusterIcon_.remove();
-  this.markers_.length = 0;
-  delete this.markers_;
+  this.markers_ = [];
+  this.center_ = null;
+  this.bounds_ = null;
 };
 
 /**
@@ -872,7 +880,7 @@ Cluster.prototype.remove = function () {
  * @return {number} The cluster center.
  */
 Cluster.prototype.getSize = function () {
-  return this.markers_.length;
+  return this.markers_ ? this.markers_.length : 0;
 };
 
 /**
@@ -881,7 +889,7 @@ Cluster.prototype.getSize = function () {
  * @return {Array.<google.maps.Marker>} The cluster center.
  */
 Cluster.prototype.getMarkers = function () {
-  return this.markers_;
+  return this.markers_ || [];
 };
 
 /**
@@ -926,14 +934,35 @@ Cluster.prototype.getMap = function () {
  * Updates the cluster icon
  */
 Cluster.prototype.updateIcon = function () {
+  if (!this.markers_ || !this.markers_.length || !this.center_) {
+    this.clusterIcon_.hide();
+    return;
+  }
+  var visibleMarkersOnMap = 0;
+  for (var j = 0; j < this.markers_.length; j++) {
+    if (this.markers_[j].getMap && this.markers_[j].getMap() === this.map_) {
+      visibleMarkersOnMap++;
+    }
+  }
+  if (visibleMarkersOnMap) {
+    this.clusterIcon_.hide();
+    return;
+  }
   var zoom = this.map_.getZoom();
   var mz = this.markerClusterer_.getMaxZoom();
+  var mapMaxZoom = typeof this.map_.get === 'function' ? this.map_.get('maxZoom') : null;
+  var effectiveMaxZoom = mz;
 
-  if (mz && zoom > mz) {
+  if (!effectiveMaxZoom && mapMaxZoom) {
+    effectiveMaxZoom = mapMaxZoom;
+  }
+
+  if (effectiveMaxZoom && zoom >= effectiveMaxZoom) {
     // The zoom is greater than our max zoom so show all the markers in cluster.
     for (var i = 0, marker; (marker = this.markers_[i]); i++) {
       marker.setMap(this.map_);
     }
+    this.clusterIcon_.hide();
     return;
   }
 
@@ -989,6 +1018,9 @@ function ClusterIcon(cluster, styles, opt_padding) {
  */
 ClusterIcon.prototype.triggerClusterClick = function (event) {
   var markerClusterer = this.cluster_.getMarkerClusterer();
+  if (!this.cluster_ || !this.cluster_.getSize || !this.cluster_.getSize()) {
+    return;
+  }
 
   // Trigger the clusterclick event.
   google.maps.event.trigger(markerClusterer, 'clusterclick', this.cluster_, event);
@@ -1016,16 +1048,16 @@ ClusterIcon.prototype.onAdd = function () {
 
   var that = this;
   var isDragging = false;
-  google.maps.event.addDomListener(this.div_, 'click', function (event) {
+  this.div_.addEventListener('click', function (event) {
     // Only perform click when not preceded by a drag
     if (!isDragging) {
       that.triggerClusterClick(event);
     }
   });
-  google.maps.event.addDomListener(this.div_, 'mousedown', function () {
+  this.div_.addEventListener('mousedown', function () {
     isDragging = false;
   });
-  google.maps.event.addDomListener(this.div_, 'mousemove', function () {
+  this.div_.addEventListener('mousemove', function () {
     isDragging = true;
   });
 };
@@ -1055,6 +1087,20 @@ ClusterIcon.prototype.getPosFromLatLng_ = function (latlng) {
  * @ignore
  */
 ClusterIcon.prototype.draw = function () {
+  if (this.cluster_ && this.cluster_.getMarkers) {
+    var markers = this.cluster_.getMarkers(),
+      hasVisibleMarkers = false;
+    for (var i = 0; i < markers.length; i++) {
+      if (markers[i].getMap && markers[i].getMap() === this.map_) {
+        hasVisibleMarkers = true;
+        break;
+      }
+    }
+    if (hasVisibleMarkers) {
+      this.hide();
+      return;
+    }
+  }
   if (this.visible_) {
     var pos = this.getPosFromLatLng_(this.center_);
     this.div_.style.top = pos.y + 'px';
@@ -1068,6 +1114,7 @@ ClusterIcon.prototype.draw = function () {
 ClusterIcon.prototype.hide = function () {
   if (this.div_) {
     this.div_.style.display = 'none';
+    this.div_.style.visibility = 'hidden';
   }
   this.visible_ = false;
 };
@@ -1076,10 +1123,25 @@ ClusterIcon.prototype.hide = function () {
  * Position and show the icon.
  */
 ClusterIcon.prototype.show = function () {
+  if (this.cluster_ && this.cluster_.getMarkers) {
+    var markers = this.cluster_.getMarkers(),
+      hasVisibleMarkers = false;
+    for (var i = 0; i < markers.length; i++) {
+      if (markers[i].getMap && markers[i].getMap() === this.map_) {
+        hasVisibleMarkers = true;
+        break;
+      }
+    }
+    if (hasVisibleMarkers) {
+      this.hide();
+      return;
+    }
+  }
   if (this.div_) {
     var pos = this.getPosFromLatLng_(this.center_);
     this.div_.style.cssText = this.createCss(pos);
     this.div_.style.display = '';
+    this.div_.style.visibility = 'visible';
   }
   this.visible_ = true;
 };
@@ -1088,6 +1150,11 @@ ClusterIcon.prototype.show = function () {
  * Remove the icon from the map
  */
 ClusterIcon.prototype.remove = function () {
+  this.hide();
+  if (this.div_ && this.div_.parentNode) {
+    this.div_.parentNode.removeChild(this.div_);
+    this.div_ = null;
+  }
   this.setMap(null);
 };
 

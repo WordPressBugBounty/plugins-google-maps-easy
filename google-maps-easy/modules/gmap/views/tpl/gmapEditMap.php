@@ -210,6 +210,28 @@ if ($this->isPro) {
 										</div>
 									</td>
 								</tr>
+								<tr>
+									<th scope="row">
+										<label for="map_opts_mapId">
+											<?php _e('Google Map ID', GMP_LANG_CODE); ?>:
+										</label>
+										<i style="float: right;" class="fa fa-question supsystic-tooltip" data-tooltip-content="#tooltip_map_id"></i>
+										<span class="tooltipContent" id="tooltip_map_id">
+											<?php _e('Optional Google Cloud Map ID. When set, the plugin can use Advanced Markers. Google Cloud styling will be used instead of local map stylization.', GMP_LANG_CODE); ?>
+										</span>
+									</th>
+									<td>
+										<?php echo htmlGmp::wpKsesHtml(
+            htmlGmp::text('map_opts[mapId]', [
+              'value' => $this->editMap && isset($this->map['params']['mapId']) ? esc_attr($this->map['params']['mapId']) : '',
+              'attrs' => 'style="width: 100%;" id="map_opts_mapId" placeholder="e.g. 123abc456def7890"',
+            ]),
+          ); ?>
+										<div style="margin-top: 6px; color: #666;">
+											<?php _e('Leave empty to keep legacy behavior and automatic fallback to classic markers.', GMP_LANG_CODE); ?>
+										</div>
+									</td>
+								</tr>
 							</table>
 							<?php
 /*?><div id="gmpExtendOptsBtnShell" class="supRow-pad">
@@ -2352,6 +2374,12 @@ if ($this->isPro) {
 					<div id="gmpHeatmapTab" class="gmpTabContent">
 					<?php if ($this->isPro) { ?>
 						<form id="gmpHeatmapForm">
+							<div style="margin: 0 0 15px 0; padding: 12px 14px; border-left: 4px solid #dba617; background: #fff8e5; color: #5f4b00;">
+								<strong><?php _e('Deprecation notice:', GMP_LANG_CODE); ?></strong>
+								<?php _e('The Heatmap Layer functionality in the Maps JavaScript API is no longer supported. This API was deprecated on May 27, 2025 and will be made unavailable in a later version of the Maps JavaScript API, releasing in May 2026.', GMP_LANG_CODE); ?>
+								<?php _e('Supsystic plans to migrate this module to a replacement heatmap solution with backward compatibility in the near future.', GMP_LANG_CODE); ?>
+								<a href="https://developers.google.com/maps/deprecations" target="_blank" rel="noopener noreferrer"><?php _e('Learn more', GMP_LANG_CODE); ?></a>.
+							</div>
 							<table class="form-table">
 								<tr>
 									<th scope="row">

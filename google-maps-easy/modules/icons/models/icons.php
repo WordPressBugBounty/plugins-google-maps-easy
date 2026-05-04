@@ -1,6 +1,15 @@
 <?php
 class iconsModelGmp extends modelGmp
 {
+  protected function ensureDefaultIconsInstalled()
+  {
+    global $wpdb;
+    $iconsCount = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}gmp_icons");
+
+    if ($iconsCount === 0) {
+      $this->setDefaultIcons();
+    }
+  }
   /* public static $tableObj;
     function __construct() {
         if(empty(self::$tableObj)){
@@ -28,6 +37,7 @@ class iconsModelGmp extends modelGmp
   }
   public function getIcons($params = [])
   {
+    $this->ensureDefaultIconsInstalled();
     global $wpdb;
     $res = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}gmp_icons AS gmp_icons", ARRAY_A);
     if (empty($res) && !$res) {
@@ -168,6 +178,7 @@ class iconsModelGmp extends modelGmp
 
   public function getIconFromId($id)
   {
+    $this->ensureDefaultIconsInstalled();
     global $wpdb;
     $res = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}gmp_icons WHERE " . $wpdb->prepare('id = %s', $id), ARRAY_A);
     //$res = frameGmp::_()->getTable('icons')->get('*', array('id' => $id));

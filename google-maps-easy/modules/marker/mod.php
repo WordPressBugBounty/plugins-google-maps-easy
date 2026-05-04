@@ -1,6 +1,11 @@
 <?php
 class markerGmp extends moduleGmp
 {
+  public function __construct($d)
+  {
+    parent::__construct($d);
+    dispatcherGmp::addFilter('gApiUrlParams', [$this, 'addMapApiUrlParams']);
+  }
   public function init()
   {
     //dispatcherGmp::addFilter('adminOptionsTabs', array($this, 'addOptionsTab'));
@@ -24,5 +29,17 @@ class markerGmp extends moduleGmp
       1 => __('Drop', GMP_LANG_CODE), //DROP
       2 => __('Bounce', GMP_LANG_CODE), //BOUNCE
     ];
+  }
+  public function addMapApiUrlParams($mapParams)
+  {
+    if (!isset($mapParams['libraries'])) {
+      $mapParams['libraries'] = '';
+    }
+    if (empty($mapParams['libraries'])) {
+      $mapParams['libraries'] = 'marker';
+    } else {
+      $mapParams['libraries'] .= ',marker';
+    }
+    return $mapParams;
   }
 }

@@ -66,6 +66,7 @@ class gmapModelGmp extends modelGmp
       'type' /*used "map_type" insted - as this was already nulled*/,
       'map_type',
       'map_display_mode',
+      'mapId',
       'map_center',
       'language',
       'enable_zoom',

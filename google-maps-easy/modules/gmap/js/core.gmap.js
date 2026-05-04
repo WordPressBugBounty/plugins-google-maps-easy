@@ -52,6 +52,12 @@ gmpGoogleMap.prototype.init = function () {
   this._afterInit();
 };
 gmpGoogleMap.prototype._beforeInit = function () {
+  if (typeof this._mapParams.mapId !== 'undefined') {
+    this._mapParams.mapId = jQuery.trim(this._mapParams.mapId);
+    if (!this._mapParams.mapId) {
+      delete this._mapParams.mapId;
+    }
+  }
   if (typeof this._mapParams.type_control !== 'undefined') {
     if (typeof google.maps.MapTypeControlStyle[this._mapParams.type_control] !== 'undefined') {
       this._mapParams.mapTypeControlOptions = {
@@ -97,8 +103,10 @@ gmpGoogleMap.prototype._beforeInit = function () {
   if (typeof this._mapParams.map_type !== 'undefined' && typeof google.maps.MapTypeId[this._mapParams.map_type] !== 'undefined') {
     this._mapParams.mapTypeId = google.maps.MapTypeId[this._mapParams.map_type];
   }
-  if (typeof this._mapParams.map_stylization_data !== 'undefined' && this._mapParams.map_stylization_data) {
+  if (!this._mapParams.mapId && typeof this._mapParams.map_stylization_data !== 'undefined' && this._mapParams.map_stylization_data) {
     this._mapParams.styles = this._mapParams.map_stylization_data;
+  } else if (this._mapParams.mapId && typeof this._mapParams.styles !== 'undefined') {
+    delete this._mapParams.styles;
   }
   jQuery(document).trigger('gmapBeforeMapInit', this);
 };

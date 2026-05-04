@@ -5,7 +5,7 @@ Plugin URI: https://supsystic.com/plugins/google-maps-plugin
 Donate link: https://supsystic.com/plugins/google-maps-plugin
 Tags: google map, map, Google Maps, map markers, location
 Tested up to: 6.9
-Stable tag: 1.12.1
+Stable tag: 1.12.2
 License: GNU General Public License v2.0 or later
 
 Google Maps with markers, locations and clusterization, KML layers and filters. Custom Google map markers with text, images, videos, links.
@@ -289,7 +289,32 @@ Easy Google Maps Plugin admin area. Add a marker to the google map.
 12. Easy Google Maps WordPress plugin admin area. Create markers with a description, links, images and galleries, videos and more.
 
 
+= Compatibility Update =
+This release modernizes the plugin for the current Google Maps JavaScript API while preserving backward compatibility for existing maps.
+
+What was improved:
+* Updated Google Maps JavaScript API loading to the current `v=weekly` channel.
+* Added support for Google Cloud `Map ID` in map settings.
+* Migrated marker rendering to `google.maps.marker.AdvancedMarkerElement` when `Map ID` is available.
+* Preserved legacy compatibility for maps that still work without `Map ID`.
+* Restored marker hover info windows with delayed display and removed the native browser tooltip for both advanced and legacy markers.
+* Improved compatibility of marker clustering, cluster redraw, cluster icon visibility and marker hover behavior on the latest Maps API.
+* Added cache-busting for updated front-end/admin JavaScript assets to reduce stale browser cache issues.
+* Added automatic recovery for default marker icons if the icon table is empty.
+
+Important compatibility notes:
+* Local map stylization and Google Cloud `Map ID` cannot be used together in the same way as before, because Google controls map styling through Cloud Styling when `Map ID` is enabled.
+* The Google Maps JavaScript API Heatmap Layer is deprecated by Google. The plugin now includes an in-product deprecation notice, and Supsystic plans to migrate this functionality to a replacement heatmap solution with backward compatibility.
+
+
 == Changelog ==
+Easy Google Map Plugin v1.12.2 / 28.04.2026 =
+ * Updated compatibility for the current Google Maps JavaScript API (`v=weekly`)
+ * Added `Map ID` support for modern Google Maps rendering
+ * Added `AdvancedMarkerElement` support with backward compatibility for legacy maps
+ * Improved marker hover info windows, marker tooltips and cluster behavior on the latest API
+ * Added automatic default icons recovery when the icon list is empty
+
 Easy Google Map Plugin v1.12.1 / 02.04.2026 =
  * Fixed activation
 
