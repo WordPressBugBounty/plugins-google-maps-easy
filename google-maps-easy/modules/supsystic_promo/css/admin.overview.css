@@ -78,17 +78,6 @@
   margin-top: 10px;
 }
 
-.supsystic-overview #form-settings input,
-.supsystic-overview #form-settings select,
-.supsystic-overview #form-settings textarea {
-  float: left;
-  /*margin-left: 50px;*/
-  width: 100%;
-  float: right;
-}
-.supsystic-overview #form-settings th {
-  min-width: 120px;
-}
 .supsystic-overview .supsistic-half-side-box > div {
   border-bottom: 1px solid rgba(164, 170, 172, 0.28);
   padding-bottom: 20px;

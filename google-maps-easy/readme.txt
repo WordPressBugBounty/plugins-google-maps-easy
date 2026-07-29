@@ -4,8 +4,8 @@ Author URI: https://supsystic.com/
 Plugin URI: https://supsystic.com/plugins/google-maps-plugin
 Donate link: https://supsystic.com/plugins/google-maps-plugin
 Tags: google map, map, Google Maps, map markers, location
-Tested up to: 6.9
-Stable tag: 1.12.2
+Tested up to: 7.0
+Stable tag: 1.12.3
 License: GNU General Public License v2.0 or later
 
 Google Maps with markers, locations and clusterization, KML layers and filters. Custom Google map markers with text, images, videos, links.
@@ -236,7 +236,12 @@ The easiest one is to drag your map using a mouse – "Draggable" option must be
 4. Paste link in the field under the option.
 5. Enable the option “Open in new window”, if you want to link was opened in a new window.
 
+= Where do I report security bugs found in this plugin? =
+Please report security bugs found in the source code of the Easy Google Maps plugin through the [Patchstack Vulnerability Disclosure Program](https://patchstack.com/database/vdp/9e5fb658-48d1-4923-a3c3-16c434266113). The Patchstack team will assist you with verification, CVE assignment, and notify the developers of this plugin.
+
 Read more [about linked markers creation](https://supsystic.com/linked-markers-example?utm_source=wordpress&utm_medium=linked-markers-example&utm_campaign=maps "Create Linked Google Map Markers in WordPress") in our tutorial.
+
+
 
 = More Info =
 * [FAQs section](https://supsystic.com/plugins/google-maps-plugin/#faq ""Google Maps WordPress plugin FAQs Section")
@@ -308,54 +313,56 @@ Important compatibility notes:
 
 
 == Changelog ==
-Easy Google Map Plugin v1.12.2 / 28.04.2026 =
- * Updated compatibility for the current Google Maps JavaScript API (`v=weekly`)
- * Added `Map ID` support for modern Google Maps rendering
- * Added `AdvancedMarkerElement` support with backward compatibility for legacy maps
- * Improved marker hover info windows, marker tooltips and cluster behavior on the latest API
- * Added automatic default icons recovery when the icon list is empty
+= Easy Google Map Plugin v1.12.3 / 28.07.2026 =
+ * Fixed: admin menu could stay hidden after activation on some installs (core module state is now self-healing)
+ * Added: guided setup after activation - connect your Google Maps API key and jump straight into creating your first map
+ * Updated: Overview page promo image
+ * Minor fixes
 
-Easy Google Map Plugin v1.12.1 / 02.04.2026 =
+= Easy Google Map Plugin v1.12.2 / 30.05.2026 =
+ * Tested up to 7.0
+
+= Easy Google Map Plugin v1.12.1 / 02.04.2026 =
  * Fixed activation
 
-Easy Google Map Plugin v1.12.0 / 27.03.2026 =
+= Easy Google Map Plugin v1.12.0 / 27.03.2026 =
  * Minor and major fixes
  * Tested up to 6.9.4
 
-Easy Google Map Plugin v1.11.23 / 17.06.2025 =
+= Easy Google Map Plugin v1.11.23 / 17.06.2025 =
  * Minor fixes and overview update
 
-Easy Google Map Plugin v1.11.22 / 11.06.2025 =
+= Easy Google Map Plugin v1.11.22 / 11.06.2025 =
  * Minor fixes
 
-Easy Google Map Plugin v1.11.21 / 14.05.2025 =
+= Easy Google Map Plugin v1.11.21 / 14.05.2025 =
  * Minor fixes
 
-Easy Google Map Plugin v1.11.20 / 06.05.2025 =
+= Easy Google Map Plugin v1.11.20 / 06.05.2025 =
  * Add fix for textdomain notice
  * Add support WP 6.8.1
 
-Easy Google Map Plugin v1.11.19 / 15.04.2025 =
+= Easy Google Map Plugin v1.11.19 / 15.04.2025 =
  * Add security fix for XXE
 
-Easy Google Map Plugin v1.11.18 / 05.04.2024 =
+= Easy Google Map Plugin v1.11.18 / 05.04.2024 =
  * Minor fixes
  * Add some security fixes
 
-Easy Google Map Plugin v1.11.17 / 28.08.2024 =
+= Easy Google Map Plugin v1.11.17 / 28.08.2024 =
  * Minor fixes
 
-Easy Google Map Plugin v1.11.16 / 22.06.2024 =
+= Easy Google Map Plugin v1.11.16 / 22.06.2024 =
  * Add XSS security fix for SVG uploads
 
-Easy Google Map Plugin v1.11.15 / 06.05.2024 =
+= Easy Google Map Plugin v1.11.15 / 06.05.2024 =
  * Fix for csv export/import
 
-Easy Google Map Plugin v1.11.14 / 22.04.2024 =
+= Easy Google Map Plugin v1.11.14 / 22.04.2024 =
  * Fixed map import/export option
 
-Easy Google Map Plugin v1.11.13 / 20.03.2024 =
- * AAdd expertise level for AC form
+= Easy Google Map Plugin v1.11.13 / 20.03.2024 =
+ * Add expertise level for AC form
 
 = Easy Google Map Plugin v1.11.12 / 23.01.2024 =
  * Add security fixes

@@ -431,6 +431,8 @@ class utilsGmp
     if (GMP_TEST_MODE) {
       add_action('activated_plugin', [frameGmp::_(), 'savePluginActivationErrors']);
     }
+    // Show a one-time "connect your API key" notice right after activation
+    update_option('gmp_show_activation_notice', 1);
     if (function_exists('is_multisite') && is_multisite()) {
       // $orig_id = $wpdb->blogid;
       $blog_id = $wpdb->get_col("SELECT blog_id FROM $wpdb->blogs");

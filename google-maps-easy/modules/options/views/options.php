@@ -95,6 +95,12 @@ class optionsViewGmp extends viewGmp
 
     $options = frameGmp::_()->getModule('options')->getAll();
     $this->assign('options', $options);
+    $onboarding = !empty($_GET['gmp_onboarding']);
+    $this->assign('onboarding', $onboarding);
+    if ($onboarding) {
+      frameGmp::_()->addJSVar('admin.settings', 'gmpOnboardingRedirect', true);
+      frameGmp::_()->addJSVar('admin.settings', 'gmpOnboardingAddMapUrl', frameGmp::_()->getModule('options')->getTabUrl('gmap_add_new'));
+    }
     return parent::getContent('optionsSettingsTabContent');
   }
 }

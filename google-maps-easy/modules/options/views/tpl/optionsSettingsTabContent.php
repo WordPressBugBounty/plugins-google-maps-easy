@@ -1,3 +1,21 @@
+<?php if (!empty($this->onboarding)) { ?>
+	<div class="notice notice-info" style="padding: 12px 16px; margin-bottom: 15px;">
+		<h2 style="margin-top: 0;"><?php _e('Connect your Google Maps API key', GMP_LANG_CODE); ?></h2>
+		<p><?php _e('Paste your key into the "User API key" field below and click Save — you will be taken straight to creating your first map.', GMP_LANG_CODE); ?></p>
+		<p>
+			<a href="#" onclick="jQuery('#gmpOnboardingApiKeyHelp').toggle(); return false;"><?php _e("Don't have a key yet? Here's how to get one", GMP_LANG_CODE); ?></a>
+		</p>
+		<div id="gmpOnboardingApiKeyHelp" style="display: none;">
+			<ol>
+				<li><?php printf(__("Open the <a href='%s' target='_blank'>Google Cloud Console credentials page</a>.", GMP_LANG_CODE), 'https://console.cloud.google.com/google/maps-apis/credentials'); ?></li>
+				<li><?php _e('Create (or select) a project, then click "Create credentials" &rarr; "API key".', GMP_LANG_CODE); ?></li>
+				<li><?php _e('Enable the "Maps JavaScript API" for that project.', GMP_LANG_CODE); ?></li>
+				<li><?php _e('Copy the generated key and paste it into the field below.', GMP_LANG_CODE); ?></li>
+			</ol>
+			<p><?php printf(__("A full step-by-step guide is also available <a href='%s' target='_blank'>here</a>.", GMP_LANG_CODE), '//supsystic.com/google-maps-api-key/'); ?></p>
+		</div>
+	</div>
+<?php } ?>
 <section class="supsystic-bar">
 	<ul class="supsystic-bar-controls">
 		<li title="<?php _e('Save all options'); ?>">
@@ -56,7 +74,7 @@
           continue;
         }
         ?>
-								<tr class="<?php echo esc_attr($catClass); ?>">
+								<tr class="<?php echo esc_attr($catClass); ?>" <?php echo $optKey === 'user_api_key' && !empty($this->onboarding) ? 'id="user_api_key" style="outline: 2px solid #2271b1; background: #f0f6fc;"' : ''; ?>>
 									<th scope="row" class="col-perc col-w-20perc">
 										<?php _e($opt['label'], GMP_LANG_CODE); ?>
 										<?php if (!empty($opt['changed_on'])) { ?>

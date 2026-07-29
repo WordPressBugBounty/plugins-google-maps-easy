@@ -4,9 +4,21 @@ jQuery(document).ready(function () {
     return false;
   });
   jQuery('#gmpSettingsForm').submit(function () {
-    jQuery(this).sendFormGmp({
+    var sendParams = {
       btn: jQuery('#gmpSettingsSaveBtn'),
-    });
+    };
+    // Onboarding: after the API key is saved, send the user straight to creating their first map
+    if (typeof gmpOnboardingRedirect != 'undefined' && gmpOnboardingRedirect) {
+      sendParams.onSuccess = function (res) {
+        if (res && !res.error) {
+          var apiKeyVal = jQuery.trim(jQuery('[data-optkey="user_api_key"]').val());
+          if (apiKeyVal && typeof gmpOnboardingAddMapUrl != 'undefined') {
+            window.location.href = '' + gmpOnboardingAddMapUrl;
+          }
+        }
+      };
+    }
+    jQuery(this).sendFormGmp(sendParams);
     return false;
   });
 });

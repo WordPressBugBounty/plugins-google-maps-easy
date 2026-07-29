@@ -135,20 +135,42 @@ class installerGmp
       ]);
     }
 
+    // Ensure every core module row exists and is active, regardless of the table's
+    // prior state. The block above only seeds rows the very first time the
+    // `gmp_modules` table is created; on any site where the table already existed
+    // (older install, partial/failed install, manual DB edit, etc.) a core module
+    // row could end up missing or stuck with active = 0, e.g. the admin menu not
+    // being registered. Insert-if-missing / reactivate-if-present on every run
+    // instead, so this is self-healing on every activation and version update.
     $tableName = $wpdb->prefix . 'gmp_modules';
-    $markerGroupTabIsExist = $wpdb->get_var('SELECT id FROM `' . $wpPrefix . "gmp_modules` WHERE code = 'marker_groups'");
-    if (!empty($markerGroupTabIsExist)) {
-      $wpdb->update($tableName, ['active' => 1], ['code' => 'marker_groups']);
-    } else {
-      $wpdb->insert($tableName, [
-        'code' => 'marker_groups',
-        'active' => 1,
-        'type_id' => 1,
-        'params' => '',
-        'has_tab' => 0,
-        'label' => 'Marker Groups',
-        'description' => 'Marker Groups',
-      ]);
+    $coreModules = [
+      ['code' => 'adminmenu', 'type_id' => 1, 'has_tab' => 0, 'label' => 'Admin Menu', 'description' => ''],
+      ['code' => 'options', 'type_id' => 1, 'has_tab' => 1, 'label' => 'Options', 'description' => ''],
+      ['code' => 'user', 'type_id' => 1, 'has_tab' => 1, 'label' => 'Users', 'description' => ''],
+      ['code' => 'templates', 'type_id' => 1, 'has_tab' => 1, 'label' => 'Templates for Plugin', 'description' => ''],
+      ['code' => 'shortcodes', 'type_id' => 6, 'has_tab' => 0, 'label' => 'Shortcodes', 'description' => 'Shortcodes data'],
+      ['code' => 'gmap', 'type_id' => 1, 'has_tab' => 1, 'label' => 'Gmap', 'description' => 'Gmap'],
+      ['code' => 'marker', 'type_id' => 1, 'has_tab' => 0, 'label' => 'Markers', 'description' => 'Maps Markers'],
+      ['code' => 'marker_groups', 'type_id' => 1, 'has_tab' => 0, 'label' => 'Marker Groups', 'description' => 'Marker Groups'],
+      ['code' => 'supsystic_promo', 'type_id' => 1, 'has_tab' => 0, 'label' => 'Promo', 'description' => 'Promo'],
+      ['code' => 'icons', 'type_id' => 1, 'has_tab' => 1, 'label' => 'Marker Icons', 'description' => 'Marker Icons'],
+      ['code' => 'mail', 'type_id' => 1, 'has_tab' => 1, 'label' => 'mail', 'description' => 'mail'],
+    ];
+    foreach ($coreModules as $coreModule) {
+      $existingId = $wpdb->get_var($wpdb->prepare("SELECT id FROM `{$tableName}` WHERE code = %s", $coreModule['code']));
+      if (empty($existingId)) {
+        $wpdb->insert($tableName, [
+          'code' => $coreModule['code'],
+          'active' => 1,
+          'type_id' => $coreModule['type_id'],
+          'params' => '',
+          'has_tab' => $coreModule['has_tab'],
+          'label' => $coreModule['label'],
+          'description' => $coreModule['description'],
+        ]);
+      } else {
+        $wpdb->update($tableName, ['active' => 1], ['code' => $coreModule['code']]);
+      }
     }
 
     /**

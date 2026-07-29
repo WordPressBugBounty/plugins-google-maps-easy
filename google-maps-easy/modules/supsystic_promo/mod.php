@@ -22,11 +22,28 @@ class supsystic_promoGmp extends moduleGmp
     }
     //$this->weLoveYou();
     dispatcherGmp::addFilter('mainAdminTabs', [$this, 'addAdminTab']);
-    dispatcherGmp::addAction('beforeSaveOpts', [$this, 'checkSaveOpts']);
-    dispatcherGmp::addAction('addMapBottomControls', [$this, 'checkWeLoveYou'], 99);
     // dispatcherGmp::addAction('discountMsg', array($this, 'getDiscountMsg'));
     // add_action('admin_notices', array($this, 'checkAdminPromoNotices'));
     add_action('admin_notices', [$this, 'showUserApiKeyAdminNotice']);
+    add_action('admin_notices', [$this, 'showActivationNotice']);
+  }
+  /**
+   * One-time notice shown right after the plugin gets activated, pointing
+   * straight at the API key setup step. Self-clearing: shown once, then the
+   * flag set in utilsGmp::activatePlugin() is removed.
+   */
+  public function showActivationNotice()
+  {
+    if (!current_user_can('manage_options') || !get_option('gmp_show_activation_notice')) {
+      return;
+    }
+    delete_option('gmp_show_activation_notice');
+    $onboardingUrl = frameGmp::_()->getModule('options')->getTabUrl('settings') . '&gmp_onboarding=1#user_api_key';
+    printf(
+      '<div class="notice notice-success is-dismissible"><p><b>%1$s</b> %2$s</p></div>',
+      esc_html__('Easy Google Maps is activated.', GMP_LANG_CODE),
+      sprintf(__("<a href='%s'>Connect your Google Maps API key</a> to create your first map.", GMP_LANG_CODE), esc_url($onboardingUrl)),
+    );
   }
   function showUserApiKeyAdminNotice()
   {
@@ -34,8 +51,12 @@ class supsystic_promoGmp extends moduleGmp
       // Our notices - only for our plugin pages for now
       return;
     }
+    if ((int) frameGmp::_()->getModule('options')->get('hide_user_api_key_msg')) {
+      // User already dismissed this notice for good
+      return;
+    }
     $class = 'supsystic-admin-notice';
-    $settingsLink = frameGmp::_()->getModule('options')->getTabUrl('settings');
+    $settingsLink = frameGmp::_()->getModule('options')->getTabUrl('settings') . '&gmp_onboarding=1#user_api_key';
     $notices = [
       'user_api_key_msg' => [
         'class' => 'updated notice is-dismissible ' . $class,
@@ -55,7 +76,26 @@ class supsystic_promoGmp extends moduleGmp
       }
     }
     foreach ($notices as $key => $notice) {
-      printf('<div class="%1$s" data-code=""><p>%2$s</p></div>', $notice['class'], $notice['html']);
+      printf('<div class="%1$s" data-code="%2$s"><p>%3$s</p></div>', $notice['class'], esc_attr($key), $notice['html']);
+    }
+    if (!empty($notices)) {
+      printf(
+        '<div class="supsystic-admin-notice gmp-api-key-popup-overlay" data-code="user_api_key_msg" style="position:fixed;z-index:100000;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;">' .
+          '<div style="background:#fff;max-width:480px;width:90%%;padding:24px 28px;border-radius:4px;box-shadow:0 5px 25px rgba(0,0,0,.3);">' .
+          '<h2 style="margin-top:0;">%1$s</h2>' .
+          '<p>%2$s</p>' .
+          '<p style="margin-top:20px;">' .
+          '<a href="%3$s" class="button button-primary">%4$s</a>&nbsp; ' .
+          '<button type="button" class="button" data-statistic-code="hide" onclick="jQuery(this).closest(\'.gmp-api-key-popup-overlay\').hide();">%5$s</button>' .
+          '</p>' .
+          '</div>' .
+          '</div>',
+        esc_html__('Connect your Google Maps API key', GMP_LANG_CODE),
+        esc_html__("You haven't set up your own Google Maps API key yet. Without it maps may stop working or show errors once the shared default key hits its limits.", GMP_LANG_CODE),
+        esc_attr($settingsLink),
+        esc_html__('Connect API key', GMP_LANG_CODE),
+        esc_html__("Hide it and don't show again", GMP_LANG_CODE),
+      );
     }
   }
   public function checkAdminPromoNotices()
@@ -82,28 +122,11 @@ class supsystic_promoGmp extends moduleGmp
 			<a href="#" class="button" data-statistic-code="hide">' .
         __('I already did', GMP_LANG_CODE) .
         '</a></p>';
-      $enbPromoLinkMsg = sprintf(__('<h3>More than eleven days with our %s plugin - Congratulations!</h3>', GMP_LANG_CODE), GMP_WP_PLUGIN_NAME);
-      $enbPromoLinkMsg .= __("<p>On behalf of the entire <a href='https://supsystic.com/' target='_blank'>supsystic.com</a> company I would like to thank you for been with us, and I really hope that our software helped you.</p>", GMP_LANG_CODE);
-      $enbPromoLinkMsg .= __(
-        "<p>And today, if you want, - you can help us. This is really simple - you can just add small promo link to our site under your maps. This is small step for you, but a big help for us! Sure, if you don't want - just skip this and continue enjoy our software!</p>",
-        GMP_LANG_CODE,
-      );
-      $enbPromoLinkMsg .=
-        '<p><a href="#" class="button button-primary" data-statistic-code="done">' .
-        __('Ok, you deserve it', GMP_LANG_CODE) .
-        '</a>
-			<a href="#" class="button" data-statistic-code="later">' .
-        __('Nope, maybe later', GMP_LANG_CODE) .
-        '</a>
-			<a href="#" class="button" data-statistic-code="hide">' .
-        __('Skip', GMP_LANG_CODE) .
-        '</a></p>';
       // $checkOtherPlugins = '<p>'
       // 	. sprintf(__("Check out <a href='%s' target='_blank' class='button button-primary' data-statistic-code='hide'>our other Plugins</a>! Years of experience in WordPress plugins developers made that list unbreakable!", GMP_LANG_CODE), frameGmp::_()->getModule('options')->getTabUrl('featured-plugins'))
       // . '</p>';
       $notices = [
         'rate_msg' => ['html' => $rateMsg, 'show_after' => 7 * $day],
-        'enb_promo_link_msg' => ['html' => $enbPromoLinkMsg, 'show_after' => 11 * $day],
         // 'check_other_plugs_msg' => array('html' => $checkOtherPlugins, 'show_after' => 1 * $day),
       ];
       // Wait for next week - when icons will be ready
@@ -146,18 +169,11 @@ class supsystic_promoGmp extends moduleGmp
           unset($notices[$nKey]);
           continue;
         }
-        if ($nKey == 'enb_promo_link_msg' && (int) frameGmp::_()->getModule('options')->get('add_love_link')) {
-          unset($notices[$nKey]);
-          continue;
-        }
       }
     } else {
       frameGmp::_()->getModule('options')->getModel()->save('start_usage', $currTime);
     }
     if (!empty($notices)) {
-      if (isset($notices['rate_msg']) && isset($notices['enb_promo_link_msg']) && !empty($notices['enb_promo_link_msg'])) {
-        unset($notices['rate_msg']); // Show only one from those messages
-      }
       $html = '';
       foreach ($notices as $nKey => $n) {
         $this->getModel()->saveUsageStat($nKey . '.' . 'show', true);
@@ -283,33 +299,6 @@ class supsystic_promoGmp extends moduleGmp
     }
     return $this->_mainLink;
   }
-  public function getContactFormFields()
-  {
-    $fields = [
-      'name' => ['label' => __('Name', GMP_LANG_CODE), 'valid' => 'notEmpty', 'html' => 'text'],
-      'email' => ['label' => __('Email', GMP_LANG_CODE), 'html' => 'email', 'valid' => ['notEmpty', 'email'], 'placeholder' => 'example@mail.com', 'def' => get_bloginfo('admin_email')],
-      'website' => ['label' => __('Website', GMP_LANG_CODE), 'html' => 'text', 'placeholder' => 'http://example.com', 'def' => get_bloginfo('url')],
-      'subject' => ['label' => __('Subject', GMP_LANG_CODE), 'valid' => 'notEmpty', 'html' => 'text'],
-      'category' => [
-        'label' => __('Topic', GMP_LANG_CODE),
-        'valid' => 'notEmpty',
-        'html' => 'selectbox',
-        'options' => [
-          'plugins_options' => __('Plugin options', GMP_LANG_CODE),
-          'bug' => __('Report a bug', GMP_LANG_CODE),
-          'functionality_request' => __('Require a new functionality', GMP_LANG_CODE),
-          'other' => __('Other', GMP_LANG_CODE),
-        ],
-      ],
-      'message' => ['label' => __('Message', GMP_LANG_CODE), 'valid' => 'notEmpty', 'html' => 'textarea', 'placeholder' => __('Hello Supsystic Team!', GMP_LANG_CODE)],
-    ];
-    foreach ($fields as $k => $v) {
-      if (isset($fields[$k]['valid']) && !is_array($fields[$k]['valid'])) {
-        $fields[$k]['valid'] = [$fields[$k]['valid']];
-      }
-    }
-    return $fields;
-  }
   public function isPro()
   {
     return frameGmp::_()->getModule('add_map_options') ? true : false;
@@ -321,78 +310,6 @@ class supsystic_promoGmp extends moduleGmp
       return $mainLink . (strpos($mainLink, '?') ? '&' : '?') . $params;
     }
     return $mainLink;
-  }
-  public function getLoveLink($show = 'hide')
-  {
-    if (!$this->checkLoveLink()) {
-      return false;
-    }
-    if (empty(get_option('supsystic_gmp_love_link_title'))) {
-      $loveLinkTitles = ['WordPress Map Plugin', 'Google Maps Wordpress', 'WordPress Google Maps Plugin', 'Google Map Wordpress', 'Google Map Plugin', 'WP Google Maps', 'WordPress Google Maps'];
-      $randomTitle = array_rand($loveLinkTitles, 1);
-      $randomTitleVal = $loveLinkTitles[$randomTitle];
-      update_option('supsystic_gmp_love_link_title', $randomTitleVal);
-    }
-    $title = get_option('supsystic_gmp_love_link_title');
-    if ($show == 'show') {
-      return '<a title="' . $title . '" style="border:none; color: #26bfc1 !important; font-size: 9px; display: block; float: right; padding-right: 10px;" href="' . $this->generateMainLink('utm_medium=love_link') . '" target="_blank">' . $title . '</a>' . '<div style="clear: both;"></div>';
-    } elseif ($show == 'hide') {
-      return '<a title="' . $title . '" style="display:none;" href="' . $this->generateMainLink('utm_medium=love_link_hide') . '" target="_blank">' . $title . '</a>' . '<div style="clear: both;"></div>';
-    }
-  }
-  public function checkSaveOpts($newValues)
-  {
-    $loveLinkEnb = (int) frameGmp::_()->getModule('options')->get('add_love_link');
-    $loveLinkEnbNew = isset($newValues['opt_values']['add_love_link']) ? (int) $newValues['opt_values']['add_love_link'] : 0;
-    if ($loveLinkEnb != $loveLinkEnbNew) {
-      $this->getModel()->saveUsageStat('love_link.' . ($loveLinkEnbNew ? 'enb' : 'dslb'));
-    }
-  }
-  public function _checkLoveLink()
-  {
-    $apiUrl = 'https://supsystic.com/wp-admin/admin-ajax.php';
-    $reqUrl = $apiUrl . '?action=show_love_link';
-    $data = [
-      'body' => [
-        'key' => 'kJ#f3(FjkF9fasd124t5t589u9d4389r3r3R#2asdas3(#R03r#(r#t-4t5t589u9d4389r3r3R#$%lfdj',
-        'site_url' => get_bloginfo('wpurl'),
-      ],
-    ];
-    $response = wp_remote_post($reqUrl, $data);
-    $responseData = json_decode(wp_remote_retrieve_body($response), true);
-    if (!empty($responseData['data']['show'])) {
-      update_option('gmp_show_love_link', true);
-    } else {
-      update_option('gmp_show_love_link', false);
-    }
-  }
-  public function checkLoveLink()
-  {
-    if (!empty(get_option('gmp_last_check_love_link'))) {
-      $time = time();
-      $prevSendTime = (int) get_option('gmp_last_check_love_link');
-      if ($prevSendTime && $time - $prevSendTime > 24 * 60 * 60) {
-        update_option('gmp_last_check_love_link', time());
-        $this->_checkLoveLink();
-      }
-    } else {
-      $this->_checkLoveLink();
-      update_option('gmp_last_check_love_link', time());
-    }
-    if (!empty(get_option('gmp_show_love_link'))) {
-      return true;
-    }
-    return false;
-  }
-  public function checkWeLoveYou()
-  {
-    if (empty(frameGmp::_()->getModule('options')->get('remove_love_link')) || !$this->isPro()) {
-      if (frameGmp::_()->getModule('options')->get('add_love_link')) {
-        echo $this->getLoveLink('show');
-      } else {
-        echo $this->getLoveLink('hide');
-      }
-    }
   }
   public function addPromoMapTabs()
   {

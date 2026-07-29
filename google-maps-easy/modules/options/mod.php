@@ -146,19 +146,6 @@ class optionsGmp extends moduleGmp
               'attrs' => 'style="width: 300px;"',
             ],
             'send_stats' => ['label' => __('Send usage statistics', GMP_LANG_CODE), 'desc' => __('Send information about what plugin options you prefer to use, this will help us make our solution better for You.', GMP_LANG_CODE), 'def' => '0', 'html' => 'checkboxHiddenVal'],
-            'add_love_link' => [
-              'label' => __('Show promo link', GMP_LANG_CODE),
-              'desc' => __('To promote our plugin, you can show the promo link below the table, if you don\'t want to show the promo link you can also hide it. You can completely remove the link under the table by purchasing the PRO version of the plugin. Thank you for cooperation!', GMP_LANG_CODE),
-              'def' => '0',
-              'html' => 'checkboxHiddenVal',
-            ],
-            'remove_love_link' => [
-              'label' => __('Remove promo link', GMP_LANG_CODE),
-              'desc' => __('If you want to delete promo link below the table from HTML just check this box. Only for PRO users.', GMP_LANG_CODE),
-              'def' => '0',
-              'html' => 'checkboxHiddenVal',
-              'pro' => '',
-            ],
             'access_roles' => [
               'label' => __('User role can use plugin', GMP_LANG_CODE),
               'desc' => __('User with next roles will have access to whole plugin from admin area.', GMP_LANG_CODE),
