@@ -83,6 +83,14 @@ class markerControllerGmp extends controllerGmp
     $page = (int) sanitize_text_field(reqGmp::getVar('page'));
     $rowsLimit = (int) sanitize_text_field(reqGmp::getVar('rows'));
     $mapId = (int) sanitize_text_field(reqGmp::getVar('map_id'));
+    if ($mapId <= 0) {
+      // Unsaved (new) map - there is nothing to list yet, never show the global orphan pool
+      $res->addData('page', 0);
+      $res->addData('total', 0);
+      $res->addData('rows', []);
+      $res->addData('records', 0);
+      return $res->ajaxExec();
+    }
     $search = reqGmp::getVar('search');
     $search = !empty($search['text_like']) ? sanitize_text_field($search['text_like']) : '';
     $totalCount = $model->getTotalCountBySearch($search, $mapId);

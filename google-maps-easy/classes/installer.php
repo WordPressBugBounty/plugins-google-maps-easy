@@ -327,12 +327,6 @@ class installerGmp
 				) DEFAULT CHARSET=utf8",
       );
     }
-    // if(!dbGmp::exist($wpPrefix.GMP_DB_PREF."markers", 'sort_order')) {
-    // 	dbGmp::query("ALTER TABLE `@__markers` ADD COLUMN `sort_order` smallint(1) NOT NULL DEFAULT '0';");
-    // }
-    // if(!dbGmp::exist($wpPrefix.GMP_DB_PREF."markers", 'user_id')) {
-    // 	dbGmp::query("ALTER TABLE `@__markers` ADD COLUMN `user_id` bigint(20);");
-    // }
     /**
      * Create table for marker Icons
      */
@@ -387,20 +381,6 @@ class installerGmp
 				  ) DEFAULT CHARSET=utf8",
       );
     }
-    // if(!dbGmp::exist($wpPrefix."gmp_marker_groups", 'params')) {
-    // 	dbGmp::query("ALTER TABLE @__marker_groups ADD params text CHARACTER SET utf8;");
-    // }
-    // if(!dbGmp::exist($wpPrefix."gmp_marker_groups", 'sort_order')) {
-    // 	dbGmp::query("ALTER TABLE @__marker_groups ADD sort_order smallint(1) NOT NULL DEFAULT '0';");
-    // }
-    // if(!dbGmp::exist($wpPrefix.GMP_DB_PREF."marker_groups", 'parent')) {
-    // 	dbGmp::query("ALTER TABLE @__marker_groups ADD parent tinyint(1) NOT NULL DEFAULT '0' AFTER params;");
-    // }
-    // $markerGroupsClearedInvalid = get_option($wpPrefix. GMP_DB_PREF. 'mg_cleared_inv', 0);
-    // if(!$markerGroupsClearedInvalid) {
-    // 	dbGmp::query('UPDATE @__markers SET marker_group_id = 0 WHERE marker_group_id = 1');	// This was wrong update in markers table before - fix this one time before update plugin
-    // 	update_option($wpPrefix. GMP_DB_PREF. 'mg_cleared_inv', 1);
-    // }
     /**
      * Plugin usage statistics
      */

@@ -14,7 +14,6 @@ class marker_groupsModelGmp extends modelGmp
     $sortOrder = isset($d['orderBy']) && !empty($d['orderBy']) ? $d['orderBy'] : 'sort_order';
     global $wpdb;
     $markerGroups = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}gmp_marker_groups AS gmp_mrgr ORDER BY sort_order", ARRAY_A);
-    //$markerGroups = frameGmp::_()->getTable('marker_groups')->orderBy($sortOrder)->get('*', $d);
     $markerGroups = $this->_afterGet($markerGroups);
     return $markerGroups;
   }
@@ -31,7 +30,6 @@ class marker_groupsModelGmp extends modelGmp
     $ids = implode(',', array_map('absint', $ids));
     $groups = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}gmp_marker_groups WHERE id IN (%1s) ORDER BY sort_order", $ids), ARRAY_A);
 
-    //$groups = frameGmp::_()->getTable('marker_groups')->orderBy('sort_order')->get('*', array('additionalCondition' => 'id IN (' . implode(',', $ids) . ')'));
     $groups = $this->_afterGet($groups);
     if (!empty($groups)) {
       return $groups;
@@ -45,7 +43,6 @@ class marker_groupsModelGmp extends modelGmp
     }
     global $wpdb;
     $markerGroup = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}gmp_marker_groups WHERE id = %s ORDER BY sort_order", $id), ARRAY_A);
-    //$markerGroup = frameGmp::_()->getTable('marker_groups')->orderBy('sort_order')->get('*', array('id' => (int)$id), '', 'row');
     $markerGroup = $this->_afterGet($markerGroup, true);
     if (!empty($markerGroup)) {
       return $markerGroup;
@@ -131,6 +128,7 @@ class marker_groupsModelGmp extends modelGmp
   }
   public function updateMarkerGroupParent($id, $parentId)
   {
+    global $wpdb;
     $tableName = $wpdb->prefix . 'gmp_marker_groups';
     $data_where = ['id' => $id];
     return $res = $wpdb->update($tableName, ['parent' => $parentId], $data_where);

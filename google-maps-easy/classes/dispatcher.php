@@ -20,6 +20,7 @@ class dispatcherGmp
     if ($numArgs > 2) {
       $args = [$tag];
       for ($i = 1; $i < func_num_args(); $i++) {
+        // phpcs:ignore PHPCompatibility.FunctionUse.ArgumentFunctionsReportCurrentValue.Changed -- only $tag (arg 0) is reassigned above; it is never fetched via func_get_arg().
         $args[] = func_get_arg($i);
       }
       return call_user_func_array('do_action', $args);
@@ -46,6 +47,7 @@ class dispatcherGmp
     if ($numArgs > 2) {
       $args = [$tag];
       for ($i = 1; $i < func_num_args(); $i++) {
+        // phpcs:ignore PHPCompatibility.FunctionUse.ArgumentFunctionsReportCurrentValue.Changed -- only $tag (arg 0) is reassigned above; it is never fetched via func_get_arg().
         $args[] = func_get_arg($i);
       }
       return call_user_func_array('apply_filters', $args);

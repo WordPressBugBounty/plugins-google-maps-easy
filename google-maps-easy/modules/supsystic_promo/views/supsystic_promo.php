@@ -27,7 +27,6 @@ class supsystic_promoViewGmp extends viewGmp
     $this->assign('mainLink', $this->getModule()->getMainLink());
     $this->assign('faqList', $this->getFaqList());
     $this->assign('serverSettings', $this->getServerSettings());
-    $this->assign('news', $this->getNewsContent());
     return parent::getContent('overviewTabContent');
   }
   public function getFaqList()
@@ -38,7 +37,7 @@ class supsystic_promoViewGmp extends viewGmp
           'Your map suddenly stopped working and you get the following error?' .
             "<blockquote style='color: gray; font-style: italic;'>Oops! Something went wrong.This page didn't load Google Maps correctly. See the JavaScript console for technical details.</blockquote>" .
             "Please check you browser console, if you'll see such error <blockquote style='color: gray; font-style: italic;'>This site has exceeded its daily quota for maps.</blockquote>" .
-            " - this <a href='//supsystic.com/google-maps-api-key/' target='_blank'>article</a> is written for you and required for reading.",
+            " - this <a href='//supsystic.com/documentation/create-google-maps-api-key/' target='_blank'>article</a> is written for you and required for reading.",
           GMP_LANG_CODE,
         ),
         $this->getModule()->getMainLink(),
@@ -50,41 +49,19 @@ class supsystic_promoViewGmp extends viewGmp
         ),
         $this->getModule()->getMainLink(),
       ),
-      __('How to add map into the site content?', GMP_LANG_CODE) => sprintf(__("You can add a map in the site content via shortcode or php code. Learn more about how to do this <a href='https://supsystic.com/add-map-into-site-content/'>here</a>.", GMP_LANG_CODE), $this->getModule()->getMainLink()),
+      __('How to add map into the site content?', GMP_LANG_CODE) => sprintf(__("You can add a map in the site content via shortcode or php code. Learn more about how to do this <a  target='_blank' href='https://supsystic.com/documentation/add-map-site-content/'>here</a>.", GMP_LANG_CODE), $this->getModule()->getMainLink()),
       __('How to add map in popup window?', GMP_LANG_CODE) => sprintf(
-        __("You can add a map in popup window by inserting map shortcode in any popup text field. Learn more about how to do this <a href='https://supsystic.com/add-map-in-popup-window/'>here</a>.", GMP_LANG_CODE),
+        __("You can add a map in popup window by inserting map shortcode in any popup text field. Learn more about how to do this <a  target='_blank' href='https://supsystic.com/documentation/add-map-popup-window/'>here</a>.", GMP_LANG_CODE),
         $this->getModule()->getMainLink(),
       ),
       __('How to zoom and center the initial map on markers?', GMP_LANG_CODE) => sprintf(
         __(
-          "There is a few different ways to zoom and centralize map. The easiest one is to drag your map using mouse - 'Draggable' option must be enabled, or with pan controller help in live preview. <a href='https://supsystic.com/how-to-zoom-and-center-the-initial-map-on-markers/'>Read more...</a>",
+          "There is a few different ways to zoom and centralize map. The easiest one is to drag your map using mouse - 'Draggable' option must be enabled, or with pan controller help in live preview. <a  target='_blank' href='https://supsystic.com/documentation/zoom-center-initial-map-markers/'>Read more...</a>",
           GMP_LANG_CODE,
         ),
         $this->getModule()->getMainLink(),
-      ),
-      __('How to get PRO version of plugin for FREE?', GMP_LANG_CODE) => sprintf(
-        __("You have an incredible opportunity to get PRO version for free. Make Translation of plugin! It will be amazing if you take advantage of this offer! More info you can find here <a target='_blank' href='%s'>Get PRO version of any plugin for FREE'</a>", GMP_LANG_CODE),
-        $this->getModule()->getMainLink(),
-      ),
-      __('Translation', GMP_LANG_CODE) => sprintf(
-        __(
-          "All available languages are provided with the Supsystic Google Maps plugin. If your language isn't available, your plugin will be in English by default.<br /><b>Available Translations: English, Polish, German, Spanish, Russian</b><br />Translate or update a translation Google Maps WordPress plugin in your language and get a Premium license for FREE. <a target='_blank' href='%s'>Contact us</a>.",
-          GMP_LANG_CODE,
-        ),
-        $this->getModule()->getMainLink() . '#contact',
       ),
     ];
-  }
-  public function getNewsContent()
-  {
-    $getData = wp_remote_get('https://supsystic.com/news/main.html');
-    $content = '';
-    if ($getData && is_array($getData) && isset($getData['response']) && isset($getData['response']['code']) && $getData['response']['code'] == 200 && isset($getData['body']) && !empty($getData['body'])) {
-      $content = $getData['body'];
-    } else {
-      $content = sprintf(__("There was some problem while trying to retrieve our news, but you can always check all list <a target='_blank' href='%s'>here</a>.", GMP_LANG_CODE), 'https://supsystic.com/news');
-    }
-    return $content;
   }
   public function getServerSettings()
   {

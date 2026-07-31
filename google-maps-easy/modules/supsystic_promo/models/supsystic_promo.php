@@ -36,7 +36,6 @@ class supsystic_promoModelGmp extends modelGmp
     }
     // $query = 'INSERT INTO @__usage_stat SET code = "'. $code.'", visits = 1
     // 	ON DUPLICATE KEY UPDATE visits = visits + 1';
-    // return dbGmp::query($query);
   }
   private function _checkUniqueStat($code)
   {
@@ -51,12 +50,7 @@ class supsystic_promoModelGmp extends modelGmp
     update_option(GMP_CODE . '_unique_stats', $uniqueStats);
     return false;
   }
-  public function saveSpentTime($code, $spent)
-  {
-    // $spent = (int) $spent;
-    // $query = 'UPDATE @__usage_stat SET spent_time = spent_time + '. $spent. ' WHERE code = "'. $code. '"';
-    // return dbGmp::query($query);
-  }
+  public function saveSpentTime($code, $spent) {}
   public function getAllUsageStat()
   {
     $query = 'SELECT * FROM @__usage_stat';
@@ -78,11 +72,7 @@ class supsystic_promoModelGmp extends modelGmp
     // In any case - give user posibility to move futher
     return true;
   }
-  public function clearUsageStat()
-  {
-    // $query = 'DELETE FROM @__usage_stat';
-    // return dbGmp::query($query);
-  }
+  public function clearUsageStat() {}
   public function getUserStatsCount()
   {
     $query = 'SELECT SUM(visits) AS total FROM @__usage_stat';

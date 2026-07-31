@@ -7,7 +7,46 @@ var g_gmpMap = null,
   g_gmpMarkerTitleColorLast = '',
   g_gmpMarkerBgColorTimeoutSet = false,
   g_gmpMapAuthorizationFailWnd = false,
-  g_gmpIsNeedTriggerZoomTypeAdmin = false;
+  g_gmpIsNeedTriggerZoomTypeAdmin = false,
+  g_gmpPendingTabAfterSave = '';
+
+function gmpShowSaveMapFirstDialog(targetTab) {
+  var $dlg = getDialogElementGmp();
+  $dlg.html(
+    '<p>' +
+      toeLangGmp('This map has not been saved yet.') +
+      '</p><p>' +
+      toeLangGmp('Please save the map first before adding markers, figures or other elements to it.') +
+      '</p>'
+  );
+  $dlg.dialog({
+    title: toeLangGmp('Save the map first'),
+    modal: true,
+    resizable: false,
+    width: 420,
+    dialogClass: 'gmpSaveMapFirstDialog',
+    buttons: [
+      {
+        text: toeLangGmp('Save map and continue'),
+        'class': 'button button-primary',
+        click: function () {
+          g_gmpPendingTabAfterSave = targetTab;
+          $dlg.dialog('close');
+          jQuery('#gmpMapSaveBtn').trigger('click');
+        },
+      },
+      {
+        text: toeLangGmp('Cancel'),
+        click: function () {
+          $dlg.dialog('close');
+        },
+      },
+    ],
+    close: function () {
+      $dlg.dialog('destroy').remove();
+    },
+  });
+}
 window.onbeforeunload = function () {
   // If there are at lease one unsaved form - show message for confirnation for page leave
   if (_gmpIsMapFormChanged()) {
@@ -38,7 +77,22 @@ jQuery(document).ready(function () {
     routerMainBtn = jQuery('#gmpRouterMainBtns'),
     markerList = jQuery('#gmpMarkerList'),
     shapeList = jQuery('#gmpShapeList'),
-    rightStickyBar = jQuery('#gmpMapRightStickyBar');
+    rightStickyBar = jQuery('#gmpMapRightStickyBar'),
+    gmpUnsavedMapTabs = ['#gmpMarkerTab', '#gmpShapeTab', '#gmpHeatmapTab', '#gmpRouterTab'];
+
+  // Block switching to Markers/Figures/Heatmap/Route Path tabs until a new map is saved
+  propTabs
+    .find('.nav-tab-wrapper:first')
+    .find('a.nav-tab:not(.notTab)')
+    .on('click', function (e) {
+      var targetTab = jQuery(this).attr('href');
+      if (!g_gmpEditMap && jQuery.inArray(targetTab, gmpUnsavedMapTabs) !== -1) {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        gmpShowSaveMapFirstDialog(targetTab);
+        return false;
+      }
+    });
 
   propTabs.wpTabs({
     change: function (selector) {
@@ -54,7 +108,7 @@ jQuery(document).ready(function () {
           markerList.show();
           shapeList.hide();
           routerMainBtn.hide();
-          if (tinyMCE.editors.markerDescription) {
+          if (typeof tinyMCE !== 'undefined' && tinyMCE.editors && tinyMCE.editors.markerDescription && tinyMCE.editors.markerDescription.theme) {
             tinyMCE.editors.markerDescription.theme.resizeTo('100%', '200');
           }
           break;
@@ -67,7 +121,7 @@ jQuery(document).ready(function () {
             markerList.hide();
             shapeList.show();
             routerMainBtn.hide();
-            if (tinyMCE.editors.shapeDescription) {
+            if (typeof tinyMCE !== 'undefined' && tinyMCE.editors && tinyMCE.editors.shapeDescription && tinyMCE.editors.shapeDescription.theme) {
               tinyMCE.editors.shapeDescription.theme.resizeTo('100%', '200');
             }
           } else {
@@ -217,15 +271,17 @@ jQuery(document).ready(function () {
           if (firstTime) {
             gmpCheckShortcode();
             if (res.data.edit_url) {
-              setBrowserUrl(res.data.edit_url);
-              jQuery('.supsystic-main-navigation-list li').removeClass('active');
-              jQuery('.supsystic-main-navigation-list li[data-tab-key="gmap"]').addClass('active');
+              var redirectUrl = res.data.edit_url;
+              if (g_gmpPendingTabAfterSave) {
+                redirectUrl += g_gmpPendingTabAfterSave;
+              }
+              _gmpUnchangeMapForm();
+              toeRedirect(redirectUrl);
+              return;
             }
             g_gmpMapMarkersIdsAdded = [];
             g_gmpMapShapesIdsAdded = [];
             gmpMainMap = res.data.map;
-            // #227
-            // window.location.reload();
           }
           if (_gmpIsMarkerFormChanged() && jQuery('#gmpMarkerForm input[name="marker_opts[title]"]').val() != '') {
             jQuery('#gmpMarkerForm').submit();

@@ -16,7 +16,6 @@ class gmapModelGmp extends modelGmp
 
     global $wpdb;
     $maps = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}gmp_maps", ARRAY_A);
-    // $maps = frameGmp::_()->getTable('maps')->get('*', $d);
     if ($maps && isset($d['simple']) && $d['simple']) {
       return $maps;
     }
@@ -154,7 +153,6 @@ class gmapModelGmp extends modelGmp
     $data = $this->prepareParams($params);
     if ($this->_validateSaveMap($data)) {
       // dispatcherGmp::doAction('beforeMapUpdate', $params['id'], $data);
-      // $res = frameGmp::_()->getTable('maps')->update($data, array('id' => (int)$params['id']));
       global $wpdb;
       $tableName = $wpdb->prefix . 'gmp_maps';
       $data_update = ['title' => $data['title'], 'html_options' => $data['html_options'], 'params' => $data['params']];
@@ -172,7 +170,6 @@ class gmapModelGmp extends modelGmp
     if (!empty($params)) {
       $insertData = $this->prepareParams($params);
       if ($this->_validateSaveMap($insertData)) {
-        //$newMapId = frameGmp::_()->getTable('maps')->insert($insertData);
         global $wpdb;
         $tableName = $wpdb->prefix . 'gmp_maps';
         $title = $insertData['title'];
@@ -206,6 +203,9 @@ class gmapModelGmp extends modelGmp
     if (!empty($mapId)) {
       global $wpdb;
       frameGmp::_()->getModule('marker')->getModel()->removeMarkersFromMap($mapId);
+      if (frameGmp::_()->getModule('shape')) {
+        frameGmp::_()->getModule('shape')->getModel()->removeShapesFromMap($mapId);
+      }
       $tableName = $wpdb->prefix . 'gmp_maps';
       $data_where = ['id' => $mapId];
       return $res = $wpdb->delete($tableName, $data_where);
@@ -219,6 +219,10 @@ class gmapModelGmp extends modelGmp
     $ids = array_map('intval', $ids);
     global $wpdb;
     foreach ($ids as $id) {
+      frameGmp::_()->getModule('marker')->getModel()->removeMarkersFromMap($id);
+      if (frameGmp::_()->getModule('shape')) {
+        frameGmp::_()->getModule('shape')->getModel()->removeShapesFromMap($id);
+      }
       $tableName = $wpdb->prefix . 'gmp_maps';
       $data_where = [
         'id' => $id,
@@ -241,7 +245,6 @@ class gmapModelGmp extends modelGmp
       foreach ($ids as $id) {
         global $wpdb;
         $map = $wpdb->get_row("SELECT * FROM {$wpdb->prefix}gmp_maps AS toe_m WHERE " . $wpdb->prepare('id = %s', $id), ARRAY_A);
-        // $map = frameGmp::_()->getTable('maps')->get('*', array('id' => (int)$id), '', 'row')
         if ($map) {
           $mapId = $map['id'];
           $map = $this->prepareDataToClone($map, false, true);
@@ -258,7 +261,6 @@ class gmapModelGmp extends modelGmp
             $clonedMapId = $wpdb->insert_id;
           }
 
-          //if($clonedMapId = frameGmp::_()->getTable('maps')->insert($map)) {
           if ($clonedMapId) {
             // Markers
             $markers = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}gmp_markers WHERE " . $wpdb->prepare('map_id = %s', $mapId) . ' ORDER BY sort_order ASC', ARRAY_A);
@@ -288,7 +290,6 @@ class gmapModelGmp extends modelGmp
                   $this->pushError(frameGmp::_()->getTable('marker')->getErrors());
                   return $this->haveErrors(); // To break foreach cycle
                 }
-                // if(!frameGmp::_()->getTable('marker')->insert($marker)) {
                 // 	$this->pushError(frameGmp::_()->getTable('marker')->getErrors());
                 // 	return $this->haveErrors();	// To break foreach cycle
                 // }
@@ -317,12 +318,10 @@ class gmapModelGmp extends modelGmp
                   $dbResId = $wpdb->insert_id;
                 }
                 if (!$dbRes) {
-                  //if(!frameGmp::_()->getTable('shape')->insert($shape)) {
                   $this->pushError(frameGmp::_()->getTable('shape')->getErrors());
                   return $this->haveErrors(); // To break foreach cycle
                 }
 
-                // if(!frameGmp::_()->getTable('shape')->insert($shape)) {
                 // 	$this->pushError(frameGmp::_()->getTable('shape')->getErrors());
                 // 	return $this->haveErrors();	// To break foreach cycle
                 // }
@@ -389,7 +388,6 @@ class gmapModelGmp extends modelGmp
     if (!$id) {
       return false;
     }
-    // $map = frameGmp::_()->getTable('maps')->get('*', array('id' => (int)$id), '', 'row');
     global $wpdb;
     $map = $wpdb->get_row("SELECT * FROM {$wpdb->prefix}gmp_maps AS toe_m WHERE " . $wpdb->prepare('id = %s', $id), ARRAY_A);
     if (!empty($map)) {

@@ -5,7 +5,8 @@ Plugin URI: https://supsystic.com/plugins/google-maps-plugin
 Donate link: https://supsystic.com/plugins/google-maps-plugin
 Tags: google map, map, Google Maps, map markers, location
 Tested up to: 7.0
-Stable tag: 1.12.3
+Requires PHP: 7.4
+Stable tag: 1.13.0
 License: GNU General Public License v2.0 or later
 
 Google Maps with markers, locations and clusterization, KML layers and filters. Custom Google map markers with text, images, videos, links.
@@ -309,145 +310,72 @@ What was improved:
 
 Important compatibility notes:
 * Local map stylization and Google Cloud `Map ID` cannot be used together in the same way as before, because Google controls map styling through Cloud Styling when `Map ID` is enabled.
-* The Google Maps JavaScript API Heatmap Layer is deprecated by Google. The plugin now includes an in-product deprecation notice, and Supsystic plans to migrate this functionality to a replacement heatmap solution with backward compatibility.
-
 
 == Changelog ==
-= Easy Google Map Plugin v1.12.3 / 28.07.2026 =
+
+= 2026 =
+
+= 1.13.0 / 31.07.2026 =
+
+ * Added further security hardening and unofficial version detected
+ * Fixed a critical error that could occur when saving markers on a newly created map
+ * Fixed an issue where reordering marker groups (parent category) could silently fail to save
+ * Completed a full compatibility pass for PHP 7.4 through 8.5 across the plugin core
+ * General code cleanup and stability improvements
+
+= 1.12.3 / 28.07.2026 =
+
  * Fixed: admin menu could stay hidden after activation on some installs (core module state is now self-healing)
  * Added: guided setup after activation - connect your Google Maps API key and jump straight into creating your first map
  * Updated: Overview page promo image
  * Minor fixes
 
-= Easy Google Map Plugin v1.12.2 / 30.05.2026 =
- * Tested up to 7.0
+= 1.12.2 / 30.05.2026 =
 
-= Easy Google Map Plugin v1.12.1 / 02.04.2026 =
- * Fixed activation
+ * Confirmed compatibility with WordPress 7.0
 
-= Easy Google Map Plugin v1.12.0 / 27.03.2026 =
- * Minor and major fixes
- * Tested up to 6.9.4
+= 1.12.1 / 02.04.2026 =
 
-= Easy Google Map Plugin v1.11.23 / 17.06.2025 =
- * Minor fixes and overview update
+ * Fixed a plugin activation issue
 
-= Easy Google Map Plugin v1.11.22 / 11.06.2025 =
- * Minor fixes
+= 1.12.0 / 27.03.2026 =
 
-= Easy Google Map Plugin v1.11.21 / 14.05.2025 =
- * Minor fixes
+ * Multiple stability fixes
+ * Confirmed compatibility with WordPress 6.9.4
 
-= Easy Google Map Plugin v1.11.20 / 06.05.2025 =
- * Add fix for textdomain notice
- * Add support WP 6.8.1
+= 2025 =
 
-= Easy Google Map Plugin v1.11.19 / 15.04.2025 =
- * Add security fix for XXE
+ * Delivered ongoing compatibility updates for WordPress 6.8.x
+ * Fixed a textdomain loading notice
+ * Added a security fix for an XXE (XML External Entity) vulnerability
+ * General stability fixes and overview page updates
 
-= Easy Google Map Plugin v1.11.18 / 05.04.2024 =
- * Minor fixes
- * Add some security fixes
+= 2024 =
 
-= Easy Google Map Plugin v1.11.17 / 28.08.2024 =
- * Minor fixes
+ * Added an XSS security fix for SVG marker icon uploads
+ * Fixed several map/marker import and export issues
+ * Added security nonce verification and an expertise-level field for the ActiveCampaign form
+ * General security hardening
 
-= Easy Google Map Plugin v1.11.16 / 22.06.2024 =
- * Add XSS security fix for SVG uploads
+= 2023 =
 
-= Easy Google Map Plugin v1.11.15 / 06.05.2024 =
- * Fix for csv export/import
+ * Fixed the Path Router feature and several visual/text editor issues for markers and marker lists
+ * Fixed an issue with loading multiple maps on the same page
+ * Completed a compatibility pass for WordPress 6.2 and PHP 8.2, with additional nonce hardening
 
-= Easy Google Map Plugin v1.11.14 / 22.04.2024 =
- * Fixed map import/export option
+= 2022 =
 
-= Easy Google Map Plugin v1.11.13 / 20.03.2024 =
- * Add expertise level for AC form
+ * Added support for WordPress 6.0/6.1 and PHP 8.1
+ * Added the renewal reminder flow for PRO licenses
 
-= Easy Google Map Plugin v1.11.12 / 23.01.2024 =
- * Add security fixes
- * Add nonce fixes
- * Minor fixes
+= 2021 =
 
-= Easy Google Map Plugin v1.11.11 / 13.12.2023 =
- * Fixes for lovelink
+ * Added support for PHP 8.0/8.1 and WordPress 5.7
+ * Replaced legacy escaping with wp_kses()/esc_attr() throughout the admin area and removed the bundled Bootstrap dependency
+ * Fixed several stability, tooltip, and custom-icon issues
 
+= 2020 =
 
-= Easy Google Map Plugin v1.11.10 / 14.09.2023 =
- * Remove promo banner
- * Enable love link
-
-= Easy Google Map Plugin v1.11.9 / 06.07.2023 =
- * Add fix for PathRouter
- * Add fix for Marker visual and text editor
- * Add fix for Marker List visual and text editor
- * Add fix for multiple map load on same page.
-
-= Easy Google Map Plugin v1.11.8 / 23.05.2023 =
- * Add support WP 6.2
- * Fixes for nonce.
- * Add support 8.2
-
-= Easy Google Map Plugin v1.11.7 / 08.11.2022 =
- * Add support WP 6.1
- * Add ac renew scenario
-
-= Easy Google Map Plugin v1.11.6 / 30.08.2022 =
- * Add support WP 6.0
- * Add support PHP 8.1
-
-= Easy Google Map Plugin v1.11.4 / 28.01.2021 =
- * Add fix for google maps
- * Fixes for export/import
-
-= Easy Google Map Plugin v1.11.3 / 13.12.2021 =
- * Minor fixes
-
-= Easy Google Map Plugin v1.11.2 / 22.11.2021 =
- * Add fix for wp_kses
-
-
-= Easy Google Map Plugin v1.11.1 / 17.11.2021 =
- * Add fix for installer
- * Added wp_kses for render class
- * changed tooltip lib
- * Add fix tooltip for license tab
-
-= Easy Google Map Plugin v1.11.0 / 05.11.2021 =
- * Add fix for wp_kses_post()
- * Add fixes for markers
- * Add fixes for custom icons
- * Any fixes for stability
-
-= Easy Google Map Plugin v1.10.1 / 27.10.2021 =
- * Add wp_kses()
- * Security fixes
- * Remove bootstrap
- * Add esc_attribute
-
-= Easy Google Map Plugin v1.9.33 / 22.96.2021 =
- * Add fix for notice
- * Add minor fixes
-
-= Easy Google Map Plugin v1.9.32 / 24.05.2021 =
- * Add support for PHP 8
- * add fix for tab xss
-
-= Easy Google Map Plugin v1.9.31 / 26.03.2021 =
- * Add fix for WP 5.7
- * Add security fixes
- * Add fix for OVH gateway
-
-= Easy Google Map Plugin v1.9.30 / 29.09.2020 =
- * Add fix for WP 5.5
- * Fix for zoom issue
- * Add fix for ajaxupload
-
-= Easy Google Map Plugin v1.9.29 / 23.06.2020 =
- * Issue with marker category
- * Add fix for PHP 7.4
- * Add fix for encoding issue
-
-= Easy Google Map Plugin v1.9.28 / 23.01.2020 =
- * Remove phpmailer code
- * Remove footer map title
+ * Added WordPress 5.5 and PHP 7.4 compatibility
+ * Fixed a map zoom issue and an asset-upload (AJAX) issue
+ * Removed the legacy PHPMailer bundling

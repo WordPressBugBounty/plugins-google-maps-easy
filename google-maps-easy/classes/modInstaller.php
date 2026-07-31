@@ -144,6 +144,14 @@ class modInstallerGmp
   {
     $locations = self::_getPluginLocations($extPlugName);
     if ($modules = self::_getExtendModules($locations)) {
+      // Resolve "license" first: activate() below only lets any other module
+      // in this extension come back on if a currently valid license exists,
+      // so license itself must already be up to date by the time we get there.
+      usort($modules, function ($a, $b) {
+        $aCode = is_array($a) ? $a['code'] ?? '' : '';
+        $bCode = is_array($b) ? $b['code'] ?? '' : '';
+        return ($bCode === 'license' ? 1 : 0) - ($aCode === 'license' ? 1 : 0);
+      });
       foreach ($modules as $m) {
         if (!empty($m)) {
           if (frameGmp::_()->getTable('modules')->exists($m['code'], 'code')) {
@@ -168,6 +176,23 @@ class modInstallerGmp
     return true;
   }
   public static function checkActivationMessages() {}
+  /**
+   * True only when this extension has a "license" module row and it is not
+   * currently active -- i.e. when activate() below should withhold every
+   * other module until a valid license re-enables them. Extensions that have
+   * no license concept at all (no "license" row) are unaffected. Read
+   * directly from the table (not via getModule('license'), which would
+   * require that module to already be loaded in this request) so it reflects
+   * any activation this same check() pass just performed.
+   */
+  private static function _licenseGateApplies()
+  {
+    // Query $wpdb directly rather than through dbGmp::get(), which is a stub
+    // that never actually executes a query in this codebase.
+    global $wpdb;
+    $active = $wpdb->get_var("SELECT active FROM {$wpdb->prefix}gmp_modules WHERE code = 'license'");
+    return $active !== null && (int) $active !== 1;
+  }
   public static function deactivate()
   {
     $locations = self::_getPluginLocations();
@@ -200,6 +225,21 @@ class modInstallerGmp
   public static function activate($modDataArr)
   {
     if (!empty($modDataArr['code']) && !frameGmp::_()->moduleActive($modDataArr['code'])) {
+      // Only "license" comes back automatically just because the extension
+      // plugin itself was (re)activated. Every other of its modules must only
+      // be reactivated once a currently valid license exists -- otherwise a
+      // bare deactivate/reactivate of the plugin would silently re-enable
+      // every paid feature regardless of license state.
+      if ($modDataArr['code'] !== 'license' && self::_licenseGateApplies()) {
+        return;
+      }
+      if (!frameGmp::_()->getModule('options')) {
+        // 'options' is a core module of the base plugin; without it we can't
+        // reach the modules table model at all. Bail instead of fataling on a
+        // null method call.
+        errorsGmp::push(__('Core "options" module is not active, cannot activate modules', GMP_LANG_CODE), errorsGmp::MOD_INSTALL);
+        return;
+      }
       $res = frameGmp::_()
         ->getModule('options')
         ->getModel('modules')
@@ -236,15 +276,13 @@ class modInstallerGmp
   public static function uninstall()
   {
     $locations = self::_getPluginLocations();
+    $optionsModule = frameGmp::_()->getModule('options');
     if ($modules = self::_getExtendModules($locations)) {
       foreach ($modules as $m) {
         self::_uninstallTables($m);
-        frameGmp::_()
-          ->getModule('options')
-          ->getModel('modules')
-          ->delete([
-            'code' => $m['code'],
-          ]);
+        if ($optionsModule) {
+          $optionsModule->getModel('modules')->delete(['code' => $m['code']]);
+        }
         utilsGmp::deleteDir(GMP_MODULES_DIR . $m['code']);
       }
     }

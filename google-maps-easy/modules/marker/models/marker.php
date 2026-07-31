@@ -38,8 +38,6 @@ class markerModelGmp extends modelGmp
       if (!$update) {
         $marker['create_date'] = date('Y-m-d H:i:s');
         if ($marker['map_id']) {
-          // $maxSortOrder = (int) dbGmp::get('SELECT MAX(sort_order) FROM @__markers WHERE map_id = "'. $marker['map_id']. '"', 'one');
-          // $marker['sort_order'] = ++$maxSortOrder;
           global $wpdb;
           $maxSortOrder = $wpdb->get_var("SELECT MAX(sort_order) FROM {$wpdb->prefix}gmp_markers WHERE " . $wpdb->prepare('map_id = %s', $marker['map_id']));
           $marker['sort_order'] = ++$maxSortOrder;
@@ -61,23 +59,6 @@ class markerModelGmp extends modelGmp
 
       if ($update) {
         dispatcherGmp::doAction('beforeMarkerUpdate', $id, $marker);
-        // 	$dbRes = frameGmp::_()->getTable('marker')->update($marker, array('id' => $id));
-        //
-        // 	frameGmp::_()->getTable('marker_groups_relation')->delete('marker_id = ' . $marker['id']);
-        // 	foreach ($markerGroupIds as $markerId) {
-        // 		$res = frameGmp::_()->getTable('marker_groups_relation')->insert(array('marker_id'=>$marker['id'], 'groups_id'=>$markerId));
-        // 	}
-        // 	dispatcherGmp::doAction('afterMarkerUpdate', $id, $marker);
-        // } else {
-        // 	dispatcherGmp::doAction('beforeMarkerInsert', $marker);
-        // 	$dbRes = frameGmp::_()->getTable('marker')->insert($marker);
-        // 	if($dbRes){
-        // 		frameGmp::_()->getTable('marker_groups_relation')->delete('marker_id = ' . $dbRes);
-        // 		foreach ($markerGroupIds as $markerId) {
-        // 			frameGmp::_()->getTable('marker_groups_relation')->insert(array('marker_id' => $dbRes, 'groups_id' => $markerId));
-        // 		}
-        // 	}
-        // 	dispatcherGmp::doAction('afterMarkerInsert', $dbRes, $marker);
         global $wpdb;
         $tableName = $wpdb->prefix . 'gmp_markers';
         $data_update = [
@@ -210,14 +191,12 @@ class markerModelGmp extends modelGmp
     global $wpdb;
     $row = $wpdb->get_row("SELECT * FROM {$wpdb->prefix}gmp_markers WHERE " . $wpdb->prepare('id = %s', $id), ARRAY_A);
     return $this->_afterGet($row);
-    //return $this->_afterGet(frameGmp::_()->getTable('marker')->get('*', array('id' => $id), '', 'row'));
   }
   public function getMarkerByTitle($title)
   {
     global $wpdb;
-    $row = $wpdb->get_row("SELECT * FROM {$wpdb->prefix}gmp_markers WHERE " . $wpdb->prepare('id = %s', $id), ARRAY_A);
+    $row = $wpdb->get_row("SELECT * FROM {$wpdb->prefix}gmp_markers WHERE " . $wpdb->prepare('title = %s', $title), ARRAY_A);
     return $this->_afterGet($row);
-    //return $this->_afterGet(frameGmp::_()->getTable('marker')->get('*', array('title' => $title), '', 'row'));
   }
   public function _afterGet($marker, $widthMapData = false, $withoutIcons = false)
   {
@@ -226,6 +205,9 @@ class markerModelGmp extends modelGmp
         $marker['icon_data'] = frameGmp::_()->getModule('icons')->getModel()->getIconFromId($marker['icon']);
       }
       $marker['params'] = utilsGmp::unserialize($marker['params']);
+      if (!is_array($marker['params'])) {
+        $marker['params'] = [];
+      }
       /*$marker['position'] = array(
 				'coord_x' => $marker['coord_x'],
 				'coord_y' => $marker['coord_y'],
@@ -261,69 +243,6 @@ class markerModelGmp extends modelGmp
     return $marker;
   }
 
-  /*public function saveMarkers($markerArr, $mapId) {
-        foreach($markerArr as $marker) {
-			 $marker['map_id'] = $mapId;
-             $this->saveMarker($marker);
-        }
-        return !$this->haveErrors();
-    }
-	public function saveMarker($marker) {
-		if(!isset($marker['marker_group_id'])) {
-			$marker['marker_group_id'] = 1;
-		}
-		if(!isset($marker['icon'])) {
-			$marker['icon'] = 1;
-		} elseif(!frameGmp::_()->getModule('icons')->getModel()->iconExists($marker['icon'])) {
-			// Why here is echo??? I don't know.........
-			//echo $marker['icon']."..";
-			$marker['icon'] = 1;
-		}
-		unset($marker['id']);
-		$marker['create_date'] = date('Y-m-d H:i:s');
-		$marker['params'] = utilsGmp::serialize(array('titleLink' => $marker['titleLink']));
-		unset($marker['titleLink']);
-		if(!frameGmp::_()->getTable('marker')->insert($marker)) {
-			$this->pushError(frameGmp::_()->getTable('marker')->getErrors());
-		}
-	}*/
-  /*public function updateMapMarkers($params, $mapId = null) {
-        foreach($params as $id => $data) {
-			//self::$tableObj->delete($id);
-			$newId = $id;
-            $exists = self::$tableObj->exists($id);
-            unset($data['id']);
-            if($mapId) {
-				$data['map_id'] = $mapId;
-            }
-            $data['marker_group_id'] = $data['groupId'];
-			$data['params'] = utilsGmp::serialize(array('titleLink' => $data['titleLink']));
-			unset($data['titleLink']);
-            if($exists) {
-                self::$tableObj->update($data, array('id' => $id));
-            } else {
-				$params[$id]['tmp_id'] = $id;
-                $newId = self::$tableObj->insert($data);
-            }
-			$params[$id]['id'] = $newId;
-			$params[$id]['params'] = utilsGmp::unserialize($data['params']);
-        }
-        return $params;
-    }*/
-  /*public function updateMarker($marker){
-        $insert = array(
-			'marker_group_id'   =>  $marker['goup_id'],
-			'title'             =>  $marker['title'],
-			'address'           =>  $marker['address'],
-			'description'       =>  $marker['desc'],
-			'coord_x'           =>  $marker['position']['coord_x'],
-			'coord_y'           =>  $marker['position']['coord_y'],
-			'animation'         =>  $marker['animation'],
-			'icon'              =>  $marker['icon']['id'],
-			'params'			=>  utilsGmp::serialize(array('titleLink' => $marker['titleLink']))
-		);
-		return self::$tableObj->update($insert," `id`='".$marker['id']."'");
-    }*/
   public function getMapMarkers($mapId, $withGroup = false, $userId = false)
   {
     $mapId = (int) $mapId;
@@ -333,7 +252,6 @@ class markerModelGmp extends modelGmp
     }
     global $wpdb;
     $markers = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}gmp_markers AS toe_mr WHERE map_id = %s ORDER BY sort_order ASC", $mapId), ARRAY_A);
-    // $markers = frameGmp::_()->getTable('marker')->orderBy('sort_order ASC')->get('*', $params);
     if (!empty($markers)) {
       $iconIds = [];
       foreach ($markers as $i => $m) {
@@ -360,7 +278,6 @@ class markerModelGmp extends modelGmp
     global $wpdb;
     $markers = $wpdb->get_col($wpdb->prepare("SELECT * FROM {$wpdb->prefix}gmp_markers WHERE map_id= %s", $mapId), ARRAY_A);
     return $markers;
-    //return frameGmp::_()->getTable('marker')->get('id', array('map_id' => $mapId), '', 'col');
   }
   public function getMarkersByIds($ids)
   {
@@ -371,7 +288,6 @@ class markerModelGmp extends modelGmp
     global $wpdb;
     $ids = implode(',', array_map('absint', $ids));
     $markers = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}gmp_markers WHERE id IN (%1s)", $ids), ARRAY_A);
-    //$markers = frameGmp::_()->getTable('marker')->get('*', array('additionalCondition' => 'id IN ('. implode(',', $ids). ')'));
     if (!empty($markers)) {
       foreach ($markers as $i => $m) {
         $markers[$i] = $this->_afterGet($markers[$i]);
@@ -388,7 +304,6 @@ class markerModelGmp extends modelGmp
       'id' => $markerId,
     ];
     return $res = $wpdb->delete($tableName, $data_where);
-    //return frameGmp::_()->getTable('marker')->delete(array('id' => $markerId));
   }
   public function removeList($ids)
   {
@@ -404,7 +319,6 @@ class markerModelGmp extends modelGmp
     if ($res) {
       return true;
     }
-    //return frameGmp::_()->getTable('marker')->delete(array('additionalCondition' => 'id IN ('. implode(',', $ids). ')'));
   }
   public function findAddress($params)
   {
@@ -431,7 +345,6 @@ class markerModelGmp extends modelGmp
   }
   public function removeMarkersFromMap($mapId)
   {
-    //  return frameGmp::_()->getTable('marker')->delete("`map_id`='".$mapId."'");
     global $wpdb;
     $tableName = $wpdb->prefix . 'gmp_markers';
     $data_where = [
@@ -446,7 +359,6 @@ class markerModelGmp extends modelGmp
     // if(isset($d['orderBy']) && !empty($d['orderBy'])) {
     // 	frameGmp::_()->getTable('marker')->orderBy( $d['orderBy'] );
     // }
-    //     $markerList = frameGmp::_()->getTable('marker')->get('*', $d);
     //     $iconsModel = frameGmp::_()->getModule('icons')->getModel();
     //     foreach($markerList as $i => &$m) {
     // 	$markerList[$i] = $this->_afterGet($markerList[$i], $widthMapData);
@@ -459,13 +371,21 @@ class markerModelGmp extends modelGmp
     }
     return $markerList;
   }
-  public function getTotalCountBySearch($search)
+  public function getTotalCountBySearch($search, $mapId = false)
   {
     global $wpdb;
     if (!empty($search)) {
-      $count = (int) $wpdb->get_var("SELECT COUNT(*) AS total FROM {$wpdb->prefix}gmp_markers " . $wpdb->prepare('(id = %s OR label = %s)', $search, $search));
+      if ($mapId) {
+        $count = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) AS total FROM {$wpdb->prefix}gmp_markers WHERE map_id = %s AND (id = %s OR label = %s)", $mapId, $search, $search));
+      } else {
+        $count = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) AS total FROM {$wpdb->prefix}gmp_markers WHERE (id = %s OR label = %s)", $search, $search));
+      }
     } else {
-      $count = (int) $wpdb->get_var("SELECT COUNT(*) AS total FROM {$wpdb->prefix}gmp_markers ");
+      if ($mapId) {
+        $count = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) AS total FROM {$wpdb->prefix}gmp_markers WHERE map_id = %s", $mapId));
+      } else {
+        $count = (int) $wpdb->get_var("SELECT COUNT(*) AS total FROM {$wpdb->prefix}gmp_markers ");
+      }
     }
     return $count;
   }
@@ -484,14 +404,12 @@ class markerModelGmp extends modelGmp
   }
   public function setMarkersToMap($addMarkerIds, $mapId)
   {
-    // if(!is_array($addMarkerIds))
-    // 	$addMarkerIds = array($addMarkerIds);
-    // $addMarkerIds = array_map('intval', $addMarkerIds);
-    // return frameGmp::_()->getTable('marker')->update(array('map_id' => (int)$mapId), array('additionalCondition' => 'id IN ('. implode(',', $addMarkerIds). ')'));
     if (!is_array($addMarkerIds)) {
       $addMarkerIds = [$addMarkerIds];
     }
     $addMarkerIds = array_map('intval', $addMarkerIds);
+    global $wpdb;
+    $dbRes = false;
     foreach ($addMarkerIds as $addMarkerId) {
       $tableName = $wpdb->prefix . 'gmp_markers';
       $data_update = [
@@ -499,6 +417,7 @@ class markerModelGmp extends modelGmp
       ];
       $data_where = [
         'id' => $addMarkerId,
+        'map_id' => 0,
       ];
       $dbRes = $wpdb->update($tableName, $data_update, $data_where);
     }
@@ -508,7 +427,6 @@ class markerModelGmp extends modelGmp
   }
   public function getCount($d = [])
   {
-    // return frameGmp::_()->getTable('marker')->get('COUNT(*)', $d, '', 'one');
     global $wpdb;
     return $count = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}gmp_markers ");
   }
@@ -516,7 +434,6 @@ class markerModelGmp extends modelGmp
   {
     // $d['id'] = isset($d['id']) ? (int) $d['id'] : 0;
     // if($d['id']) {
-    // 	return frameGmp::_()->getTable('marker')->update(array(
     // 		'coord_x' => $d['lat'],
     // 		'coord_y' => $d['lng'],
     // 	), array(
@@ -559,7 +476,6 @@ class markerModelGmp extends modelGmp
     }
     return false;
     // if($id) {
-    // 	return frameGmp::_()->getTable('marker')->update(array(
     // 		'icon' => '1',
     // 	), array(
     // 		'icon' => $id,

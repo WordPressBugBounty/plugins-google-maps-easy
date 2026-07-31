@@ -19,7 +19,6 @@ class iconsModelGmp extends modelGmp
 
   public function getIconsByIds($ids)
   {
-    //$icons = frameGmp::_()->getTable('icons')->get('*', array('additionalCondition' => 'id IN ('. implode(',', $ids). ')'));
     global $wpdb;
     $ids = implode(',', array_map('absint', $ids));
     $icons = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}gmp_icons WHERE id IN (%1s)", $ids), ARRAY_A);
@@ -57,7 +56,6 @@ class iconsModelGmp extends modelGmp
       return false;
     }
     $url = $params['url'];
-    //$exists = frameGmp::_()->getTable('icons')->get("*", "`path`='".$url."'");
     global $wpdb;
     $exists = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}gmp_icons WHERE " . $wpdb->prepare('path = %s', $url), ARRAY_A);
     if (!empty($exists)) {
@@ -77,7 +75,6 @@ class iconsModelGmp extends modelGmp
     } else {
       return $res;
     }
-    // return frameGmp::_()->getTable('icons')->insert(array(
     // 	'path' => $url,
     // 	'title' => $params['title'],
     // 	'description' => $params['description'],
@@ -181,7 +178,6 @@ class iconsModelGmp extends modelGmp
     $this->ensureDefaultIconsInstalled();
     global $wpdb;
     $res = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}gmp_icons WHERE " . $wpdb->prepare('id = %s', $id), ARRAY_A);
-    //$res = frameGmp::_()->getTable('icons')->get('*', array('id' => $id));
     if (empty($res)) {
       return $res;
     }
@@ -211,7 +207,6 @@ class iconsModelGmp extends modelGmp
   {
     global $wpdb;
     return $res = $wpdb->get_row("SELECT * FROM {$wpdb->prefix}gmp_icons WHERE " . $wpdb->prepare('id = %s', $iconId), ARRAY_A);
-    //return frameGmp::_()->getTable('icons')->exists($iconId, 'id');
   }
   public function remove($d = [])
   {

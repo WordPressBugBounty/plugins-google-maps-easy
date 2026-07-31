@@ -2374,12 +2374,6 @@ if ($this->isPro) {
 					<div id="gmpHeatmapTab" class="gmpTabContent">
 					<?php if ($this->isPro) { ?>
 						<form id="gmpHeatmapForm">
-							<div style="margin: 0 0 15px 0; padding: 12px 14px; border-left: 4px solid #dba617; background: #fff8e5; color: #5f4b00;">
-								<strong><?php _e('Deprecation notice:', GMP_LANG_CODE); ?></strong>
-								<?php _e('The Heatmap Layer functionality in the Maps JavaScript API is no longer supported. This API was deprecated on May 27, 2025 and will be made unavailable in a later version of the Maps JavaScript API, releasing in May 2026.', GMP_LANG_CODE); ?>
-								<?php _e('Supsystic plans to migrate this module to a replacement heatmap solution with backward compatibility in the near future.', GMP_LANG_CODE); ?>
-								<a href="https://developers.google.com/maps/deprecations" target="_blank" rel="noopener noreferrer"><?php _e('Learn more', GMP_LANG_CODE); ?></a>.
-							</div>
 							<table class="form-table">
 								<tr>
 									<th scope="row">
@@ -2387,7 +2381,7 @@ if ($this->isPro) {
 											<?php _e('Points', GMP_LANG_CODE); ?>:
 										</label>
 										<i style="float: right;" class="fa fa-question supsystic-tooltip" title="<?php _e(
-            'To add Heatmap Layer points you need to activate Add Points button and draw each point by click on map. To remove points you need to activate Remove Points button and delete necessary point by click on it or just click on Delete Heatmap Layer button to remove all Heatmap Layer points. Important! You must to deactivate Add by Click and Remove by Click buttons after ending of the add / remove points.',
+            'To add Heatmap Layer points, activate the Add Point button and click on the map for each point. To manage existing points, use the list below: click a point to center the map on it, use the move icon to reposition it, or the trash icon to delete it. Click Delete Heatmap Layer to remove all points at once.',
             GMP_LANG_CODE,
           ); ?>"></i>
 									</th>
@@ -2396,9 +2390,6 @@ if ($this->isPro) {
 											<a href="#" class="button" id="gmpHeatmapAddPointBtn">
 												<?php _e('Add Point', GMP_LANG_CODE); ?>
 											</a>
-											<a href="#" class="button" id="gmpHeatmapRemovePointBtn">
-												<?php _e('Remove Point', GMP_LANG_CODE); ?>
-											</a>
 										</div>
 										<div class="gmpHeatmapPointsCount">
 											<label>
@@ -2406,6 +2397,8 @@ if ($this->isPro) {
 											</label>
 											<div id="gmpHeatmapPointsNumber"></div>
 										</div>
+										<div id="gmpHeatmapMovePointHint"><?php _e('Click on the map to move the selected point to its new position.', GMP_LANG_CODE); ?></div>
+										<div id="gmpHeatmapPointsList"></div>
 									</td>
 								</tr>
 								<tr>

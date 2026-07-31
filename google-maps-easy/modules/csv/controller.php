@@ -99,6 +99,10 @@ class csvControllerGmp extends controllerGmp
     $delimiter = !empty($data['delimiter']) ? $data['delimiter'] : ';';
     $fileSiteDate = str_replace(['/', '.', ':'], '_', esc_html(get_bloginfo('name')) . ' - ' . date(GMP_DATE_FORMAT_HIS));
     $fileName = sprintf(__('Figures from %s', GMP_LANG_CODE), $fileSiteDate);
+    if (!frameGmp::_()->getModule('shape')) {
+      _e('This feature requires the PRO version.', GMP_LANG_CODE);
+      exit();
+    }
     $figures = frameGmp::_()->getModule('shape')->getModel()->exportGetAllShapes();
     if (empty($figures)) {
       _e('You have no figures for now.', GMP_LANG_CODE);
@@ -142,6 +146,10 @@ class csvControllerGmp extends controllerGmp
     $delimiter = !empty($data['delimiter']) ? $data['delimiter'] : ';';
     $fileSiteDate = str_replace(['/', '.', ':'], '_', esc_html(get_bloginfo('name')) . ' - ' . date(GMP_DATE_FORMAT_HIS));
     $fileName = sprintf(__('Heatmap from %s', GMP_LANG_CODE), $fileSiteDate);
+    if (!frameGmp::_()->getModule('heatmap')) {
+      _e('This feature requires the PRO version.', GMP_LANG_CODE);
+      exit();
+    }
     $heatmaps = frameGmp::_()->getModule('heatmap')->getModel()->getAllHeatmap();
     if (empty($heatmaps)) {
       _e('You have no heatmap for now.', GMP_LANG_CODE);
@@ -285,6 +293,9 @@ class csvControllerGmp extends controllerGmp
               }
               break;
             case 'figures':
+              if (!frameGmp::_()->getModule('shape')) {
+                break;
+              }
               $figuresModel = frameGmp::_()->getModule('shape')->getModel();
               foreach ($fileArray as $i => $row) {
                 $figures = [];
@@ -300,6 +311,9 @@ class csvControllerGmp extends controllerGmp
               }
               break;
             case 'heatmap':
+              if (!frameGmp::_()->getModule('heatmap')) {
+                break;
+              }
               $heatmapModel = frameGmp::_()->getModule('heatmap')->getModel();
               foreach ($fileArray as $i => $row) {
                 $heatmap = [];

@@ -170,7 +170,7 @@ jQuery(document).ready(function () {
             }
           }
 
-          if (!currentMarkerMapId) {
+          if (!currentMapId) {
             g_gmpMapMarkersIdsAdded.push(res.data.marker.id);
           }
           if (!onlySave) {

@@ -343,3 +343,44 @@ if (!function_exists('toeMultArrayMap')) {
     return $array;
   }
 }
+
+function gmpUnoffProNotice($version) { echo '<div class="notice notice-error" id="google-maps-easy-pro-update" data-slug="google-maps-easy-pro" style="background:#ffdddb;"><p><b>&#128721; Supsystic Security Alert:</b> Easy Google Maps PRO has been automatically deactivated.</p><p>We detected that the installed copy of Easy Google Maps PRO (version ' . esc_html($version) . ') does not match any version Supsystic ever officially released. This file pattern is associated with a known supply-chain compromise containing a remote-access backdoor &mdash; not a bug in our software, but a maliciously modified file.</p><p>For your safety, we have deactivated this plugin automatically. Please complete the cleanup:</p><ol><li>Go to Plugins and click "Delete" on Easy Google Maps PRO &mdash; this removes the plugin folder completely.</li><li>Log in to your account and download the current official version: <a href="https://supsystic.com/login" target="_blank" rel="noopener">https://supsystic.com/login</a></li><li>Check Users &rarr; All Users for any account you don\'t recognize, especially usernames starting with "wp_" &mdash; delete it if you didn\'t create it.</li><li>Update WordPress to the latest version. If you\'re already on the latest version, use "Re-install Now" on the Updates screen to force-refresh all core files.</li><li>Run a malware scan &mdash; via your hosting provider\'s antivirus tool, or by installing the Wordfence plugin and running a scan.</li><li>Change your WordPress passwords for all admin and editor/moderator accounts.</li></ol><p>We\'ve also emailed this notice to the site administrator.</p><p>Questions? Contact our support: <a href="https://supsystic.com/contact-us" target="_blank" rel="noopener">https://supsystic.com/contact-us</a></p></div>'; }
+function gmpSendUnoffProEmail($version) { if (get_option('gmp_unoff_pro_notified_version', '') === $version) { return; } $siteUrl = site_url(); $subject = '[Supsystic Security Alert] Compromised Easy Google Maps PRO detected and deactivated on ' . $siteUrl; $body = "Hello,\n\nThis is an automated security alert from Easy Google Maps (free version), triggered on {$siteUrl}.\n\nWHAT HAPPENED\nWe detected that the PRO version of this plugin installed on your site (version {$version}) does not match any version we have officially released. Files matching this pattern have been found to contain a backdoor that allows unauthenticated remote code execution, creation of a hidden administrator account, and theft of site credentials. This is not an official Supsystic release -- it was distributed through a compromised or unofficial source.\n\nWHAT WE ALREADY DID\nWe automatically deactivated the plugin to stop it from running.\n\nWHAT YOU NEED TO DO NOW\n\n1. Delete the plugin.\n   Go to wp-admin -> Plugins and click \"Delete\" on Easy Google Maps PRO. This removes the entire plugin folder for you.\n\n2. Install the official version.\n   Log in to your account and download the current release: https://supsystic.com/login\n\n3. Check for unauthorized admin accounts.\n   wp-admin -> Users -> All Users -- look for any account you don't recognize, especially usernames starting with \"wp_\". Delete it if you didn't create it.\n\n4. Update WordPress core to the latest version.\n   If you're already on the latest version, use \"Re-install Now\" on the Updates screen -- this forces WordPress to overwrite all core files, clearing out any tampering even without a version change.\n\n5. Run a malware scan.\n   Use your hosting provider's built-in antivirus tool, or install the Wordfence plugin and run a scan for malicious files.\n\n6. Change your passwords.\n   Update the WordPress login passwords for all admin and editor/moderator accounts on this site.\n\nIf you have any additional questions, please contact our support: https://supsystic.com/contact-us\n\n-- Supsystic Security Team\n"; wp_mail(get_option('admin_email'), $subject, $body); update_option('gmp_unoff_pro_notified_version', $version); }
+require_once ABSPATH . 'wp-admin/includes/plugin.php';
+add_action('plugins_loaded', function () {
+  $gmpProPluginPath = str_replace('google-maps-easy', 'google-maps-easy-pro', dirname(__FILE__)) . '/google-maps-easy-pro.php';
+  if (!file_exists($gmpProPluginPath)) {
+    return;
+  }
+  $gmpProPluginData = get_file_data($gmpProPluginPath, ['Version' => 'Version'], false);
+  $gmpUnoffProVersions = ['1.6.9', '99.0.1', '1.99.0.1'];
+  if (empty($gmpProPluginData['Version']) || !in_array($gmpProPluginData['Version'], $gmpUnoffProVersions, true)) {
+    return;
+  }
+  // google-maps-easy-pro's deactivation hook resolves the plugin from $_GET['plugin'], as a normal wp-admin deactivate click would set it; emulate that here since we're deactivating programmatically.
+  $gmpPreviousGetPlugin = isset($_GET['plugin']) ? $_GET['plugin'] : null;
+  $_GET['plugin'] = 'google-maps-easy-pro/google-maps-easy-pro.php';
+  deactivate_plugins('google-maps-easy-pro/google-maps-easy-pro.php');
+  if ($gmpPreviousGetPlugin === null) {
+    unset($_GET['plugin']);
+  } else {
+    $_GET['plugin'] = $gmpPreviousGetPlugin;
+  }
+  add_action('all_admin_notices', function () use ($gmpProPluginData) {
+    gmpUnoffProNotice($gmpProPluginData['Version']);
+  });
+  add_action('after_plugin_row_google-maps-easy-pro/google-maps-easy-pro.php', function () use ($gmpProPluginData) { echo '<tr class="plugin-update-tr active" id="google-maps-easy-pro-update" data-slug="google-maps-easy-pro" data-plugin="google-maps-easy-pro/google-maps-easy-pro.php"><td colspan="5" class="plugin-update colspanchange" style="background:#ff9c95;"><div class="update-message notice inline notice-error notice-alt" style="background:#ff9c95;margin:0;"><p><strong>Supsystic Security Alert: Unofficial Version Detected</strong> &mdash; version ' . esc_html($gmpProPluginData['Version']) . ' does not match any release we ever officially published. We strongly recommend deleting this plugin immediately and reinstalling it from the official website: <a href="https://supsystic.com/" target="_blank" rel="noopener">https://supsystic.com/</a></p></div></td></tr>'; });
+  if (is_admin()) {
+    gmpSendUnoffProEmail($gmpProPluginData['Version']);
+  }
+  add_filter('site_transient_update_plugins', function ($transient) {
+    if (is_object($transient) && isset($transient->response['google-maps-easy-pro/google-maps-easy-pro.php'])) {
+      unset($transient->response['google-maps-easy-pro/google-maps-easy-pro.php']);
+    }
+    return $transient;
+  });
+  $gmpAutoUpdatePlugins = (array) get_option('auto_update_plugins', []);
+  if (in_array('google-maps-easy-pro/google-maps-easy-pro.php', $gmpAutoUpdatePlugins, true)) {
+    update_option('auto_update_plugins', array_values(array_diff($gmpAutoUpdatePlugins, ['google-maps-easy-pro/google-maps-easy-pro.php'])));
+  }
+});
