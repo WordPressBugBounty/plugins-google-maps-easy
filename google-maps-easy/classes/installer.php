@@ -382,29 +382,6 @@ class installerGmp
       );
     }
     /**
-     * Plugin usage statistics
-     */
-    if (!dbGmp::exist('gmp_usage_stat')) {
-      dbDelta(
-        'CREATE TABLE `' .
-          $wpPrefix .
-          "gmp_usage_stat` (
-			  `id` int(11) NOT NULL AUTO_INCREMENT,
-			  `code` varchar(64) NOT NULL,
-			  `visits` int(11) NOT NULL DEFAULT '0',
-			  `spent_time` int(11) NOT NULL DEFAULT '0',
-			  `modify_timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-			  UNIQUE INDEX `code` (`code`),
-			  PRIMARY KEY (`id`)
-			) DEFAULT CHARSET=utf8",
-      );
-      $tableName = $wpdb->prefix . 'gmp_usage_stat';
-      $wpdb->insert($tableName, [
-        'code' => 'installed',
-        'visits' => 1,
-      ]);
-    }
-    /**
      * Create table for marker groups
      */
     if (!dbGmp::exist('gmp_marker_groups_relation')) {
@@ -471,7 +448,6 @@ class installerGmp
   }
   public static function delete()
   {
-    self::_checkSendStat('delete');
     global $wpdb;
     $wpPrefix = $wpdb->prefix; /* add to 0.0.3 Versiom */
     $deleteOptions = false;
@@ -495,17 +471,7 @@ class installerGmp
       //delete_option(GMP_DB_PREF. 'plug_was_used');
     }
   }
-  public static function deactivate()
-  {
-    self::_checkSendStat('deactivate');
-  }
-  private static function _checkSendStat($statCode)
-  {
-    if (class_exists('frameGmp') && frameGmp::_()->getModule('supsystic_promo') && frameGmp::_()->getModule('options')) {
-      frameGmp::_()->getModule('supsystic_promo')->getModel()->saveUsageStat($statCode);
-      frameGmp::_()->getModule('supsystic_promo')->getModel()->checkAndSend(true);
-    }
-  }
+  public static function deactivate() {}
   public static function update()
   {
     global $wpdb;

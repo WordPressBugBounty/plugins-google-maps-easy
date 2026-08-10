@@ -8,6 +8,13 @@ jQuery(document).ready(function () {
   jQuery('body').find('.ui-button').html('');
 
   gmpInitMainPromoPopup();
+  jQuery('.overview-section-btn').on('click', function () {
+    jQuery('.overview-section').hide();
+    jQuery(".overview-section[data-section='" + jQuery(this).data('section') + "']").show();
+    jQuery('.overview-section-btn-active').removeClass('overview-section-btn-active');
+    jQuery(this).addClass('overview-section-btn-active');
+  });
+  jQuery('.overview-section-btn').eq(0).trigger('click');
   if (typeof gmpActiveTab != 'undefined' && gmpActiveTab != 'main_page' && jQuery('#toplevel_page_' + gmpMainSlug).hasClass('wp-has-current-submenu')) {
     var subMenus = jQuery('#toplevel_page_' + gmpMainSlug).find('.wp-submenu li');
     subMenus.removeClass('current').each(function () {

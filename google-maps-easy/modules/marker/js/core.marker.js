@@ -78,10 +78,12 @@ function gmpPatchAdvancedMarker(marker) {
     this.content = gmpCreateAdvancedMarkerContent(icon);
   };
   marker.setTitle = function (title) {
+    // AdvancedMarkerElement's title setter throws if given anything but a string.
+    title = typeof title === 'string' ? title : '';
     this.title = title;
     if (this.content) {
       this.content.title = '';
-      this.content.setAttribute('aria-label', title || '');
+      this.content.setAttribute('aria-label', title);
     }
   };
   return marker;

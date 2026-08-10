@@ -1,10 +1,6 @@
 <?php
 class supsystic_promoViewGmp extends viewGmp
 {
-  public function displayAdminFooter()
-  {
-    parent::display('adminFooter');
-  }
   public function showWelcomePage()
   {
     $this->assign('askOptions', [
@@ -92,9 +88,4 @@ class supsystic_promoViewGmp extends viewGmp
     $this->assign('tabDescription', $tabDescription);
     return parent::getContent('adminPromoTabContent');
   }
-  // public function getDiscountMsg($buyLink = '#') {
-  // 	$this->assign('bundlePageLink', '//supsystic.com/all-plugins/');
-  // 	$this->assign('buyLink', $buyLink);
-  // 	parent::display('discountMsg');
-  // }
 }

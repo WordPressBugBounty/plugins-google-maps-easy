@@ -17,7 +17,7 @@ class templatesGmp extends moduleGmp
         $this->loadCoreCss();
         $this->loadJqueryUi();
         //$this->loadChosenSelects();
-        frameGmp::_()->addScript('gmpAcPromoScript', GMP_JS_PATH . 'acPromoScript.js');
+        // acPromoStyle.css also carries shared admin layout rules, not just promo styling - keep the style enqueue
         frameGmp::_()->addStyle('gmpAcPromoStyle', GMP_CSS_PATH . 'acPromoStyle.css');
         frameGmp::_()->addScript('adminOptionsGmp', GMP_JS_PATH . 'admin.options.js', [], false, true);
         add_action('admin_enqueue_scripts', [$this, 'loadMediaScripts']);
@@ -81,25 +81,6 @@ class templatesGmp extends moduleGmp
       ];
       if (is_admin()) {
         $jsData['isPro'] = frameGmp::_()->getModule('supsystic_promo')->isPro();
-        $show = true;
-        $acRemind = get_option('gmp_ac_remind', false);
-        if (!empty($acRemind)) {
-          $currentDate = date('Y-m-d h:i:s');
-          if ($currentDate > $acRemind) {
-            $show = true;
-          } else {
-            $show = false;
-          }
-        }
-        $acSubscribe = get_option('gmp_ac_subscribe', false);
-        if (!empty($acSubscribe)) {
-          $show = false;
-        }
-        $acDisabled = get_option('gmp_ac_disabled', false);
-        if (!empty($acDisabled)) {
-          $show = false;
-        }
-        $jsData['gmpAcShow'] = $show;
       }
       $jsData = dispatcherGmp::applyFilters('jsInitVariables', $jsData);
       frameGmp::_()->addJSVar('coreGmp', 'GMP_DATA', $jsData);

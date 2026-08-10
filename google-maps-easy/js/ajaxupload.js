@@ -342,6 +342,19 @@
         if (self._parentDialog != d.body) {
           dialogOffset = getOffset(self._parentDialog);
         }
+
+        // Position the invisible file input under the cursor right away, instead of
+        // waiting for a subsequent mousemove. Otherwise a click landing immediately
+        // after mouseover (no pointer movement in between) hits the underlying button
+        // element rather than the file input, so the file dialog only opens on a
+        // second click.
+        var c = getMouseCoords(e);
+        if (c.x >= box.left && c.x <= box.right && c.y >= box.top && c.y <= box.bottom) {
+          self._input.style.top = c.y - dialogOffset.top + 'px';
+          self._input.style.left = c.x - dialogOffset.left + 'px';
+          self._input.style.display = 'block';
+          addClass(self._button, 'hover');
+        }
       });
 
       // we can't use mouseout on the button,

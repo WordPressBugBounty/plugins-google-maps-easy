@@ -210,7 +210,7 @@ class modInstallerGmp
             'id' => $id,
           ];
           $res = $wpdb->update($tableName, $data, $data_where);
-          if (!$res) {
+          if ($res === false) {
             errorsGmp::push(__('Error Deactivation module', GMP_LANG_CODE), errorsGmp::MOD_INSTALL);
           }
         }

@@ -7,7 +7,6 @@ class supsystic_promoGmp extends moduleGmp
     'from' => ['?', '&'],
     'to' => ['%', '^'],
   ];
-  private $_minDataInStatToSend = 20; // At least 20 points in table shuld be present before send stats
   public function __construct($d)
   {
     parent::__construct($d);
@@ -16,11 +15,6 @@ class supsystic_promoGmp extends moduleGmp
   public function init()
   {
     parent::init();
-    add_action('admin_footer', [$this, 'displayAdminFooter'], 9);
-    if (is_admin()) {
-      $this->checkStatisticStatus();
-    }
-    //$this->weLoveYou();
     dispatcherGmp::addFilter('mainAdminTabs', [$this, 'addAdminTab']);
     // dispatcherGmp::addAction('discountMsg', array($this, 'getDiscountMsg'));
     // add_action('admin_notices', array($this, 'checkAdminPromoNotices'));
@@ -253,12 +247,6 @@ class supsystic_promoGmp extends moduleGmp
   {
     $this->getView()->showWelcomePage();
   }
-  public function displayAdminFooter()
-  {
-    if (frameGmp::_()->isAdminPlugPage()) {
-      $this->getView()->displayAdminFooter();
-    }
-  }
   private function _preparePromoLink($link, $ref = '')
   {
     if (empty($ref)) {
@@ -267,29 +255,12 @@ class supsystic_promoGmp extends moduleGmp
     $link .= '?ref=' . $ref;
     return $link;
   }
-  public function weLoveYou()
-  {
-    if (!frameGmp::_()->getModule(implode('', ['l', 'ic', 'e', 'ns', 'e']))) {
-      //
-    }
-  }
   /**
    * Public shell for private method
    */
   public function preparePromoLink($link, $ref = '')
   {
     return $this->_preparePromoLink($link, $ref);
-  }
-  public function checkStatisticStatus()
-  {
-    $canSend = (int) frameGmp::_()->getModule('options')->get('send_stats');
-    if ($canSend) {
-      $this->getModel()->checkAndSend();
-    }
-  }
-  public function getMinStatSend()
-  {
-    return $this->_minDataInStatToSend;
   }
   public function getMainLink()
   {
@@ -335,40 +306,5 @@ class supsystic_promoGmp extends moduleGmp
       ];
     }
     return $tabs;
-  }
-  // public function getDiscountMsg() {
-  // 	if($this->isPro()
-  // 		&& frameGmp::_()->getModule('options')->getActiveTab() == 'license'
-  // 		&& frameGmp::_()->getModule('license')
-  // 		&& frameGmp::_()->getModule('license')->getModel()->isActive()
-  // 	) {
-  // 		$proPluginsList = array(
-  // 			'ultimate-maps-by-supsystic-pro', 'newsletters-by-supsystic-pro', 'contact-form-by-supsystic-pro', 'live-chat-pro',
-  // 			'digital-publications-supsystic-pro', 'coming-soon-supsystic-pro', 'price-table-supsystic-pro', 'tables-generator-pro',
-  // 			'social-share-pro', 'popup-by-supsystic-pro', 'supsystic_slider_pro', 'supsystic-gallery-pro', 'google-maps-easy-pro',
-  // 			'backup-supsystic-pro',
-  // 		);
-  // 		$activePluginsList = get_option('active_plugins', array());
-  // 		$activeProPluginsCount = 0;
-  // 		foreach($activePluginsList as $actPl) {
-  // 			foreach($proPluginsList as $proPl) {
-  // 				if(strpos($actPl, $proPl) !== false) {
-  // 					$activeProPluginsCount++;
-  // 				}
-  // 			}
-  // 		}
-  // 		if($activeProPluginsCount === 1) {
-  // 			$buyLink = $this->getDiscountBuyUrl();
-  // 			$this->getView()->getDiscountMsg($buyLink);
-  // 		}
-  // 	}
-  // }
-  public function getDiscountBuyUrl()
-  {
-    $license = frameGmp::_()->getModule('license')->getModel()->getCredentials();
-    $license['key'] = md5($license['key']);
-    $license = urlencode(base64_encode(implode('|', $license)));
-    $plugin_code = 'google_maps_easy_pro';
-    return 'https://supsystic.com/?mod=manager&pl=lms&action=applyDiscountBuyUrl&plugin_code=' . $plugin_code . '&lic=' . $license;
   }
 }

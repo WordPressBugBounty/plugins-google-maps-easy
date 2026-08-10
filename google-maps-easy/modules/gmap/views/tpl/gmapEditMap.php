@@ -926,6 +926,7 @@ if ($this->isPro) {
 												<?php echo htmlGmp::wpKsesHtml(htmlGmp::text('map_opts[kml_file_url][]', ['value' => '', 'attrs' => 'class="gmpProOpt" style="width: 86%; float: right;" disabled="disabled"'])); ?>
 												<span class="gmpKmlUploadMsg" style="float: right; width: 100%; text-align: right;" ></span>
 												<a 	href="#"
+													onclick="return false;"
 													class="gmpKmlUploadFileBtn button gmpProOpt"
 													data-nonce="<?php echo wp_create_nonce('upload-kml-file'); ?>"
 													data-url="<?php echo uriGmp::_([

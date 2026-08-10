@@ -99,7 +99,6 @@ abstract class viewGmp extends baseObjectGmp
           'data-unit' => 1,
           'data-mapid' => 1,
           'data-viewid' => 1,
-          'onclick' => 1,
           'data-is-mobile' => 1,
           'data-tab-link' => 1,
           'data-tab-item' => 1,
@@ -143,7 +142,7 @@ abstract class viewGmp extends baseObjectGmp
         'i' => ['style' => 1, 'title' => 1, 'align' => 1, 'class' => 1, 'width' => 1, 'height' => 1, 'id' => 1, 'data-tooltip-content' => 1],
         'u' => ['style' => 1, 'title' => 1, 'align' => 1, 'class' => 1, 'width' => 1, 'height' => 1, 'id' => 1],
         'img' => ['style' => 1, 'title' => 1, 'align' => 1, 'class' => 1, 'width' => 1, 'height' => 1, 'id' => 1],
-        'a' => ['data-nonce' => 1, 'data-url' => 1, 'onclick' => 1, 'data-active-label' => 1, 'data-apply-label' => 1, 'style' => 1, 'title' => 1, 'align' => 1, 'class' => 1, 'width' => 1, 'height' => 1, 'id' => 1, 'link' => 1, 'rel' => 1, 'href' => 1, 'target' => 1],
+        'a' => ['data-nonce' => 1, 'data-url' => 1, 'data-active-label' => 1, 'data-apply-label' => 1, 'style' => 1, 'title' => 1, 'align' => 1, 'class' => 1, 'width' => 1, 'height' => 1, 'id' => 1, 'link' => 1, 'rel' => 1, 'href' => 1, 'target' => 1],
         'abbr' => ['style' => 1, 'title' => 1, 'align' => 1, 'class' => 1, 'width' => 1, 'height' => 1, 'id' => 1],
         'address' => ['style' => 1, 'title' => 1, 'align' => 1, 'class' => 1, 'width' => 1, 'height' => 1, 'id' => 1],
         'blockquote' => ['style' => 1, 'title' => 1, 'align' => 1, 'class' => 1, 'width' => 1, 'height' => 1, 'id' => 1],
@@ -152,7 +151,6 @@ abstract class viewGmp extends baseObjectGmp
         'fieldset' => ['style' => 1, 'title' => 1, 'align' => 1, 'class' => 1, 'width' => 1, 'height' => 1, 'id' => 1],
         'label' => ['for' => 1, 'style' => 1, 'title' => 1, 'align' => 1, 'class' => 1, 'width' => 1, 'height' => 1, 'id' => 1],
         'input' => [
-          'onclick' => 1,
           'data-type' => 1,
           'data-hideid' => 1,
           'placeholder' => 1,
@@ -189,12 +187,17 @@ abstract class viewGmp extends baseObjectGmp
         'option' => ['name' => 1, 'checked' => 1, 'disabled' => 1, 'selected' => 1, 'style' => 1, 'title' => 1, 'align' => 1, 'class' => 1, 'width' => 1, 'height' => 1, 'id' => 1, 'value' => 1],
         'sup' => [],
         'sub' => [],
-        'button' => ['data-wp-editor-id' => 1, 'style' => 1, 'class' => 1, 'id' => 1, 'data-mapid' => 1, 'data-viewid' => 1, 'onclick' => 1],
+        'button' => ['data-wp-editor-id' => 1, 'style' => 1, 'class' => 1, 'id' => 1, 'data-mapid' => 1, 'data-viewid' => 1],
         'img' => ['src' => 1, 'style' => 1, 'width' => 1, 'height' => 1, 'id' => 1, 'class' => 1, 'alt' => 1, 'border' => 1],
         'track' => ['src' => 1, 'kind' => 1, 'label' => 1, 'srclang' => 1],
         'source' => ['src' => 1, 'type' => 1],
         'audio' => ['src' => 1, 'style' => 1, 'width' => 1, 'height' => 1, 'id' => 1, 'class' => 1, 'autoplay' => 1, 'controls' => 1, 'crossorigin' => 1, 'loop' => 1, 'muted' => 1, 'preload' => 1],
-        'iframe' => ['src' => 1, 'style' => 1, 'width' => 1, 'height' => 1, 'id' => 1, 'class' => 1, 'title' => 1, 'allow' => 1, 'allowfullscreen' => 1, 'allowpaymentrequest' => 1, 'csp' => 1, 'height' => 1, 'loading' => 1, 'name' => 1, 'referrerpolicy' => 1, 'sandbox' => 1, 'srcdoc' => 1],
+        // 'srcdoc' intentionally excluded: unlike 'src' (a URL, protocol-checked by
+        // wp_kses), 'srcdoc' is raw HTML that the browser parses and renders as a
+        // same-origin document, including any <script> it contains. wp_kses() only
+        // validates attribute names/tag structure, not HTML embedded inside an
+        // attribute value, so allowing 'srcdoc' here is a stored-XSS vector.
+        'iframe' => ['src' => 1, 'style' => 1, 'width' => 1, 'height' => 1, 'id' => 1, 'class' => 1, 'title' => 1, 'allow' => 1, 'allowfullscreen' => 1, 'allowpaymentrequest' => 1, 'csp' => 1, 'height' => 1, 'loading' => 1, 'name' => 1, 'referrerpolicy' => 1, 'sandbox' => 1],
       ];
       self::$_allowedHtml = array_merge($allowedHtml, $allowedDiv);
     }
