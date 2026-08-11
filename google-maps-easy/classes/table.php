@@ -413,11 +413,11 @@ abstract class tableGmp
                 $res .= $k . ' = ' . $val . ' ' . $delim . ' ';
                 break;
               default:
-                $res .= $k . ' = \'' . $val . '\' ' . $delim . ' ';
+                $res .= $k . ' = \'' . esc_sql($val) . '\' ' . $delim . ' ';
                 break;
             }
           } else {
-            $res .= $k . ' = \'' . $val . '\' ' . $delim . ' ';
+            $res .= $k . ' = \'' . esc_sql($val) . '\' ' . $delim . ' ';
           }
         } elseif ($k == 'additionalCondition') {
           //just add some string to query

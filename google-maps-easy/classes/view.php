@@ -192,11 +192,6 @@ abstract class viewGmp extends baseObjectGmp
         'track' => ['src' => 1, 'kind' => 1, 'label' => 1, 'srclang' => 1],
         'source' => ['src' => 1, 'type' => 1],
         'audio' => ['src' => 1, 'style' => 1, 'width' => 1, 'height' => 1, 'id' => 1, 'class' => 1, 'autoplay' => 1, 'controls' => 1, 'crossorigin' => 1, 'loop' => 1, 'muted' => 1, 'preload' => 1],
-        // 'srcdoc' intentionally excluded: unlike 'src' (a URL, protocol-checked by
-        // wp_kses), 'srcdoc' is raw HTML that the browser parses and renders as a
-        // same-origin document, including any <script> it contains. wp_kses() only
-        // validates attribute names/tag structure, not HTML embedded inside an
-        // attribute value, so allowing 'srcdoc' here is a stored-XSS vector.
         'iframe' => ['src' => 1, 'style' => 1, 'width' => 1, 'height' => 1, 'id' => 1, 'class' => 1, 'title' => 1, 'allow' => 1, 'allowfullscreen' => 1, 'allowpaymentrequest' => 1, 'csp' => 1, 'height' => 1, 'loading' => 1, 'name' => 1, 'referrerpolicy' => 1, 'sandbox' => 1],
       ];
       self::$_allowedHtml = array_merge($allowedHtml, $allowedDiv);

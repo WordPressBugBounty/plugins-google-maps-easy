@@ -3,6 +3,9 @@ class optionsModelGmp extends modelGmp
 {
   private $_values = [];
   private $_valuesLoaded = false;
+  private static $_restrictedOptionValues = [
+    'api_domain' => ['https://maps.googleapis.com/', 'https://maps.google.cn/'],
+  ];
 
   public function get($optKey)
   {
@@ -16,6 +19,9 @@ class optionsModelGmp extends modelGmp
   }
   public function save($optKey, $val, $ignoreDbUpdate = false)
   {
+    if (isset(self::$_restrictedOptionValues[$optKey]) && !in_array($val, self::$_restrictedOptionValues[$optKey], true)) {
+      return;
+    }
     $this->_loadOptValues();
     if (!isset($this->_values[$optKey]) || $this->_values[$optKey]['value'] !== $val) {
       if (isset($this->_values[$optKey]) || !isset($this->_values[$optKey]['value'])) {

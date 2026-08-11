@@ -31,9 +31,6 @@ class utilsGmp
     if (is_array($data)) {
       return $data;
     }
-    // Disallow object instantiation: this plugin only ever needs to unserialize
-    // scalars/arrays it wrote itself, and allowing classes here is what makes
-    // PHP Object Injection possible via crafted serialized payloads.
     return unserialize($data, ['allowed_classes' => false]);
   }
   public static function serialize($data)

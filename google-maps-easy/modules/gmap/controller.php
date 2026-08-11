@@ -8,7 +8,9 @@ class gmapControllerGmp extends controllerGmp
 	}*/
   protected function _prepareTextLikeSearch($val)
   {
-    $query = '(title LIKE "%' . $val . '%"';
+    global $wpdb;
+    $escaped = esc_sql($wpdb->esc_like($val));
+    $query = '(title LIKE "%' . $escaped . '%"';
     if (is_numeric($val)) {
       $query .= ' OR id LIKE "%' . (int) $val . '%"';
     }

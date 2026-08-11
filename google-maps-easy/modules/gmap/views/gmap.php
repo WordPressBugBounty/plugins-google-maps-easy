@@ -34,8 +34,10 @@ class gmapViewGmp extends viewGmp
   public function getApiDomain()
   {
     $apiDomain = 'https://maps.googleapis.com/';
+    $allowedApiDomains = ['https://maps.googleapis.com/', 'https://maps.google.cn/'];
 
-    if ($chosenApiDomain = frameGmp::_()->getModule('options')->get('api_domain')) {
+    $chosenApiDomain = frameGmp::_()->getModule('options')->get('api_domain');
+    if ($chosenApiDomain && in_array($chosenApiDomain, $allowedApiDomains, true)) {
       $apiDomain = $chosenApiDomain;
     }
     return $apiDomain;
