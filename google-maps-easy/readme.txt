@@ -6,7 +6,7 @@ Donate link: https://supsystic.com/plugins/google-maps-plugin
 Tags: google map, map, Google Maps, map markers, location
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.14.2
+Stable tag: 1.14.3
 License: GNU General Public License v2.0 or later
 
 Google Maps with markers, locations and clusterization, KML layers and filters. Custom Google map markers with text, images, videos, links.
@@ -314,6 +314,10 @@ Important compatibility notes:
 == Changelog ==
 
 = 2026 =
+
+= 1.14.3 / 14.08.2026 =
+
+ * Fix Custom Map Controls and related admin toggles not working
 
 = 1.14.2 / 10.08.2026 =
 

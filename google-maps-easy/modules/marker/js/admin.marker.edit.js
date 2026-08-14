@@ -4,6 +4,10 @@ var g_gmpCurrentEditMarker = null,
   g_gmpGrid = jQuery('#gmpMarkersListGrid'),
   g_gmpGridData = null;
 jQuery(document).ready(function () {
+  // Marker Link checkbox - toggles the #link_options submenu.
+  // Bound here (not inline onclick) because wp_kses strips onclick= from admin output.
+  jQuery('#marker_link').on('click', gmpAddLinkOptions);
+
   // Build initial markers list
   g_gmpGrid
     .jqGrid({

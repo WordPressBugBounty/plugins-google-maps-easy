@@ -920,13 +920,12 @@ if ($this->isPro) {
 													<?php _e('Hide Sublayers at KML filter', GMP_LANG_CODE); ?>
 												</label>
 												<div style="clear: both;"></div>
-												<a href="#" title="<?php _e('Remove KML field', GMP_LANG_CODE); ?>" class="button gmpProOpt" onclick="gmpKmlRemoveFileRowBtnClick(this); return false;">
+												<a href="#" title="<?php _e('Remove KML field', GMP_LANG_CODE); ?>" class="button gmpProOpt gmpKmlRemoveFileRowBtn">
 													<i class="fa fa-trash-o"></i>
 												</a>
 												<?php echo htmlGmp::wpKsesHtml(htmlGmp::text('map_opts[kml_file_url][]', ['value' => '', 'attrs' => 'class="gmpProOpt" style="width: 86%; float: right;" disabled="disabled"'])); ?>
 												<span class="gmpKmlUploadMsg" style="float: right; width: 100%; text-align: right;" ></span>
 												<a 	href="#"
-													onclick="return false;"
 													class="gmpKmlUploadFileBtn button gmpProOpt"
 													data-nonce="<?php echo wp_create_nonce('upload-kml-file'); ?>"
 													data-url="<?php echo uriGmp::_([
@@ -992,7 +991,7 @@ if ($this->isPro) {
 											<?php echo htmlGmp::wpKsesHtml(
              htmlGmp::checkboxHiddenVal('map_opts[enable_custom_map_controls]', [
                'value' => $this->editMap && isset($this->map['params']['enable_custom_map_controls']) ? esc_attr($this->map['params']['enable_custom_map_controls']) : false,
-               'attrs' => 'class="gmpProOpt" onclick="gmpAddCustomControlsOptions()"',
+               'attrs' => 'class="gmpProOpt"',
              ]),
            ); ?>
 											<div id="custom_controls_options" style="display: none;">
@@ -1991,7 +1990,7 @@ if ($this->isPro) {
 										<?php echo htmlGmp::wpKsesHtml(
             htmlGmp::checkbox('marker_opts[params][marker_link]', [
               'checked' => '',
-              'attrs' => 'id="marker_link" onclick="gmpAddLinkOptions()"',
+              'attrs' => 'id="marker_link"',
             ]),
           ); ?>
 										<div id="link_options" style="display: none;">
@@ -2463,7 +2462,7 @@ if ($this->isPro) {
 										</a>
 										<div class="gmpHeatmapGradientExample gmpHeatmapGradient" style="display: none; margin-top: 10px;">
 											<input type="text" name="heatmap_opts[params][gradient][]" value="#5ED836" disabled="disabled" />
-											<a href="#" class="button gmpHeatmapRemoveColorBtn" title="<?php _e('Remove Color', GMP_LANG_CODE); ?>" onclick="gmpHeatmapRemoveColorBtnClick(this); return false;">
+											<a href="#" class="button gmpHeatmapRemoveColorBtn" title="<?php _e('Remove Color', GMP_LANG_CODE); ?>">
 												<i class="fa fa-trash-o"></i>
 											</a>
 										</div>

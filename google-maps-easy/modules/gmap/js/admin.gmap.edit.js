@@ -202,6 +202,10 @@ jQuery(document).ready(function () {
     return false;
   });
 
+  // Custom Map Controls checkbox - toggles the #custom_controls_options submenu.
+  // Bound here (not inline onclick) because wp_kses strips onclick= from admin output.
+  jQuery('#map_optsenable_custom_map_controls_check').on('click', gmpAddCustomControlsOptions);
+
   // Preview map definition
   gmpMainMap = typeof gmpMainMap === 'undefined' ? null : gmpMainMap;
   var previewMapParams = {},

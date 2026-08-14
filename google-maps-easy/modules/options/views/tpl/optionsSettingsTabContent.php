@@ -3,7 +3,7 @@
 		<h2 style="margin-top: 0;"><?php _e('Connect your Google Maps API key', GMP_LANG_CODE); ?></h2>
 		<p><?php _e('Paste your key into the "User API key" field below and click Save — you will be taken straight to creating your first map.', GMP_LANG_CODE); ?></p>
 		<p>
-			<a href="#" onclick="jQuery('#gmpOnboardingApiKeyHelp').toggle(); return false;"><?php _e("Don't have a key yet? Here's how to get one", GMP_LANG_CODE); ?></a>
+			<a href="#" id="gmpOnboardingApiKeyHelpToggle"><?php _e("Don't have a key yet? Here's how to get one", GMP_LANG_CODE); ?></a>
 		</p>
 		<div id="gmpOnboardingApiKeyHelp" style="display: none;">
 			<ol>

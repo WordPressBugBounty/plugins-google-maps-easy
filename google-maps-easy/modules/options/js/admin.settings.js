@@ -1,4 +1,10 @@
 jQuery(document).ready(function () {
+  // Onboarding "don't have a key yet?" help toggle - bound here (not inline
+  // onclick) because wp_kses strips onclick= from admin output.
+  jQuery('#gmpOnboardingApiKeyHelpToggle').on('click', function () {
+    jQuery('#gmpOnboardingApiKeyHelp').toggle();
+    return false;
+  });
   jQuery('#gmpSettingsSaveBtn').click(function () {
     _gmpSaveMainOpts();
     return false;
