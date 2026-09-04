@@ -1,23 +1,47 @@
 var g_gmpAllMaps = [];
-jQuery(document).ready(function () {
-  var mapsInitClb = function () {
-    if (typeof gmpAllMapsInfo !== 'undefined' && gmpAllMapsInfo && gmpAllMapsInfo.length) {
-      for (var i = 0; i < gmpAllMapsInfo.length; i++) {
-        if (jQuery('#' + gmpAllMapsInfo[i].view_html_id).length) {
-          gmpInitMapOnPage(gmpAllMapsInfo[i]);
-        }
+var g_gmpInitializedMapViews = {};
+function gmpInitPendingMaps($scope) {
+  var mapsInfo = typeof gmpAllMapsInfo !== 'undefined' ? gmpAllMapsInfo : window.gmpAllMapsInfo;
+  var initialized = false;
+  if (mapsInfo && mapsInfo.length) {
+    for (var i = 0; i < mapsInfo.length; i++) {
+      if (!mapsInfo[i] || !mapsInfo[i].view_html_id || g_gmpInitializedMapViews[mapsInfo[i].view_html_id]) {
+        continue;
       }
+      var $mapShell = $scope ? $scope.find('#' + mapsInfo[i].view_html_id) : jQuery('#' + mapsInfo[i].view_html_id);
+      if ($mapShell.length) {
+        gmpInitMapOnPage(mapsInfo[i]);
+        g_gmpInitializedMapViews[mapsInfo[i].view_html_id] = true;
+        initialized = true;
+      }
+    }
+    if (initialized) {
       jQuery(document).trigger('gmpAmiVarInited');
     }
-  };
+  }
+}
+function gmpWaitForFrontendMaps(attempts, $scope) {
+  attempts = typeof attempts === 'undefined' ? 20 : attempts;
   if (
     typeof google === 'undefined' &&
     typeof gmpLoadGoogleLib !== 'undefined' // Maybe it's just a static maps here - can do it without google lib
   ) {
     gmpLoadGoogleLib();
-    setTimeout(mapsInitClb, 1000);
+    if (attempts > 0) {
+      setTimeout(function () {
+        gmpWaitForFrontendMaps(attempts - 1, $scope);
+      }, 300);
+    }
   } else {
-    mapsInitClb();
+    gmpInitPendingMaps($scope);
+  }
+}
+jQuery(document).ready(function () {
+  gmpWaitForFrontendMaps();
+  if (window.elementorFrontend && window.elementorFrontend.hooks) {
+    window.elementorFrontend.hooks.addAction('frontend/element_ready/global', function ($scope) {
+      gmpWaitForFrontendMaps(20, $scope);
+    });
   }
 });
 function gmpInitMapOnPage(mapData) {
@@ -81,6 +105,21 @@ function gmpInitMapOnPage(mapData) {
   }
 
   g_gmpAllMaps.push(newMap);
+  gmpRefreshMapContainer(newMap);
+}
+function gmpRefreshMapContainer(newMap) {
+  if (newMap && typeof google !== 'undefined' && google.maps && google.maps.event && typeof newMap.getRawMapInstance === 'function') {
+    var rawMap = newMap.getRawMapInstance();
+    if (rawMap) {
+      var center = rawMap.getCenter ? rawMap.getCenter() : null;
+      google.maps.event.trigger(rawMap, 'resize');
+      if (center && rawMap.setCenter) {
+        rawMap.setCenter(center);
+      }
+      return;
+    }
+  }
+  jQuery(window).trigger('resize');
 }
 function gmpGetMapInfoById(id) {
   if (typeof gmpAllMapsInfo !== 'undefined' && gmpAllMapsInfo && gmpAllMapsInfo.length) {

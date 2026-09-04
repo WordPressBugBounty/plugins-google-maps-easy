@@ -209,7 +209,8 @@ class gmapViewGmp extends viewGmp
     }
     $mapObj['params']['html_options'] = $this->htmlOptions; // have created in $this->addMapStyles function
     // Add map object to js
-    $this->addMapData(dispatcherGmp::applyFilters('mapDataToJs', $mapObj));
+    $mapData = dispatcherGmp::applyFilters('mapDataToJs', $mapObj);
+    $this->addMapData($mapData);
 
     $this->assign('markersDisplayType', $mapObj['params']['markers_list_type']);
     $this->assign('currentMap', $mapObj);
@@ -226,7 +227,18 @@ class gmapViewGmp extends viewGmp
       $this->assign('routeData', $routeData);
     }
 
-    return $content . parent::getInlineContent('gmapDrawMap');
+    return $content . parent::getInlineContent('gmapDrawMap') . $this->getInlineMapDataJs($mapData);
+  }
+  private function getInlineMapDataJs($mapObj)
+  {
+    $jsonOptions = JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT;
+    $mapJson = function_exists('wp_json_encode') ? wp_json_encode($mapObj, $jsonOptions) : json_encode($mapObj, $jsonOptions);
+    if (empty($mapJson)) {
+      return '';
+    }
+    return '<script type="text/javascript">(function(){var mapData=' .
+      $mapJson .
+      ';window.gmpAllMapsInfo=window.gmpAllMapsInfo||[];window.gmpAllMapsInfo.push(mapData);if(typeof window.gmpWaitForFrontendMaps==="function"){window.gmpWaitForFrontendMaps();}else if(typeof window.gmpInitPendingMaps==="function"){window.gmpInitPendingMaps();}}());</script>';
   }
   public function prepareMapHtmlParams($mapObj)
   {

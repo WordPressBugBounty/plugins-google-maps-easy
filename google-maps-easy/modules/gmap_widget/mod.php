@@ -20,9 +20,9 @@ class gmpMapsWidget extends WP_Widget
   {
     $widgetOps = [
       'classname' => 'gmpMapsWidget',
-      'description' => __('Displays Most Viewed Products', GMP_LANG_CODE),
+      'description' => __('Displays an Easy Google Maps by Supsystic map.', GMP_LANG_CODE),
     ];
-    parent::__construct('gmpMapsWidget', GMP_WP_PLUGIN_NAME, $widgetOps);
+    parent::__construct('gmpMapsWidget', __('Easy Google Maps by Supsystic', GMP_LANG_CODE), $widgetOps);
   }
   public function widget($args, $instance)
   {
@@ -35,6 +35,26 @@ class gmpMapsWidget extends WP_Widget
   public function update($new_instance, $old_instance)
   {
     //frameGmp::_()->getModule('supsystic_promo')->getModel()->saveUsageStat('map.widget.update');
-    return $new_instance;
+    $instance = [];
+    $instance['id'] = !empty($new_instance['id']) ? absint($new_instance['id']) : 0;
+
+    foreach (['width', 'height', 'map_center', 'zoom'] as $key) {
+      if (isset($new_instance[$key]) && $new_instance[$key] !== '') {
+        $instance[$key] = sanitize_text_field(wp_unslash($new_instance[$key]));
+      }
+    }
+
+    if (!empty($new_instance['align']) && in_array($new_instance['align'], ['left', 'right', 'none'], true)) {
+      $instance['align'] = $new_instance['align'];
+    }
+
+    $instance['display_as_img'] = !empty($new_instance['display_as_img']) ? 1 : 0;
+    foreach (['img_width', 'img_height'] as $key) {
+      if (isset($new_instance[$key]) && $new_instance[$key] !== '') {
+        $instance[$key] = absint($new_instance[$key]);
+      }
+    }
+
+    return $instance;
   }
 }

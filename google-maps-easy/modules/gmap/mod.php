@@ -5,16 +5,156 @@ class gmapGmp extends moduleGmp
   private $_markersLists = [];
   private $_mapsInPosts = [];
   public $_mapsInPostsParams = [];
+  private $_elementorWidgetRegistered = false;
 
   public function init()
   {
     dispatcherGmp::addFilter('mainAdminTabs', [$this, 'addAdminTab']);
+    $this->registerGutenbergBlock();
     add_action('wp_head', [$this, 'addMapStyles']);
     add_action('template_redirect', [$this, 'getMapsInPosts']);
     add_action('wp_footer', [$this, 'addMapDataToJs'], 5);
+    if (defined('ELEMENTOR_VERSION') && version_compare(ELEMENTOR_VERSION, '3.5.0', '<')) {
+      add_action('elementor/widgets/widgets_registered', [$this, 'registerElementorWidget']);
+    } else {
+      add_action('elementor/widgets/register', [$this, 'registerElementorWidget']);
+    }
     add_shortcode(GMP_SHORTCODE, [$this, 'drawMapFromShortcode']);
     // Add to admin bar new item
     add_action('admin_bar_menu', [$this, 'addAdminBarNewItem'], 300);
+  }
+  public function registerElementorWidget($widgetsManager = null)
+  {
+    if ($this->_elementorWidgetRegistered) {
+      return;
+    }
+    if (!did_action('elementor/loaded') || !class_exists('\Elementor\Widget_Base')) {
+      return;
+    }
+
+    $widgetFile = $this->getModDir() . 'elementor' . DS . 'google-maps-easy-widget.php';
+    if (!class_exists('\Elementor\Widget_Google_Maps_Easy_Gmp') && is_file($widgetFile)) {
+      require_once $widgetFile;
+    }
+
+    if (!class_exists('\Elementor\Widget_Google_Maps_Easy_Gmp')) {
+      return;
+    }
+
+    $widget = new \Elementor\Widget_Google_Maps_Easy_Gmp();
+    $this->_elementorWidgetRegistered = true;
+    if ($widgetsManager && method_exists($widgetsManager, 'register')) {
+      $widgetsManager->register($widget);
+    } elseif ($widgetsManager && method_exists($widgetsManager, 'register_widget_type')) {
+      $widgetsManager->register_widget_type($widget);
+    } elseif (isset(\Elementor\Plugin::$instance->widgets_manager)) {
+      $manager = \Elementor\Plugin::$instance->widgets_manager;
+      method_exists($manager, 'register') ? $manager->register($widget) : $manager->register_widget_type($widget);
+    }
+  }
+  public function registerGutenbergBlock()
+  {
+    if (!function_exists('register_block_type') || !function_exists('wp_register_script')) {
+      return;
+    }
+
+    $scriptHandle = 'gmp-gutenberg-maps-block';
+    $scriptFile = $this->getModDir() . 'gutenberg' . DS . 'google-maps-easy-block.js';
+    if (!is_file($scriptFile)) {
+      return;
+    }
+
+    wp_register_script(
+      $scriptHandle,
+      $this->getModPath() . 'gutenberg/google-maps-easy-block.js',
+      ['wp-blocks', 'wp-element', 'wp-components', 'wp-i18n', 'wp-server-side-render'],
+      GMP_VERSION_PLUGIN,
+      true
+    );
+    wp_localize_script($scriptHandle, 'gmpGutenbergMaps', [
+      'maps' => $this->getMapsOptionsForEditor(),
+      'defaultMapId' => $this->getDefaultMapId(),
+    ]);
+
+    register_block_type('supsystic/google-maps-easy', [
+      'editor_script' => $scriptHandle,
+      'render_callback' => [$this, 'renderGutenbergBlock'],
+      'attributes' => [
+        'map_id' => [
+          'type' => 'string',
+          'default' => '',
+        ],
+        'width' => [
+          'type' => 'string',
+          'default' => '',
+        ],
+        'height' => [
+          'type' => 'number',
+        ],
+        'align' => [
+          'type' => 'string',
+          'default' => '',
+        ],
+      ],
+    ]);
+  }
+  public function renderGutenbergBlock($attributes)
+  {
+    $mapId = !empty($attributes['map_id']) ? (int) $attributes['map_id'] : 0;
+    if (!$mapId) {
+      return '';
+    }
+
+    $params = ['id' => $mapId];
+    if (!empty($attributes['width'])) {
+      $params['width'] = sanitize_text_field($attributes['width']);
+    }
+    if (isset($attributes['height']) && $attributes['height'] !== '') {
+      $params['height'] = absint($attributes['height']);
+    }
+    if (!empty($attributes['align']) && in_array($attributes['align'], ['left', 'right', 'none'], true)) {
+      $params['align'] = $attributes['align'];
+    }
+
+    return $this->drawMapFromShortcode($params);
+  }
+  public function getMapsOptionsForSelect()
+  {
+    $options = ['' => __('Select a map', GMP_LANG_CODE)];
+    $maps = $this->getModel()->getAllMaps(['simple' => true]);
+
+    if (!empty($maps)) {
+      foreach ($maps as $map) {
+        if (empty($map['id'])) {
+          continue;
+        }
+        $id = (int) $map['id'];
+        $title = !empty($map['title']) ? wp_strip_all_tags($map['title']) : sprintf(__('Map #%d', GMP_LANG_CODE), $id);
+        $options[(string) $id] = sprintf('%s (ID: %d)', $title, $id);
+      }
+    }
+
+    return $options;
+  }
+  public function getMapsOptionsForEditor()
+  {
+    $options = [];
+    foreach ($this->getMapsOptionsForSelect() as $value => $label) {
+      $options[] = [
+        'label' => $label,
+        'value' => (string) $value,
+      ];
+    }
+    return $options;
+  }
+  public function getDefaultMapId()
+  {
+    foreach ($this->getMapsOptionsForSelect() as $id => $label) {
+      if ($id !== '') {
+        return $id;
+      }
+    }
+    return '';
   }
   public function addAdminTab($tabs)
   {

@@ -53,6 +53,25 @@ if (empty($this->data['img_height'])) {
 </div>
 <div class="gmpWidgetRow">
 	<div class="gmpWidgetRowCell gmpFirstCell">
+		<label for="<?php echo esc_attr($this->widget->get_field_id('align')); ?>"><?php _e('Alignment', GMP_LANG_CODE); ?>:</label>
+	</div>
+	<div class="gmpWidgetRowCell gmpLastCell">
+		<?php echo htmlGmp::wpKsesHtml(
+    htmlGmp::selectbox($this->widget->get_field_name('align'), [
+      'attrs' => 'id="' . esc_attr($this->widget->get_field_id('align')) . '"',
+      'value' => isset($this->data['align']) ? esc_attr($this->data['align']) : '',
+      'options' => [
+        '' => esc_html__('Default', GMP_LANG_CODE),
+        'left' => esc_html__('Left', GMP_LANG_CODE),
+        'right' => esc_html__('Right', GMP_LANG_CODE),
+        'none' => esc_html__('None', GMP_LANG_CODE),
+      ],
+    ]),
+  ); ?>
+	</div>
+</div>
+<div class="gmpWidgetRow">
+	<div class="gmpWidgetRowCell gmpFirstCell">
 		<label for="<?php echo esc_attr($this->widget->get_field_id('map_center')); ?>"><?php _e('Map Center', GMP_LANG_CODE); ?>:</label>
 	</div>
 	<div class="gmpWidgetRowCell gmpLastCell">

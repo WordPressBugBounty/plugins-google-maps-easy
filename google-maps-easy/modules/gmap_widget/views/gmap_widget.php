@@ -27,15 +27,8 @@ class gmap_widgetViewGmp extends viewGmp
   {
     frameGmp::_()->addStyle('gmap_widget', $this->getModule()->getModPath() . 'css/gmap_widget.css');
 
-    $maps = frameGmp::_()->getModule('gmap')->getModel()->getAllMaps();
-    $mapsOpts = [];
-    if (empty($maps)) {
-      $mapsOpts[0] = __('You have no maps', GMP_LANG_CODE);
-    } else {
-      foreach ($maps as $map) {
-        $mapsOpts[$map['id']] = $map['title'];
-      }
-    }
+    $mapsModule = frameGmp::_()->getModule('gmap');
+    $mapsOpts = $mapsModule ? $mapsModule->getMapsOptionsForSelect() : ['' => __('Select a map', GMP_LANG_CODE)];
     $this->assign('mapsOpts', $mapsOpts);
     $this->displayWidgetForm($data, $widget);
   }
