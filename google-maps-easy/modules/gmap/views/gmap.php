@@ -23,6 +23,10 @@ class gmapViewGmp extends viewGmp
           'v' => 'weekly',
         ],
       );
+      $apiRegion = strtoupper(trim((string) frameGmp::_()->getModule('options')->get('api_region')));
+      if ($apiRegion && preg_match('/^[A-Z]{2}$/', $apiRegion) && empty($urlParams['region'])) {
+        $urlParams['region'] = $apiRegion;
+      }
       if (!empty($urlParams['libraries'])) {
         $libraries = array_filter(array_map('trim', explode(',', $urlParams['libraries'])));
         $urlParams['libraries'] = implode(',', array_unique($libraries));

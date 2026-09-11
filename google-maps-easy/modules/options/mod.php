@@ -138,6 +138,13 @@ class optionsGmp extends moduleGmp
               'options' => ['https://maps.googleapis.com/' => 'https://maps.googleapis.com/', 'https://maps.google.cn/' => 'https://maps.google.cn/'],
               'attrs' => 'style="width: 300px;"',
             ],
+            'api_region' => [
+              'label' => __('API Region', GMP_LANG_CODE),
+              'desc' => __('Optional two-letter region code for Google Maps API localization. Leave empty to use Google Maps default behavior. For Canada, use CA.', GMP_LANG_CODE),
+              'def' => '',
+              'html' => 'text',
+              'attrs' => 'style="width: 300px;" placeholder="Default" maxlength="2"',
+            ],
             'user_api_key' => [
               'label' => __('User API key', GMP_LANG_CODE),
               'desc' => __("You can use your own Google API key, check the <a href='//supsystic.com/google-maps-api-key/' target='_blank'>instruction</a> how to create it. To use plugin's default API key leave this field blank.", GMP_LANG_CODE),

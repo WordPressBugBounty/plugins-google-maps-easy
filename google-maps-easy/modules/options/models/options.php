@@ -19,6 +19,12 @@ class optionsModelGmp extends modelGmp
   }
   public function save($optKey, $val, $ignoreDbUpdate = false)
   {
+    if ($optKey === 'api_region') {
+      $val = strtoupper(trim((string) $val));
+      if ($val !== '' && !preg_match('/^[A-Z]{2}$/', $val)) {
+        return;
+      }
+    }
     if (isset(self::$_restrictedOptionValues[$optKey]) && !in_array($val, self::$_restrictedOptionValues[$optKey], true)) {
       return;
     }
