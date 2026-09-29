@@ -18,7 +18,7 @@ class templatesGmp extends moduleGmp
         $this->loadJqueryUi();
         //$this->loadChosenSelects();
         // acPromoStyle.css also carries shared admin layout rules, not just promo styling - keep the style enqueue
-        frameGmp::_()->addStyle('gmpAcPromoStyle', GMP_CSS_PATH . 'acPromoStyle.css');
+        frameGmp::_()->addStyle('gmpAcPromoStyle', GMP_CSS_PATH . 'acPromoStyle.css', [], GMP_VERSION_PLUGIN . '-modern-shell-4');
         frameGmp::_()->addScript('adminOptionsGmp', GMP_JS_PATH . 'admin.options.js', [], false, true);
         add_action('admin_enqueue_scripts', [$this, 'loadMediaScripts']);
       }

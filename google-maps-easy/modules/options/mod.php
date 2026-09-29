@@ -52,11 +52,7 @@ class optionsGmp extends moduleGmp
   }
   public function getAdminPage()
   {
-    if (installerGmp::isUsed()) {
-      return $this->getView()->getAdminPage();
-    } else {
-      return frameGmp::_()->getModule('supsystic_promo')->showWelcomePage();
-    }
+    return $this->getView()->getAdminPage();
   }
   public function getTabs()
   {
@@ -96,8 +92,26 @@ class optionsGmp extends moduleGmp
   }
   public function getActiveTab()
   {
-    $reqTab = reqGmp::getVar('tab');
-    return empty($reqTab) ? 'gmap' : esc_attr($reqTab);
+    // Tab keys are plain slugs; anything else (entities, quotes, markup) is attacker input.
+    $reqTab = sanitize_key((string) reqGmp::getVar('tab'));
+    return empty($reqTab) ? $this->_getDefaultTab() : $reqTab;
+  }
+  /**
+   * Tab shown when the plugin menu link is opened without ?tab=. A brand new install
+   * lands on Overview exactly once; every visit after that goes straight to All Maps.
+   * installerGmp::update() marks existing sites as visited when they upgrade.
+   */
+  private function _getDefaultTab()
+  {
+    static $defaultTab = null;
+    if ($defaultTab === null) {
+      $defaultTab = 'gmap';
+      if (!get_option('gmp_default_page_visited')) {
+        update_option('gmp_default_page_visited', 1);
+        $defaultTab = 'overview';
+      }
+    }
+    return $defaultTab;
   }
   public function getTabUrl($tab = '')
   {

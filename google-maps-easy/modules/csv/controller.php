@@ -233,6 +233,7 @@ class csvControllerGmp extends controllerGmp
         if (count($fileArray) > 1) {
           //$overwriteSameNames = (int) reqGmp::getVar('overwrite_same_names');
           $keys = array_shift($fileArray);
+          $imported = 0;
           switch ($type) {
             case 'maps':
               $mapModel = frameGmp::_()->getModule('gmap')->getModel();
@@ -260,12 +261,16 @@ class csvControllerGmp extends controllerGmp
                 }
                 if (isset($map['id']) && $mapModel->existsId($map['id'])) {
                   $mapModel->updateMap($map);
+                  $imported++;
                 } else {
                   $originalMapId = isset($map['id']) ? $map['id'] : 0;
                   if (isset($map['id'])) {
                     unset($map['id']);
                   }
                   $newMapId = $mapModel->saveNewMap($map);
+                  if ($newMapId) {
+                    $imported++;
+                  }
                   if ($newMapId && $originalMapId) {
                     dbGmp::query("UPDATE @__maps SET id = '$originalMapId' WHERE id = '$newMapId'");
                     if ($originalMapId > $newMapId) {
@@ -285,11 +290,14 @@ class csvControllerGmp extends controllerGmp
                 if (isset($marker['id']) && !$markerModel->existsId($marker['id'])) {
                   unset($marker['id']);
                 }
-                $markerModel->save($marker);
+                if ($markerModel->save($marker)) {
+                  $imported++;
+                }
               }
               break;
             case 'figures':
               if (!frameGmp::_()->getModule('shape')) {
+                $res->pushError(__('Figures import is available in the PRO version', GMP_LANG_CODE));
                 break;
               }
               $figuresModel = frameGmp::_()->getModule('shape')->getModel();
@@ -303,11 +311,14 @@ class csvControllerGmp extends controllerGmp
                 if (isset($figures['id']) && !$figuresModel->existsId($figures['id'])) {
                   unset($figures['id']);
                 }
-                $figuresModel->save($figures);
+                if ($figuresModel->save($figures)) {
+                  $imported++;
+                }
               }
               break;
             case 'heatmap':
               if (!frameGmp::_()->getModule('heatmap')) {
+                $res->pushError(__('Heatmap import is available in the PRO version', GMP_LANG_CODE));
                 break;
               }
               $heatmapModel = frameGmp::_()->getModule('heatmap')->getModel();
@@ -321,9 +332,14 @@ class csvControllerGmp extends controllerGmp
                 if (isset($heatmap['id']) && !$heatmapModel->existsId($heatmap['id'])) {
                   unset($heatmap['id']);
                 }
-                $heatmapModel->save($heatmap);
+                if ($heatmapModel->save($heatmap)) {
+                  $imported++;
+                }
               }
               break;
+          }
+          if (!$res->error()) {
+            $res->addMessage(sprintf(__('Imported %d of %d rows', GMP_LANG_CODE), $imported, count($fileArray)));
           }
           /*$importRes = $this->getModel()->import($fileArray, $overwriteSameNames);
 					if($importRes) {

@@ -359,14 +359,40 @@ class gmapViewGmp extends viewGmp
   }
   public function getTabContent()
   {
-    frameGmp::_()->getModule('templates')->loadJqGrid();
-    frameGmp::_()->addScript('admin.gmap', $this->getModule()->getModPath() . 'js/admin.gmap.js');
-    frameGmp::_()->addScript('admin.gmap.list', $this->getModule()->getModPath() . 'js/admin.gmap.list.js');
-    frameGmp::_()->addJSVar('admin.gmap.list', 'gmpTblDataUrl', uriGmp::mod('gmap', 'getListForTbl', ['reqType' => 'ajax']));
-    frameGmp::_()->addStyle('admin.gmap', $this->getModule()->getModPath() . 'css/admin.gmap.css');
+    $list = $this->getModel()->getAdminListPage();
+    frameGmp::_()->addScript('admin.gmap.list', $this->getModule()->getModPath() . 'js/admin.gmap.list.js', ['jquery'], GMP_VERSION_PLUGIN . '-native-list-4');
+    frameGmp::_()->addJSVar('admin.gmap.list', 'gmpMapListConfig', [
+      'listUrl' => uriGmp::mod('gmap', 'getAdminListPage', ['reqType' => 'ajax']),
+      'removeUrl' => uriGmp::mod('gmap', 'removeGroup', ['reqType' => 'ajax']),
+      'cloneUrl' => uriGmp::mod('gmap', 'cloneMapGroup', ['reqType' => 'ajax']),
+      'nonce' => wp_create_nonce('gmp_nonce'),
+      'initial' => [
+        'page' => $list['page'],
+        'perPage' => $list['perPage'],
+        'sort' => $list['sort'],
+        'dir' => $list['dir'],
+        'recordsTotal' => $list['recordsTotal'],
+      ],
+      'labels' => [
+        'of' => __('of', GMP_LANG_CODE),
+        'maps' => __('maps', GMP_LANG_CODE),
+        'confirmDelete' => __('Delete selected maps?', GMP_LANG_CODE),
+        'confirmClone' => __('Clone selected maps?', GMP_LANG_CODE),
+        'requestFailed' => __('The request failed. Please try again.', GMP_LANG_CODE),
+        'deleted' => __('Maps deleted.', GMP_LANG_CODE),
+        'cloned' => __('Maps cloned.', GMP_LANG_CODE),
+      ],
+    ]);
+    frameGmp::_()->addStyle('admin.gmap.list', $this->getModule()->getModPath() . 'css/admin.gmap.list.css', [], GMP_VERSION_PLUGIN . '-native-list-4');
 
     $this->assign('addNewLink', frameGmp::_()->getModule('options')->getTabUrl('gmap_add_new'));
+    $this->assign('list', $list);
     return parent::getContent('gmapAdmin');
+  }
+  public function getAdminListRows($maps)
+  {
+    $this->assign('maps', $maps);
+    return parent::getContent('gmapAdminListRows');
   }
   public function getEditMap($id = 0)
   {
@@ -375,7 +401,6 @@ class gmapViewGmp extends viewGmp
     $gMapApiParams = ['language' => ''];
     $markerLists = $this->getModule()->getMarkerLists();
     $positionsList = $this->getModule()->getControlsPositions();
-    $isContactFormsInstalled = utilsGmp::classExists('frameCfs');
     $customControlsUnit = $this->getModule()->getCustomControlsUnit();
 
     $allStylizationsList = $this->getModule()->getStylizationsList();
@@ -397,15 +422,19 @@ class gmapViewGmp extends viewGmp
 
     frameGmp::_()->addJSVar('admin.gmap.edit', 'gmpMapShortcode', GMP_SHORTCODE);
     frameGmp::_()->addJSVar('admin.gmap.edit', 'gmpAllStylizationsList', $allStylizationsList);
+    frameGmp::_()->addJSVar('admin.gmap.edit', 'gmpMapEditTexts', [
+      'copied' => __('JSON copied to clipboard', GMP_LANG_CODE),
+      'noTheme' => __('Select a theme first', GMP_LANG_CODE),
+    ]);
     frameGmp::_()->addJSVar('admin.gmap.edit', 'gmpMapsListUrl', frameGmp::_()->getModule('options')->getTabUrl('gmap'));
 
     // jqGrid tables urls
-    $gmpMarkersTblDataUrl = uriGmp::mod('marker', 'getListForTbl', ['reqType' => 'ajax', 'map_id' => $id]);
+    $gmpMarkersTblDataUrl = uriGmp::mod('marker', 'getListForTbl', ['reqType' => 'ajax', 'map_id' => $id, '_wpnonce' => wp_create_nonce('gmp_nonce')]);
     frameGmp::_()->addJSVar('admin.gmap.edit', 'gmpMarkersTblDataUrl', $gmpMarkersTblDataUrl);
     frameGmp::_()->addJSVar('admin.marker.edit', 'gmpMarkersTblDataUrl', $gmpMarkersTblDataUrl);
 
     if ($isPro) {
-      $gmpShapesTblDataUrl = uriGmp::mod('shape', 'getListForTbl', ['reqType' => 'ajax', 'map_id' => $id]);
+      $gmpShapesTblDataUrl = uriGmp::mod('shape', 'getListForTbl', ['reqType' => 'ajax', 'map_id' => $id, '_wpnonce' => wp_create_nonce('gmp_nonce')]);
       frameGmp::_()->addJSVar('admin.gmap.edit', 'gmpShapesTblDataUrl', $gmpShapesTblDataUrl);
       frameGmp::_()->addJSVar('admin.shape.edit', 'gmpShapesTblDataUrl', $gmpShapesTblDataUrl);
     }
@@ -480,27 +509,9 @@ class gmapViewGmp extends viewGmp
     $this->assign('viewId', $editMap ? $map['view_id'] : 'preview_id_' . mt_rand(1, 9999));
     $this->assign('promoModPath', frameGmp::_()->getModule('supsystic_promo')->getModPath());
 
-    if ($isContactFormsInstalled) {
-      frameGmp::_()->addJSVar('admin.gmap.edit', 'gmpContactFormEditUrl', frameCfs::_()->getModule('options')->getTabUrl('forms_edit'));
-      $this->assign('contactFormsForSelect', $this->getAllContactForms());
-    }
-    $this->assign('isContactFormsInstalled', $isContactFormsInstalled);
 
     return parent::getContent('gmapEditMap');
   }
-  public function getAllContactForms()
-  {
-    $formsList = [];
-    global $wpdb;
-    $forms = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}cfs_forms WHERE original_id != 0 AND ab_id = 0", ARRAY_A);
-    if ($forms) {
-      foreach ($forms as $f) {
-        $formsList[$f['id']] = $f['label'];
-      }
-    }
-    return $formsList;
-  }
-
   public function connectMapsAssets($params, $forAdminArea = false)
   {
     if (!$forAdminArea && isset($params['is_static']) && (int) $params['is_static']) {

@@ -38,6 +38,14 @@ abstract class controllerGmp
   {
     return [];
   }
+  /**
+   * Actions that visitors without admin rights may call. Everything else is
+   * admin-only unless listed in getPermissions() (see frameGmp::havePermissions()).
+   */
+  public function getPublicMethods()
+  {
+    return [];
+  }
   public function getView($name = '')
   {
     if (empty($name)) {

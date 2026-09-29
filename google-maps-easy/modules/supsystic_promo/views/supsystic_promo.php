@@ -1,25 +1,11 @@
 <?php
 class supsystic_promoViewGmp extends viewGmp
 {
-  public function showWelcomePage()
-  {
-    $this->assign('askOptions', [
-      1 => ['label' => 'Google'],
-      2 => ['label' => 'Worgmpess.org'],
-      3 => ['label' => 'Refer a friend'],
-      4 => ['label' => 'Find on the web'],
-      5 => ['label' => 'Other way...'],
-    ]);
-    $this->assign('originalPage', uriGmp::getFullUrl());
-    parent::display('welcomePage');
-  }
   public function getOverviewTabContent()
   {
     frameGmp::_()->getModule('templates')->loadJqueryUi();
-
-    frameGmp::_()->getModule('templates')->loadSlimscroll();
-    frameGmp::_()->addScript('admin.overview', $this->getModule()->getModPath() . 'js/admin.overview.js');
-    frameGmp::_()->addStyle('admin.overview', $this->getModule()->getModPath() . 'css/admin.overview.css');
+    frameGmp::_()->addScript('admin.overview', $this->getModule()->getModPath() . 'js/admin.overview.js', ['jquery'], GMP_VERSION_PLUGIN . '-overview-2');
+    frameGmp::_()->addStyle('admin.overview', $this->getModule()->getModPath() . 'css/admin.overview.css', [], GMP_VERSION_PLUGIN . '-overview-4');
     $this->assign('mainLink', $this->getModule()->getMainLink());
     $this->assign('faqList', $this->getFaqList());
     $this->assign('serverSettings', $this->getServerSettings());

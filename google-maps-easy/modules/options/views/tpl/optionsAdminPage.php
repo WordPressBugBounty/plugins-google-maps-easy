@@ -1,5 +1,10 @@
 <div class="wrap">
     <div class="supsystic-plugin">
+        <nav class="supsystic-breadcrumbs" aria-label="<?php echo esc_attr__('Breadcrumb', GMP_LANG_CODE); ?>">
+            <a href="<?php echo esc_url($this->tabs['gmap']['url'] ?? $this->mainUrl); ?>"><?php echo esc_html__('Maps', GMP_LANG_CODE); ?></a>
+            <i class="fa fa-angle-right" aria-hidden="true"></i>
+            <span aria-current="page"><?php echo esc_html($this->tabs[$this->activeTab]['label'] ?? $this->activeTab); ?></span>
+        </nav>
         <section class="supsystic-content">
             <nav class="supsystic-navigation supsystic-sticky <?php dispatcherGmp::doAction('adminMainNavClassAdd'); ?>">
                 <ul class="supsystic-main-navigation-list">

@@ -334,9 +334,6 @@ input[type='color'] {
   text-overflow: ellipsis;
   -o-text-overflow: ellipsis;
 }
-.supsystic-welcome-page-content .supsystic-item p {
-  white-space: normal;
-}
 
 .supsystic-item small {
   display: block;

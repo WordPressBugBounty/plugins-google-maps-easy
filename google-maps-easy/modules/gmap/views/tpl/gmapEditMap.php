@@ -17,9 +17,6 @@ if ($this->isPro) {
 <section>
 	<div class="supsystic-item supsystic-panel">
 		<div id="containerWrapper">
-			<div class="gmpMapBtns supsistic-half-side-box">
-				<button id="gmpInsertToContactForm" class="button"><?php _e('Insert to Contact Form', GMP_LANG_CODE); ?></button>
-			</div>
 			<div class="supsistic-half-side-box" style="position: relative;">
 				<select name="shortcode_example" id="gmpCopyTextCodeExamples" style="width: 35%; height: 32px; float: left; margin: 0; font-size: 16px;">
 					<option value="shortcode"><?php _e('Map shortcode', GMP_LANG_CODE); ?></option>
@@ -229,6 +226,9 @@ if ($this->isPro) {
           ); ?>
 										<div style="margin-top: 6px; color: #666;">
 											<?php _e('Leave empty to keep legacy behavior and automatic fallback to classic markers.', GMP_LANG_CODE); ?>
+										</div>
+										<div id="gmpMapIdChangedNotice" class="gmpMapIdNotice" style="display: none;">
+											<?php _e('Save the map and reload the page to apply the Map ID change to the preview.', GMP_LANG_CODE); ?>
 										</div>
 									</td>
 								</tr>
@@ -581,7 +581,8 @@ if ($this->isPro) {
 											<?php echo htmlGmp::wpKsesHtml(
              htmlGmp::selectbox('map_opts[map_stylization]', [
                'options' => $this->stylizationsForSelect,
-               'value' => $this->editMap && isset($this->map['params']['map_stylization']) ? esc_attr($this->map['params']['map_stylization']) : 'none',
+               // Compared against the raw style names (option keys); the value itself is not printed.
+               'value' => $this->editMap && isset($this->map['params']['map_stylization']) ? html_entity_decode($this->map['params']['map_stylization'], ENT_QUOTES, 'UTF-8') : 'none',
                'attrs' => 'style="width: ' . ($this->isPro ? '100%' : 'calc(100% - 200px)') . ';" id="map_opts_map_stylization"',
              ]),
            ); ?>
@@ -591,6 +592,22 @@ if ($this->isPro) {
 													<?php _e('Get 300+ Themes with PRO', GMP_LANG_CODE); ?>
 												</a>
 											<?php } ?>
+											<div id="gmpStylizationCloudBox" class="gmpMapIdNotice" style="display: none;">
+												<p>
+													<strong><?php _e('Map ID is set, so Google styles this map from Google Cloud.', GMP_LANG_CODE); ?></strong>
+													<?php _e('The theme selected here is not applied to the published map. To use it, import it into Google Cloud:', GMP_LANG_CODE); ?>
+												</p>
+												<p class="gmpStylizationCloudBtns">
+													<a href="#" id="gmpStylizationCopyJson" class="button"><i class="fa fa-clipboard"></i> <?php _e('Copy JSON', GMP_LANG_CODE); ?></a>
+													<a href="#" id="gmpStylizationDownloadJson" class="button"><i class="fa fa-download"></i> <?php _e('Download JSON', GMP_LANG_CODE); ?></a>
+													<span id="gmpStylizationCloudMsg"></span>
+												</p>
+												<ol>
+													<li><?php echo wp_kses(sprintf(__('Open <a href="%s" target="_blank">Map Styles</a> in Google Cloud Console and click "Create style".', GMP_LANG_CODE), esc_url('https://console.cloud.google.com/google/maps-apis/studio/styles')), ['a' => ['href' => [], 'target' => []]]); ?></li>
+													<li><?php _e('Choose "Import JSON", paste or upload the JSON. Google converts the theme to its cloud format.', GMP_LANG_CODE); ?></li>
+													<li><?php echo wp_kses(sprintf(__('Save and publish the style, then assign it to your Map ID in <a href="%s" target="_blank">Map Management</a>.', GMP_LANG_CODE), esc_url('https://console.cloud.google.com/google/maps-apis/studio/maps')), ['a' => ['href' => [], 'target' => []]]); ?></li>
+												</ol>
+											</div>
 										</td>
 									</tr>
 									<tr>
@@ -870,11 +887,11 @@ if ($this->isPro) {
 												<?php
             _e(
               'Add KML files to display custom layers on the map. Additional options:' .
-                '<br /><br /><b>Enable KML layers filter</b> - add form to map for dynamically enable / disable KML layers and sublayers. <br /><br />  <b>Load KML faster</b> - Use for large KML files. <b>Warning </b>-  filters will stop working!<br',
+                '<br /><br /><b>Enable KML layers filter</b> - add form to map for dynamically enable / disable KML layers and sublayers. <br /><br />  <b>Load KML faster</b> - Use for large KML files. <b>Warning </b>-  filters will stop working!<br />',
               GMP_LANG_CODE,
             );
             if (!$this->isPro) {
-              echo esc_html('<a href="' . esc_attr($proLink) . '" target="_blank"><img src="' . esc_attr($this->promoModPath) . 'img/kml/kml.png" /></a>');
+              echo '<a href="' . esc_url($proLink) . '" target="_blank"><img src="' . esc_url($this->promoModPath . 'img/kml/kml.png') . '" /></a>';
             }
             ?>
 											</span>
@@ -978,7 +995,7 @@ if ($this->isPro) {
 												<?php
             _e('Add custom map controls to the map.', GMP_LANG_CODE);
             if (!$this->isPro) {
-              echo esc_html('<a href="' . esc_attr($proLink) . '" target="_blank"><img src="' . esc_attr($this->promoModPath) . 'img/custom_controls/custom_map_controls.png" /></a>');
+              echo '<a href="' . esc_url($proLink) . '" target="_blank"><img src="' . esc_url($this->promoModPath . 'img/custom_controls/custom_map_controls.png') . '" /></a>';
             }
             ?>
 											</span>
@@ -1420,7 +1437,7 @@ if ($this->isPro) {
             _e('Activate the toolbar for search Places (restaurants, schools, museums, etc.) on the map. Use the shortcode to display toolbar on wherever you need, but toolbar must be placed on the same page as its map.', GMP_LANG_CODE);
             echo '<br />';
             if (!$this->isPro) {
-              echo esc_html('<a href="' . esc_attr($proLink) . '" target="_blank"><img src="' . esc_attr($this->promoModPath) . 'img/places/places.png" /></a>');
+              echo '<a href="' . esc_url($proLink) . '" target="_blank"><img src="' . esc_url($this->promoModPath . 'img/places/places.png') . '" /></a>';
             }
             ?>
 											</span>
@@ -1757,7 +1774,7 @@ if ($this->isPro) {
 												<?php
             _e('Add a button at marker info window to get direction from the entered address to the marker. If Show route data option is enabled - the total route time and distance will be shown by click on the route polyline.', GMP_LANG_CODE);
             if (!$this->isPro) {
-              echo esc_html('<a href="' . esc_attr($proLink) . '" target="_blank"><img src="' . esc_attr($this->promoModPath) . 'img/directions/get_directions.png" /></a>');
+              echo '<a href="' . esc_url($proLink) . '" target="_blank"><img src="' . esc_url($this->promoModPath . 'img/directions/get_directions.png') . '" /></a>';
             }
             ?>
 											</span>
@@ -2897,31 +2914,6 @@ if ($this->isPro) {
 		</li>
 		<?php } ?>
 	</ul>
-</div>
-<!--Insert To Contact Form Wnd-->
-<div id="gmpInsertToContactFormWnd" style="display: none;" title="<?php _e('Select Contact Form', GMP_LANG_CODE); ?>">
-	<?php if ($this->isContactFormsInstalled) { ?>
-		<?php if ($this->contactFormsForSelect) { ?>
-			<select name="contact_form" style="width: 100%; margin: 20px 0 0 0;">
-				<?php foreach ($this->contactFormsForSelect as $k => $v) { ?>
-					<option value="<?php echo esc_attr($k); ?>"><?php echo esc_attr($v); ?></option>
-				<?php } ?>
-			</select>
-		<?php } else { ?>
-			<span style="font-size: 14px; line-height: 25px;"><?php echo sprintf(
-     'You have no Contact Forms for now. <a target="_blank" href="%s">Create your first contact form</a> then just reload page with your Map settings, and you will see list with available Contact Forms for your Map.',
-     frameCfs::_()->getModule('options')->getTabUrl('forms_add_new'),
-   ); ?>
-			</span>
-		<?php } ?>
-	<?php } else { ?>
-		<span style="font-size: 14px; line-height: 25px;"><?php echo sprintf(
-    'You need to install Contact Forms by Supsystic to use this feature. <a target="_blank" href="%s">Install plugin</a> from your admin area, or visit it\'s official page on Wordpress.org <a target="_blank" href="%s">here.</a>',
-    admin_url('plugin-install.php?tab=search&type=term&s=Contact+Forms+by+Supsystic'),
-    'https://wordpress.org/plugins/contact-form-by-supsystic/',
-  ); ?>
-		</span>
-	<?php } ?>
 </div>
 <!--Map Authorization Fail Wnd-->
 <div id="gmpMapAuthorizationFailWnd" style="display: none;" title="<?php _e('Oops! Something went wrong...', GMP_LANG_CODE); ?>">

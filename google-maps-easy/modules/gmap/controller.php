@@ -218,6 +218,21 @@ class gmapControllerGmp extends controllerGmp
 		}
 		return $returnList;
 	}*/
+  public function getAdminListPage()
+  {
+    $list = $this->getModel()->getAdminListPage(
+      reqGmp::getVar('search', 'post', ''),
+      reqGmp::getVar('page', 'post', 1),
+      reqGmp::getVar('perPage', 'post', 20),
+      reqGmp::getVar('sort', 'post', 'id'),
+      reqGmp::getVar('dir', 'post', 'desc')
+    );
+    $list['html'] = $this->getView()->getAdminListRows($list['rows']);
+    unset($list['rows']);
+    $res = new responseGmp();
+    $res->addData($list);
+    return $res->ajaxExec();
+  }
   public function getListForTbl()
   {
     $res = new responseGmp();
@@ -270,13 +285,13 @@ class gmapControllerGmp extends controllerGmp
    */
   public function getNoncedMethods()
   {
-    return ['getListForTbl', 'getAllMaps', 'save', 'clear', 'remove', 'removeGroup', 'cloneMapGroup', 'resortMarkers'];
+    return ['getAdminListPage', 'getListForTbl', 'getListForTable', 'getAllMaps', 'getMapById', 'save', 'clear', 'remove', 'removeMap', 'removeGroup', 'cloneMapGroup', 'resortMarkers', 'resortShapes'];
   }
   public function getPermissions()
   {
     return [
       GMP_USERLEVELS => [
-        GMP_ADMIN => ['getListForTbl', 'getAllMaps', 'save', 'clear', 'remove', 'removeGroup', 'cloneMapGroup', 'resortMarkers'],
+        GMP_ADMIN => ['getAdminListPage', 'getListForTbl', 'getListForTable', 'getAllMaps', 'getMapById', 'save', 'clear', 'remove', 'removeMap', 'removeGroup', 'cloneMapGroup', 'resortMarkers', 'resortShapes'],
       ],
     ];
   }

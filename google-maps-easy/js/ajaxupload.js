@@ -325,11 +325,21 @@
     _rerouteClicks: function () {
       var self = this;
 
-      // IE displays 'access denied' error when using this method
-      // other browsers just ignore click()
-      // addEvent(this._button, 'click', function(e){
-      //   self._input.click();
-      // });
+      // Open the file dialog when the button itself receives the click. The invisible
+      // input positioned under the cursor (below) only catches pointer clicks when its
+      // placement is exact; keyboard/touch activation, CSS zoom or Firefox's file input
+      // hit area let the click fall through to the button, which otherwise did nothing.
+      addEvent(self._button, 'click', function (e) {
+        if (e.preventDefault) {
+          e.preventDefault();
+        } else {
+          e.returnValue = false;
+        }
+        if (self._disabled || !self._input) {
+          return;
+        }
+        self._input.click();
+      });
 
       var box,
         dialogOffset = { top: 0, left: 0 },

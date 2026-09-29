@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 130" role="img" aria-labelledby="title desc">
+  <title id="title">Store storefront</title>
+  <desc id="desc">A bright illustrated city coffee shop with a striped awning and trees.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#cfeaf4"/>
+      <stop offset="1" stop-color="#edf7f5"/>
+    </linearGradient>
+    <linearGradient id="wall" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fffaf0"/>
+      <stop offset="1" stop-color="#f1e6d2"/>
+    </linearGradient>
+  </defs>
+  <rect width="180" height="130" fill="url(#sky)"/>
+  <circle cx="151" cy="25" r="14" fill="#ffd56a" opacity=".9"/>
+  <path d="M0 101h180v29H0z" fill="#d8d3ca"/>
+  <path d="M0 108h180v4H0z" fill="#f7f3ea"/>
+  <rect x="25" y="37" width="129" height="67" rx="3" fill="url(#wall)" stroke="#d8cbb6"/>
+  <rect x="38" y="62" width="38" height="42" rx="2" fill="#497f8c"/>
+  <rect x="83" y="62" width="57" height="29" rx="2" fill="#7bb5c0"/>
+  <path d="M32 48h115l-8 18H40z" fill="#fff"/>
+  <path d="M32 48h18l-5 18H40zm36 0h18l-2 18H63zm36 0h18l2 18h-18zm36 0h7l-8 18h-17z" fill="#1fa69d"/>
+  <rect x="54" y="22" width="73" height="24" rx="5" fill="#26384c"/>
+  <text x="90.5" y="38" fill="#fff" font-family="Arial,sans-serif" font-size="11" font-weight="700" text-anchor="middle">YOUR STORE</text>
+  <circle cx="57" cy="81" r="7" fill="#f6d19c" opacity=".9"/>
+  <path d="M0 105c16-14 25-16 35 0zm143 0c14-18 25-19 37 0z" fill="#68a67d"/>
+  <rect x="17" y="84" width="4" height="23" rx="2" fill="#776555"/>
+  <circle cx="19" cy="79" r="14" fill="#74b987"/>
+  <rect x="158" y="87" width="4" height="20" rx="2" fill="#776555"/>
+  <circle cx="160" cy="82" r="12" fill="#65aa7b"/>
+</svg>

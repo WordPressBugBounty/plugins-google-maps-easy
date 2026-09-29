@@ -33,32 +33,7 @@ class adminmenuGmp extends moduleGmp
     ];
     $mainMenuPageOptions = dispatcherGmp::applyFilters('adminMenuMainOption', $mainMenuPageOptions);
     add_menu_page($mainMenuPageOptions['page_title'], $mainMenuPageOptions['menu_title'], $mainMenuPageOptions['capability'], $mainMenuPageOptions['menu_slug'], $mainMenuPageOptions['function'], 'dashicons-admin-site');
-    //remove duplicated WP menu item
-    //add_submenu_page($mainMenuPageOptions['menu_slug'], '', '', $mainMenuPageOptions['capability'], $mainMenuPageOptions['menu_slug'], $mainMenuPageOptions['function']);
-    $tabs = frameGmp::_()->getModule('options')->getTabs();
-    $subMenus = [];
-    foreach ($tabs as $tKey => $tab) {
-      if ($tKey == 'main_page') {
-        continue;
-      } // Top level menu item - is main page, avoid place it 2 times
-      if (
-        (isset($tab['hidden']) && $tab['hidden']) ||
-        (isset($tab['hidden_for_main']) && $tab['hidden_for_main']) || // Hidden for WP main
-        (isset($tab['is_main']) && $tab['is_main'])
-      ) {
-        continue;
-      }
-      $subMenus[] = [
-        'title' => $tab['label'],
-        'capability' => $mainCap,
-        'menu_slug' => 'admin.php?page=' . $mainSlug . '&tab=' . $tKey,
-        'function' => '',
-      ];
-    }
-    $subMenus = dispatcherGmp::applyFilters('adminMenuOptions', $subMenus);
-    foreach ($subMenus as $opt) {
-      add_submenu_page($mainSlug, $opt['title'], $opt['title'], $opt['capability'], $opt['menu_slug'], $opt['function']);
-    }
+    // No WP sidebar submenu: sections are reached through the plugin's own navigation.
   }
   public function getMainLink()
   {

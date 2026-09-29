@@ -6,7 +6,7 @@ Donate link: https://supsystic.com/plugins/google-maps-plugin
 Tags: google map, map, Google Maps, map markers, location
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.14.6
+Stable tag: 1.15.1
 License: GNU General Public License v2.0 or later
 
 Google Maps with markers, locations and clusterization, KML layers and filters. Custom Google map markers with text, images, videos, links.
@@ -314,6 +314,18 @@ Important compatibility notes:
 == Changelog ==
 
 = 2026 =
+
+= 1.15.1 — September 29, 2026 =
+
+* Maintenance release with minor stability improvements.
+
+= 1.15.0 / 24.09.2026 =
+
+ * General security hardening
+ * Added JSON export of map themes for Google Cloud styling when a Map ID is set
+ * Fixed a grey map when no maximum zoom level is set
+ * Fixed the CSV Import button not opening the file dialog
+ * Removing maps, markers and marker categories now also removes their related data
 
 = 1.14.6 / 08.09.2026 =
 

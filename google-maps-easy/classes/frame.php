@@ -87,7 +87,10 @@ class frameGmp
           }
           if (is_dir($moduleLocationDir . $code)) {
             $this->_allModules[$m['code']] = 1;
-            if ((bool) $m['active']) {
+            // The "active" flag of an extension module is only reset by the extension's
+            // deactivation hook, which can be skipped (bulk/CLI deactivation, removed folder).
+            // Never load it while the plugin that ships it is inactive in WordPress.
+            if ((bool) $m['active'] && (empty($m['ex_plug_dir']) || $this->_extPluginActive($m['ex_plug_dir']))) {
               importClassGmp($code . strFirstUp(GMP_CODE), $moduleLocationDir . $code . DS . 'mod.php');
               $moduleClass = toeGetClassNameGmp($code);
               if (class_exists($moduleClass)) {
@@ -101,6 +104,23 @@ class frameGmp
         }
       }
     }
+  }
+  protected function _extPluginActive($plugDir)
+  {
+    static $activePlugins = null;
+    if ($activePlugins === null) {
+      $activePlugins = (array) get_option('active_plugins', []);
+      if (is_multisite()) {
+        $activePlugins = array_merge($activePlugins, array_keys((array) get_site_option('active_sitewide_plugins', [])));
+      }
+    }
+    $prefix = trim($plugDir, '/\\') . '/';
+    foreach ($activePlugins as $plugin) {
+      if (strpos($plugin, $prefix) === 0) {
+        return true;
+      }
+    }
+    return false;
   }
   protected function _initModules()
   {
@@ -159,83 +179,97 @@ class frameGmp
     }
   }
   /**
-   * Check permissions for action in controller by $code
+   * Framework plumbing that is public for PHP reasons but must never be reachable as an action.
+   */
+  private $_notActions = ['__construct', '__call', 'init', 'setcode', 'getcode', 'exec', 'getview', 'getmodel', 'getnoncedmethods', 'getpermissions', 'getpublicmethods', 'getmodule', 'display'];
+  /**
+   * Actions of extension modules that are called by site visitors. Used for extension
+   * versions released before controllers declared getPublicMethods(). Their old forms
+   * send no nonce, so a nonce is required only when the controller itself asks for it.
+   */
+  private $_legacyPublicActions = [
+    'frontend_actions' => ['saveMarkerForm', 'deleteMarkerOnFrontend'],
+  ];
+  /**
+   * Only real, public, non-framework methods declared on the controller can be actions.
+   * This also rules out __call(), which would otherwise proxy any model method.
+   */
+  protected function _isControllerAction($controller, $action)
+  {
+    if (!$controller || $action === '' || $action[0] === '_' || in_array($action, $this->_notActions, true) || !method_exists($controller, $action)) {
+      return false;
+    }
+    $method = new ReflectionMethod($controller, $action);
+    return $method->isPublic() && !$method->isStatic();
+  }
+  /**
+   * Actions of the module that visitors without admin rights may call.
+   */
+  public function getPublicActions($code)
+  {
+    $mod = $this->getModule($code);
+    $controller = $mod ? $mod->getController() : null;
+    $public = $controller && method_exists($controller, 'getPublicMethods') ? (array) $controller->getPublicMethods() : [];
+    if (isset($this->_legacyPublicActions[$code])) {
+      $public = array_merge($public, $this->_legacyPublicActions[$code]);
+    }
+    return array_map('strtolower', $public);
+  }
+  /**
+   * Check permissions for action in controller by $code.
+   * Deny by default: an action that is not listed in the controller permissions is
+   * allowed to administrators only, unless the controller declares it public.
    * @param string $code Code of controller that need to be checked
    * @param string $action Action that need to be checked
    * @return bool true if ok, else - false
    */
   public function havePermissions($code, $action)
   {
-    $res = true;
     $mod = $this->getModule($code);
-    $action = strtolower($action);
-    if ($mod) {
-      $permissions = $mod->getController()->getPermissions();
-      if (!empty($permissions)) {
-        // Special permissions
-        if (isset($permissions[GMP_METHODS]) && !empty($permissions[GMP_METHODS])) {
-          foreach ($permissions[GMP_METHODS] as $method => $permissions) {
-            // Make case-insensitive
-            $permissions[GMP_METHODS][strtolower($method)] = $permissions;
-          }
-          if (array_key_exists($action, $permissions[GMP_METHODS])) {
-            // Permission for this method exists
-            $currentUserPosition = frameGmp::_()->getModule('user')->getCurrentUserPosition();
-            if ((is_array($permissions[GMP_METHODS][$action]) && !in_array($currentUserPosition, $permissions[GMP_METHODS][$action])) || (!is_array($permissions[GMP_METHODS][$action]) && $permissions[GMP_METHODS][$action] != $currentUserPosition)) {
-              $res = false;
-            }
-          }
-        }
-        if (isset($permissions[GMP_USERLEVELS]) && !empty($permissions[GMP_USERLEVELS])) {
-          $currentUserPosition = frameGmp::_()->getModule('user')->getCurrentUserPosition();
-          // For multi-sites network admin role is undefined, let's do this here
-          if (is_multisite() && is_admin() && is_super_admin()) {
-            $currentUserPosition = GMP_ADMIN;
-          }
-          foreach ($permissions[GMP_USERLEVELS] as $userlevel => $methods) {
-            if (is_array($methods)) {
-              $lowerMethods = array_map('strtolower', $methods); // Make case-insensitive
-              if (in_array($action, $lowerMethods)) {
-                // Permission for this method exists
-                if ($currentUserPosition != $userlevel) {
-                  $res = false;
-                }
-                break;
-              }
-            } else {
-              $lowerMethod = strtolower($methods); // Make case-insensitive
-              if ($lowerMethod == $action) {
-                // Permission for this method exists
-                if ($currentUserPosition != $userlevel) {
-                  $res = false;
-                }
-                break;
-              }
-            }
-          }
-        }
-      }
-      if ($res) {
-        // Additional check for nonces
-        $noncedMethods = $mod->getController()->getNoncedMethods();
-        if (!empty($noncedMethods)) {
-          $noncedMethods = array_map('strtolower', $noncedMethods);
-          if (in_array($action, $noncedMethods)) {
-            $nonce = isset($_REQUEST['_wpnonce']) ? $_REQUEST['_wpnonce'] : reqGmp::getVar('_wpnonce');
-            if (is_admin()) {
-              if (!wp_verify_nonce($nonce, 'gmp_nonce')) {
-                $res = false;
-              }
-            } else {
-              if (!wp_verify_nonce($nonce, 'gmp_nonce_frontend')) {
-                $res = false;
-              }
-            }
-          }
+    $controller = $mod ? $mod->getController() : null;
+    $action = strtolower((string) $action);
+    if (!$this->_isControllerAction($controller, $action)) {
+      return false;
+    }
+    $currentUserPosition = frameGmp::_()->getModule('user')->getCurrentUserPosition();
+    // For multi-sites network admin role is undefined, let's do this here
+    if (is_multisite() && is_admin() && is_super_admin()) {
+      $currentUserPosition = GMP_ADMIN;
+    }
+    $res = null;
+    $permissions = $controller->getPermissions();
+    if (!empty($permissions[GMP_METHODS]) && is_array($permissions[GMP_METHODS])) {
+      foreach ($permissions[GMP_METHODS] as $method => $levels) {
+        if (strtolower($method) === $action) {
+          $res = is_array($levels) ? in_array($currentUserPosition, $levels) : $levels == $currentUserPosition;
+          break;
         }
       }
     }
-    return $res;
+    if ($res === null && !empty($permissions[GMP_USERLEVELS]) && is_array($permissions[GMP_USERLEVELS])) {
+      foreach ($permissions[GMP_USERLEVELS] as $userlevel => $methods) {
+        if (in_array($action, array_map('strtolower', (array) $methods), true)) {
+          $res = $currentUserPosition == $userlevel;
+          break;
+        }
+      }
+    }
+    $publicActions = $this->getPublicActions($code);
+    if ($res === null) {
+      $res = $currentUserPosition == GMP_ADMIN || in_array($action, $publicActions, true);
+    }
+    if ($res) {
+      // Additional check for nonces
+      $noncedMethods = array_map('strtolower', (array) $controller->getNoncedMethods());
+      if (in_array($action, $noncedMethods, true)) {
+        $nonce = isset($_REQUEST['_wpnonce']) ? $_REQUEST['_wpnonce'] : reqGmp::getVar('_wpnonce');
+        $nonceAction = is_admin() && !in_array($action, $publicActions, true) ? 'gmp_nonce' : 'gmp_nonce_frontend';
+        if (!wp_verify_nonce($nonce, $nonceAction)) {
+          $res = false;
+        }
+      }
+    }
+    return (bool) $res;
   }
   public function getRes()
   {
@@ -295,7 +329,10 @@ class frameGmp
       switch (reqGmp::getVar('reqType')) {
         case 'ajax':
           add_action('wp_ajax_' . $this->_action, [$mod->getController(), $this->_action]);
-          add_action('wp_ajax_nopriv_' . $this->_action, [$mod->getController(), $this->_action]);
+          // Logged-out requests only for actions the controller declares public.
+          if (in_array(strtolower($this->_action), $this->getPublicActions($this->_mod), true)) {
+            add_action('wp_ajax_nopriv_' . $this->_action, [$mod->getController(), $this->_action]);
+          }
           break;
         default:
           $this->_res = $mod->exec($this->_action);

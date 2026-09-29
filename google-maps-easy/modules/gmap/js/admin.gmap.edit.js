@@ -68,8 +68,6 @@ jQuery(window).bind('orientationchange', _gmpResizeRightSidebar);
 
 jQuery(document).ready(function () {
   var propTabs = jQuery('#gmpMapPropertiesTabs'),
-    $contactFormsListWnd = jQuery('#gmpInsertToContactFormWnd'),
-    contactFormBtn = jQuery('#gmpInsertToContactForm'),
     mapMainBtns = jQuery('#gmpMapMainBtns'),
     markerMainBtns = jQuery('#gmpMarkerMainBtns'),
     shapeMainBtns = jQuery('#gmpShapeMainBtns'),
@@ -170,37 +168,6 @@ jQuery(document).ready(function () {
     },
   });
   propTabs.show();
-
-  $contactFormsListWnd.dialog({
-    modal: true,
-    autoOpen: false,
-    width: 540,
-    height: 'auto',
-    buttons: {
-      Cancel: function () {
-        $contactFormsListWnd.dialog('close');
-      },
-      Select: function () {
-        var formSelect = $contactFormsListWnd.find('select[name="contact_form"]');
-
-        if (formSelect.length && typeof gmpContactFormEditUrl != 'undefined') {
-          var id = formSelect.val();
-
-          window.open(gmpContactFormEditUrl + '&id=' + id + '&map_id=' + g_gmpMap.getId() + '#cfsFormFields', '_blank');
-          $contactFormsListWnd.dialog('close');
-        }
-      },
-    },
-    open: function () {
-      if (!$contactFormsListWnd.find('select[name="contact_form"]').length) {
-        $contactFormsListWnd.next('.ui-dialog-buttonpane').find('button:last-child').hide();
-      }
-    },
-  });
-  contactFormBtn.click(function () {
-    $contactFormsListWnd.dialog('open');
-    return false;
-  });
 
   // Custom Map Controls checkbox - toggles the #custom_controls_options submenu.
   // Bound here (not inline onclick) because wp_kses strips onclick= from admin output.
@@ -501,7 +468,41 @@ jQuery(document).ready(function () {
       gmpStylesToggle(g_gmpMap, 'hide_poi');
       gmpStylesToggle(g_gmpMap, 'hide_countries');
     }
+    gmpUpdateStylizationCloudBox();
   });
+  // With a Map ID Google ignores local styles: offer the selected theme as JSON for Google Cloud instead.
+  jQuery('#map_opts_mapId').on('input change', gmpUpdateStylizationCloudBox);
+  jQuery('#gmpStylizationCopyJson').on('click', function (e) {
+    e.preventDefault();
+    var json = gmpGetSelectedStylizationJson();
+    if (!json) return;
+    var done = function () {
+      gmpShowStylizationCloudMsg(gmpMapEditTexts.copied);
+    };
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(json).then(done, function () {
+        gmpCopyTextFallback(json) && done();
+      });
+    } else if (gmpCopyTextFallback(json)) {
+      done();
+    }
+  });
+  jQuery('#gmpStylizationDownloadJson').on('click', function (e) {
+    e.preventDefault();
+    var json = gmpGetSelectedStylizationJson();
+    if (!json) return;
+    var name = jQuery('#map_opts_map_stylization').val(),
+      link = document.createElement('a');
+    link.href = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+    link.download = 'map-style-' + name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '.json';
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(function () {
+      URL.revokeObjectURL(link.href);
+      link.remove();
+    }, 0);
+  });
+  gmpUpdateStylizationCloudBox();
   // Map Clasterization
   jQuery('#gmpMapForm select[name="map_opts[marker_clasterer]"]').change(function () {
     var newType = jQuery(this).val();
@@ -894,4 +895,41 @@ function gm_authFailure() {
     },
   });
   g_gmpMapAuthorizationFailWnd.dialog('open');
+}
+function gmpGetSelectedStylizationJson() {
+  var name = jQuery('#map_opts_map_stylization').val();
+  if (!name || name === 'none' || typeof gmpAllStylizationsList === 'undefined' || !gmpAllStylizationsList[name]) {
+    gmpShowStylizationCloudMsg(gmpMapEditTexts.noTheme);
+    return '';
+  }
+  return JSON.stringify(gmpAllStylizationsList[name], null, 2);
+}
+function gmpUpdateStylizationCloudBox() {
+  var fieldMapId = jQuery.trim(jQuery('#map_opts_mapId').val() || ''),
+    previewMapId = g_gmpMap ? jQuery.trim(g_gmpMap.getParam('mapId') || '') : fieldMapId,
+    hasTheme = jQuery('#map_opts_map_stylization').val() !== 'none';
+  jQuery('#gmpStylizationCloudBox').toggle(!!fieldMapId);
+  jQuery('#gmpStylizationCopyJson, #gmpStylizationDownloadJson').toggleClass('disabled', !hasTheme);
+  jQuery('#gmpMapIdChangedNotice').toggle(fieldMapId !== previewMapId);
+}
+function gmpShowStylizationCloudMsg(text) {
+  var msg = jQuery('#gmpStylizationCloudMsg');
+  msg.text(text).stop(true, true).show();
+  clearTimeout(msg.data('hideTimer'));
+  msg.data(
+    'hideTimer',
+    setTimeout(function () {
+      msg.fadeOut(300);
+    }, 2500)
+  );
+}
+function gmpCopyTextFallback(text) {
+  var area = jQuery('<textarea readonly style="position: absolute; left: -9999px;"></textarea>').val(text).appendTo('body');
+  area[0].select();
+  var ok = false;
+  try {
+    ok = document.execCommand('copy');
+  } catch (e) {}
+  area.remove();
+  return ok;
 }

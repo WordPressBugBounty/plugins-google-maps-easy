@@ -314,14 +314,30 @@ class gmapGmp extends moduleGmp
     if (empty($this->_stylizations)) {
       $this->_stylizations = dispatcherGmp::applyFilters('stylizationsList', require_once $this->getModDir() . 'stylezations.php');
       foreach ($this->_stylizations as $k => $v) {
-        $this->_stylizations[$k] = utilsGmp::jsonDecode($this->_stylizations[$k]);
+        $decoded = utilsGmp::jsonDecode($v);
+        if ($decoded === null && is_string($v)) {
+          $decoded = utilsGmp::jsonDecode($this->_repairStyleJson($v));
+        }
+        $this->_stylizations[$k] = $decoded;
       }
     }
     return $this->_stylizations;
   }
+  /**
+   * Some bundled styles were pasted from JS snippets: "// --- comment ---" blocks,
+   * unquoted keys and trailing commas. Normalize them to strict JSON.
+   */
+  private function _repairStyleJson($json)
+  {
+    $json = preg_replace('~//\s*-{2,}.*?-{2,}~', '', $json);
+    $json = preg_replace('~([{,]\s*)([A-Za-z_][A-Za-z0-9_]*)\s*:~', '$1"$2":', $json);
+    return preg_replace('~,\s*([\]}])~', '$1', $json);
+  }
   public function getStylizationByName($name)
   {
     $this->getStylizationsList();
+    // Saved names go through wp_kses_post() on save, so "Red & Green" is stored as "Red &amp; Green".
+    $name = html_entity_decode((string) $name, ENT_QUOTES, 'UTF-8');
     return isset($this->_stylizations[$name]) ? $this->_stylizations[$name] : false;
   }
   public function getMarkerLists()

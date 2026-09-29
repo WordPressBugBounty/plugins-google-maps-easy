@@ -51,7 +51,8 @@ class htmlGmp
     if (isset($params['placeholder']) && $params['placeholder']) {
       $params['attrs'] .= ' placeholder="' . $params['placeholder'] . '"'; // HTML5 "required" validation attr
     }
-    $params['value'] = isset($params['value']) ? $params['value'] : '';
+    // esc_attr() does not double-encode existing entities, so values escaped by the caller stay intact.
+    $params['value'] = isset($params['value']) ? esc_attr($params['value']) : '';
     return '<input type="' . $params['type'] . '" name="' . $name . '" value="' . $params['value'] . '" ' . (isset($params['attrs']) ? $params['attrs'] : '') . ' />';
   }
   private static function _dataToAttrs($params)

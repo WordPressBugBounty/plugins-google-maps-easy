@@ -197,15 +197,26 @@ class gmapModelGmp extends modelGmp
     }
     return false;
   }
+  /**
+   * Everything stored per map. Shapes, heatmaps and routes tables belong to PRO
+   * features but may hold rows even while PRO is inactive, so clean them directly.
+   */
+  private function _removeMapData($mapId)
+  {
+    global $wpdb;
+    frameGmp::_()->getModule('marker')->getModel()->removeMarkersFromMap($mapId);
+    foreach (['gmp_shapes', 'gmp_heatmaps', 'gmp_routes'] as $table) {
+      if (dbGmp::exist($table)) {
+        $wpdb->delete($wpdb->prefix . $table, ['map_id' => $mapId]);
+      }
+    }
+  }
   public function remove($mapId)
   {
     $mapId = (int) $mapId;
     if (!empty($mapId)) {
       global $wpdb;
-      frameGmp::_()->getModule('marker')->getModel()->removeMarkersFromMap($mapId);
-      if (frameGmp::_()->getModule('shape')) {
-        frameGmp::_()->getModule('shape')->getModel()->removeShapesFromMap($mapId);
-      }
+      $this->_removeMapData($mapId);
       $tableName = $wpdb->prefix . 'gmp_maps';
       $data_where = ['id' => $mapId];
       return $res = $wpdb->delete($tableName, $data_where);
@@ -219,10 +230,7 @@ class gmapModelGmp extends modelGmp
     $ids = array_map('intval', $ids);
     global $wpdb;
     foreach ($ids as $id) {
-      frameGmp::_()->getModule('marker')->getModel()->removeMarkersFromMap($id);
-      if (frameGmp::_()->getModule('shape')) {
-        frameGmp::_()->getModule('shape')->getModel()->removeShapesFromMap($id);
-      }
+      $this->_removeMapData($id);
       $tableName = $wpdb->prefix . 'gmp_maps';
       $data_where = [
         'id' => $id,
@@ -521,6 +529,71 @@ class gmapModelGmp extends modelGmp
     }
     return true;
   }
+  /**
+   * A bounded, sortable page for the native admin maps list.
+   */
+  public function getAdminListPage($search = '', $page = 1, $perPage = 20, $sort = 'id', $direction = 'desc')
+  {
+    global $wpdb;
+
+    $search = trim((string) $search);
+    $page = max(1, (int) $page);
+    $perPage = in_array((int) $perPage, [10, 20, 50, 100], true) ? (int) $perPage : 20;
+    $sortColumns = [
+      'id' => 'm.id',
+      'title' => 'm.title',
+      'create_date' => 'm.create_date',
+      'markers' => 'COALESCE(mc.marker_count, 0)',
+    ];
+    $sort = isset($sortColumns[$sort]) ? $sort : 'id';
+    $direction = strtolower($direction) === 'asc' ? 'asc' : 'desc';
+    $where = '';
+    $params = [];
+
+    if ($search !== '') {
+      $like = '%' . $wpdb->esc_like($search) . '%';
+      $where = ' WHERE (m.title LIKE %s OR CAST(m.id AS CHAR) LIKE %s)';
+      $params = [$like, $like];
+    }
+
+    $mapsTable = $wpdb->prefix . 'gmp_maps';
+    $markersTable = $wpdb->prefix . 'gmp_markers';
+    $countSql = "SELECT COUNT(*) FROM {$mapsTable} m{$where}";
+    $total = (int) $wpdb->get_var($params ? $wpdb->prepare($countSql, $params) : $countSql);
+    $page = min($page, max(1, (int) ceil($total / $perPage)));
+    $offset = ($page - 1) * $perPage;
+    $order = $sortColumns[$sort] . ' ' . strtoupper($direction);
+    $sql = "SELECT m.id, m.title, m.create_date, COALESCE(mc.marker_count, 0) AS marker_count
+      FROM {$mapsTable} m
+      LEFT JOIN (SELECT map_id, COUNT(*) AS marker_count FROM {$markersTable} GROUP BY map_id) mc ON mc.map_id = m.id
+      {$where}
+      ORDER BY {$order}, m.id DESC
+      LIMIT %d OFFSET %d";
+    $rows = $wpdb->get_results($wpdb->prepare($sql, array_merge($params, [$perPage, $offset])), ARRAY_A);
+
+    foreach ($rows as &$row) {
+      $row['id'] = (int) $row['id'];
+      $row['marker_count'] = (int) $row['marker_count'];
+      $row['marker_preview'] = $wpdb->get_col($wpdb->prepare(
+        "SELECT title FROM {$markersTable} WHERE map_id = %d ORDER BY sort_order ASC, id ASC LIMIT 2",
+        $row['id']
+      ));
+      $row['created_label'] = !empty($row['create_date'])
+        ? date_i18n(get_option('date_format'), strtotime($row['create_date']))
+        : '';
+    }
+    unset($row);
+
+    return [
+      'rows' => $rows,
+      'page' => $page,
+      'perPage' => $perPage,
+      'sort' => $sort,
+      'dir' => $direction,
+      'recordsTotal' => $total,
+    ];
+  }
+
   public function getTotalCountBySearch($search)
   {
     global $wpdb;

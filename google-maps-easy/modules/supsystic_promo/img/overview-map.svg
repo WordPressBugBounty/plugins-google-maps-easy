@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 360 360" width="360" height="360" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<defs>
+<radialGradient id="gmpHeat"><stop offset="0" stop-color="#e53935" stop-opacity=".9"/><stop offset=".3" stop-color="#fb8c00" stop-opacity=".75"/><stop offset=".6" stop-color="#fdd835" stop-opacity=".5"/><stop offset=".85" stop-color="#7cb342" stop-opacity=".22"/><stop offset="1" stop-color="#7cb342" stop-opacity="0"/></radialGradient>
+<filter id="gmpPinShadow" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="1.5" stdDeviation="1.4" flood-color="#000" flood-opacity=".3"/></filter>
+<path id="gmpPin" d="M0 0C-3-6-11-12.5-11-21A11 11 0 1 1 11-21C11-12.5 3-6 0 0Z"/>
+</defs>
+<rect width="360" height="360" fill="#f1f3f4"/>
+<g fill="#e8eaed"><rect x="66" y="70" width="42" height="60" rx="3"/><rect x="128" y="70" width="42" height="60" rx="3"/><rect x="128" y="150" width="42" height="55" rx="3"/><rect x="190" y="150" width="45" height="55" rx="3"/><rect x="190" y="225" width="45" height="28" rx="3"/><rect x="66" y="225" width="42" height="28" rx="3"/><rect x="128" y="272" width="42" height="40" rx="3"/><rect x="255" y="225" width="45" height="28" rx="3"/><rect x="5" y="225" width="40" height="28" rx="3"/><rect x="190" y="5" width="45" height="45" rx="3"/><rect x="128" y="5" width="42" height="45" rx="3"/></g>
+<path d="M280 370C292 330 322 306 370 292V370Z" fill="#aadaff"/>
+<rect x="6" y="148" width="104" height="58" rx="7" fill="#c8e6c9"/>
+<g fill="none" stroke-linecap="round">
+<g stroke="#dadce0" stroke-width="8"><path d="M-10 60H370M-10 140H370M-10 262H370M-10 320H370M55-10V140M55 215V370M118-10V370M245-10V370M310-10V370"/><path d="M190 370C250 300 300 283 370 252"/></g>
+<g stroke="#fff" stroke-width="6"><path d="M-10 60H370M-10 140H370M-10 262H370M-10 320H370M55-10V140M55 215V370M118-10V370M245-10V370M310-10V370"/><path id="gmpHarborRd" d="M190 370C250 300 300 283 370 252"/></g>
+<g stroke="#f2c14e" stroke-width="11"><path d="M-10 215H370M180-10V370"/></g>
+<g stroke="#fde293" stroke-width="9"><path d="M-10 215H370M180-10V370"/></g>
+</g>
+<polygon points="262,50 352,42 358,165 305,190 256,150" fill="#4285f4" fill-opacity=".14" stroke="#4285f4" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="55" cy="95" r="38" fill="#19a79e" fill-opacity=".14" stroke="#19a79e" stroke-width="1.8"/>
+<g style="mix-blend-mode:multiply"><circle cx="232" cy="282" r="44" fill="url(#gmpHeat)"/><circle cx="268" cy="300" r="34" fill="url(#gmpHeat)"/><circle cx="212" cy="312" r="28" fill="url(#gmpHeat)"/><circle cx="254" cy="255" r="26" fill="url(#gmpHeat)"/><circle cx="238" cy="290" r="16" fill="url(#gmpHeat)"/></g>
+<g font-family="Roboto, Arial, sans-serif" font-weight="600" paint-order="stroke" stroke="#fff" stroke-width="2.5" stroke-linejoin="round">
+<text x="278" y="218" font-size="7.5" fill="#6d5a1f" text-anchor="middle">Market St</text>
+<text transform="translate(183 340) rotate(-90)" font-size="7.5" fill="#6d5a1f">5th Ave</text>
+<text font-size="6.5" fill="#70757a"><textPath href="#gmpHarborRd" xlink:href="#gmpHarborRd" startOffset="54%">Harbor Rd</textPath></text>
+<text x="58" y="181" font-size="7" fill="#2e7d32" text-anchor="middle">Riverside Park</text>
+<text x="336" y="346" font-size="7" font-style="italic" fill="#3f7bb5" text-anchor="middle">Harbor Bay</text>
+<text x="307" y="178" font-size="6.5" font-weight="800" fill="#1a56c9" text-anchor="middle" letter-spacing=".4">DELIVERY ZONE</text>
+</g>
+<path d="M85 320H118V262H180V224" fill="none" stroke="#1967d2" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M85 320H118V262H180V224" fill="none" stroke="#4285f4" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="85" cy="320" r="13" fill="#4285f4" fill-opacity=".18"/>
+<circle cx="85" cy="320" r="6" fill="#4285f4" stroke="#fff" stroke-width="2.5" filter="url(#gmpPinShadow)"/>
+<g transform="translate(338 232)" filter="url(#gmpPinShadow)"><circle r="15" fill="#4285f4" fill-opacity=".25"/><circle r="11" fill="#4285f4" stroke="#fff" stroke-width="2"/><text y="3.5" font-family="Roboto, Arial, sans-serif" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">8</text></g>
+<g transform="translate(55 95)" filter="url(#gmpPinShadow)"><use href="#gmpPin" xlink:href="#gmpPin" fill="#19a79e" stroke="#0e7a73" stroke-width="1"/><text y="-17.5" font-family="Roboto, Arial, sans-serif" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">2</text></g>
+<g transform="translate(318 122)" filter="url(#gmpPinShadow)"><use href="#gmpPin" xlink:href="#gmpPin" fill="#7259ef" stroke="#4f3bc2" stroke-width="1"/><text y="-17.5" font-family="Roboto, Arial, sans-serif" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">3</text></g>
+<g transform="translate(272 88) scale(.72)" filter="url(#gmpPinShadow)"><use href="#gmpPin" xlink:href="#gmpPin" fill="#ea4335" stroke="#b31412" stroke-width="1.2"/><circle cy="-21" r="4" fill="#b31412"/></g>
+<g transform="translate(66 262)" filter="url(#gmpPinShadow)"><use href="#gmpPin" xlink:href="#gmpPin" fill="#f29900" stroke="#c26401" stroke-width="1"/><text y="-17.5" font-family="Roboto, Arial, sans-serif" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">4</text></g>
+<g transform="translate(180 215) scale(1.25)" filter="url(#gmpPinShadow)"><use href="#gmpPin" xlink:href="#gmpPin" fill="#ea4335" stroke="#b31412" stroke-width="1"/><text y="-17.5" font-family="Roboto, Arial, sans-serif" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">1</text></g>
+</svg>

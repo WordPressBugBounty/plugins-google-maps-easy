@@ -415,16 +415,6 @@ class installerGmp
 
     installerDbUpdaterGmp::runUpdate();
   }
-  public static function setUsed()
-  {
-    update_option('gmp_plug_was_used', 1);
-  }
-  public static function isUsed()
-  {
-    // No welcome page for now
-    return true;
-    return (bool) get_option('gmp_plug_was_used');
-  }
   /**
    * Create pages for plugin usage
    */
@@ -467,18 +457,49 @@ class installerGmp
 
       delete_option('gmp_def_icons_installed');
       delete_option('gmp_db_version');
+      delete_option('gmp_default_page_visited');
+      delete_option('gmp_orphaned_data_cleaned');
       delete_option($wpPrefix . 'gmp_db_installed');
-      //delete_option(GMP_DB_PREF. 'plug_was_used');
     }
   }
   public static function deactivate() {}
+  /**
+   * Older versions did not remove category links together with markers. Drop only links
+   * whose marker is gone: a removed marker never comes back (CSV import always creates
+   * markers with new ids), so this cannot affect live data.
+   * Everything that may still become valid is intentionally kept: markers/figures of
+   * removed maps (map CSV import restores original map ids) and references to categories
+   * (markers may be imported before their categories are recreated).
+   *
+   * @return array Number of removed rows.
+   */
+  public static function cleanupOrphanedData()
+  {
+    global $wpdb;
+    $p = $wpdb->prefix;
+    $report = [];
+    if (!dbGmp::exist('gmp_markers') || !dbGmp::exist('gmp_marker_groups_relation')) {
+      return $report;
+    }
+    $report['relations_without_marker'] = (int) $wpdb->query("DELETE r FROM {$p}gmp_marker_groups_relation r LEFT JOIN {$p}gmp_markers mk ON mk.id = r.marker_id WHERE mk.id IS NULL");
+    return $report;
+  }
   public static function update()
   {
     global $wpdb;
+    // One-time cleanup, run from an admin page load only (not front-end or AJAX requests).
+    if (is_admin() && !wp_doing_ajax() && !get_option('gmp_orphaned_data_cleaned')) {
+      $report = self::cleanupOrphanedData();
+      update_option('gmp_orphaned_data_cleaned', ['time' => time(), 'version' => GMP_VERSION_PLUGIN, 'removed' => $report], false);
+    }
     $wpPrefix = $wpdb->prefix; /* add to 0.0.3 Versiom */
     $currentVersion = get_option($wpPrefix . 'gmp_db_version', 0);
     $installed = (int) get_option($wpPrefix . 'gmp_db_installed', 0);
     if (!$currentVersion || version_compare(GMP_VERSION_PLUGIN, $currentVersion, '>')) {
+      if ($currentVersion) {
+        // Existing site upgrading: only brand new installs get the one-time Overview landing.
+        update_option('gmp_default_page_visited', 1);
+      }
       self::init();
       $tableName = $wpdb->prefix . 'gmp_modules';
       if (empty($wpdb->get_var('SELECT code FROM ' . $tableName . ' WHERE code = "gmap_widget"'))) {

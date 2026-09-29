@@ -139,12 +139,14 @@ gmpGoogleMap.prototype._setMinZoomLevel = function () {
   var curZoom = this.getZoom();
   var minZoom = parseInt(this._mapParams.zoom_min) ? parseInt(this._mapParams.zoom_min) : null;
   this.getRawMapInstance().setOptions({ minZoom: minZoom });
-  if (curZoom < minZoom) this.getRawMapInstance().setOptions({ zoom: minZoom });
+  // Compare only against a real limit: in JS "curZoom < null" / "zoom > null" coerce null to 0.
+  if (minZoom !== null && curZoom < minZoom) this.getRawMapInstance().setOptions({ zoom: minZoom });
 };
 gmpGoogleMap.prototype._setMaxZoomLevel = function () {
   var maxZoom = parseInt(this._mapParams.zoom_max) ? parseInt(this._mapParams.zoom_max) : null;
   this.getRawMapInstance().setOptions({ maxZoom: maxZoom });
-  if (this.getRawMapInstance().zoom > maxZoom) this.getRawMapInstance().setOptions({ zoom: maxZoom });
+  // Without this guard an unset max zoom reset the map zoom to null (grey map without Map ID).
+  if (maxZoom !== null && this.getRawMapInstance().zoom > maxZoom) this.getRawMapInstance().setOptions({ zoom: maxZoom });
 };
 gmpGoogleMap.prototype._fixZoomLevel = function () {
   var eventHandle = this._getEventListenerHandle('zoom_changed', 'zoomChanged');

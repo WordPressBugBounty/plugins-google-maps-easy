@@ -450,3 +450,166 @@ div.supsysticOverviewACFormOverlay button.button.button-hero,
   font-weight: normal;
   font-size: 12px;
 }
+
+/* Modern shared shell for every Easy Google Maps admin module. */
+.supsystic-plugin .supsystic-container.supsystic-overview {
+  float: none;
+  width: auto;
+  padding-left: 20px;
+}
+
+.supsystic-plugin .supsystic-content .supsystic-navigation {
+  z-index: 20;
+  width: 75px;
+  margin-right: 10px;
+  padding: 8px 6px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 12px 0 0 12px;
+  background: linear-gradient(180deg, #26384c 0%, #1d2b3c 100%);
+  box-shadow: 0 14px 34px rgba(23, 39, 55, .16);
+}
+
+.supsystic-plugin .supsystic-navigation ul {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.supsystic-plugin .supsystic-navigation ul li,
+.supsystic-plugin .supsystic-navigation ul li:hover,
+.supsystic-plugin .supsystic-navigation ul li.active {
+  margin: 0;
+  padding: 0;
+  border-radius: 9px;
+  background: transparent;
+}
+
+.supsystic-plugin .supsystic-navigation ul li a {
+  position: relative;
+  display: flex;
+  box-sizing: border-box;
+  min-height: 62px;
+  padding: 8px 3px 7px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 5px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  color: #c9d5e2 !important;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  box-shadow: none;
+  transition: color .16s ease, background-color .16s ease, border-color .16s ease, transform .16s ease, box-shadow .16s ease;
+}
+
+.supsystic-plugin .supsystic-navigation ul li a:hover,
+.supsystic-plugin .supsystic-navigation ul li a:focus-visible {
+  border-color: rgba(74, 232, 234, .2);
+  background: rgba(255, 255, 255, .08);
+  color: #fff !important;
+  outline: 0;
+  transform: translateY(-1px);
+}
+
+.supsystic-plugin .supsystic-navigation ul li.active a {
+  border-color: rgba(74, 232, 234, .3);
+  background: linear-gradient(145deg, rgba(74, 232, 234, .22), rgba(55, 125, 255, .16));
+  color: #fff !important;
+}
+
+.supsystic-plugin .supsystic-navigation ul li a i {
+  display: inline-flex !important;
+  width: 30px;
+  height: 30px;
+  margin: 0 auto !important;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .07);
+  color: #fff;
+  font-size: 17px !important;
+  line-height: 1 !important;
+  transition: color .16s ease, background-color .16s ease, transform .16s ease;
+}
+
+.supsystic-plugin .supsystic-navigation ul li a i:before { display: block; line-height: 1; }
+
+.supsystic-plugin .supsystic-navigation ul li a:hover i,
+.supsystic-plugin .supsystic-navigation ul li a:focus-visible i,
+.supsystic-plugin .supsystic-navigation ul li.active a i {
+  background: rgba(74, 232, 234, .14);
+  color: #7ff8ef;
+}
+
+.supsystic-plugin .supsystic-navigation ul li a:hover i,
+.supsystic-plugin .supsystic-navigation ul li a:focus-visible i { transform: scale(1.06); }
+
+.supsystic-plugin .supsystic-footer-wrapper {
+  box-sizing: border-box;
+  clear: both;
+  width: calc(100% - 75px);
+  min-height: 48px;
+  margin-left: 75px;
+  padding: 10px 14px;
+  gap: 16px;
+  background: #263546;
+  color: #fff;
+}
+
+.supsystic-plugin .supsystic-breadcrumbs {
+  display: flex;
+  min-height: 34px;
+  padding: 8px 12px;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.supsystic-plugin .supsystic-breadcrumbs a,
+.supsystic-plugin .supsystic-breadcrumbs span {
+  color: #fff !important;
+  text-decoration: none;
+}
+
+.supsystic-plugin .supsystic-breadcrumbs a:hover { color: #4ae8ea !important; }
+
+.supsystic-plugin .supsystic-footer-wrapper a { color: #4ae8ea !important; }
+.supsystic-plugin .supsystic-footer-wrapper img { display: block; width: auto; max-height: 25px; }
+
+@media screen and (max-width: 810px) {
+  .supsystic-plugin .supsystic-content .supsystic-container { margin-left: 40px; }
+
+  .supsystic-plugin .supsystic-content .supsystic-navigation {
+    width: 40px;
+    padding: 6px 4px;
+    border-radius: 9px 0 0 9px;
+  }
+
+  .supsystic-plugin .supsystic-navigation ul { gap: 4px; }
+
+  .supsystic-plugin .supsystic-navigation ul li a {
+    min-height: 42px;
+    padding: 5px 2px;
+    overflow: hidden;
+    color: transparent !important;
+    font-size: 0;
+  }
+
+  .supsystic-plugin .supsystic-navigation ul li a i {
+    width: 28px;
+    height: 28px;
+    font-size: 15px !important;
+  }
+
+  .supsystic-breadcrumbs { margin-left: 40px; }
+
+  .supsystic-plugin .supsystic-footer-wrapper { width: calc(100% - 40px); margin-left: 40px; flex-wrap: wrap; }
+}

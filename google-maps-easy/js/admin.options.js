@@ -17,8 +17,16 @@ jQuery(document).ready(function () {
   jQuery('.overview-section-btn').eq(0).trigger('click');
   if (typeof gmpActiveTab != 'undefined' && gmpActiveTab != 'main_page' && jQuery('#toplevel_page_' + gmpMainSlug).hasClass('wp-has-current-submenu')) {
     var subMenus = jQuery('#toplevel_page_' + gmpMainSlug).find('.wp-submenu li');
+    var activeTabSuffix = '&tab=' + gmpActiveTab;
     subMenus.removeClass('current').each(function () {
-      if (jQuery(this).find('a[href$="&tab=' + gmpActiveTab + '"]').length) {
+      // Compare strings instead of building a selector from the request value.
+      var isActive = jQuery(this)
+        .find('a[href]')
+        .filter(function () {
+          var href = this.getAttribute('href');
+          return href.slice(-activeTabSuffix.length) === activeTabSuffix;
+        }).length;
+      if (isActive) {
         jQuery(this).addClass('current');
       }
     });
@@ -177,12 +185,40 @@ function tooltipsterize() {
       if (title) {
         jQuery(this).attr('title', '');
         jQuery(this).attr('data-tooltip-content', '#tooltip_' + counter + '');
-        var html = '<span class="tooltipContent" id="tooltip_' + counter + '">' + title + '</span>';
+        var html = '<span class="tooltipContent" id="tooltip_' + counter + '">' + gmpSanitizeTooltipHtml(title) + '</span>';
         jQuery('.tooltip_templates').append(html);
       }
     });
   jQuery('body').find('.tooltipContent').show();
   jQuery('[data-tooltip-content]').tooltipster(tooltipsterSettings);
+}
+/**
+ * Tooltip titles may contain simple markup (links, <br>, images), but a title attribute
+ * is decoded by the browser, so treat it as untrusted: parse it in an inert document
+ * and drop scripting elements, event handlers and script URLs before inserting it.
+ */
+function gmpSanitizeTooltipHtml(html) {
+  var doc = new DOMParser().parseFromString('<body>' + html + '</body>', 'text/html');
+  var blocked = 'script,style,iframe,frame,frameset,object,embed,applet,link,meta,base,form,input,button,textarea,select,svg,math,template,noscript';
+  jQuery(doc.body).find(blocked).remove();
+  jQuery(doc.body)
+    .find('*')
+    .each(function () {
+      for (var i = this.attributes.length - 1; i >= 0; i--) {
+        var name = this.attributes[i].name.toLowerCase(),
+          value = this.attributes[i].value.replace(/[\s\u0000-\u001F]+/g, '').toLowerCase();
+        if (
+          name.indexOf('on') === 0 ||
+          name === 'style' ||
+          name === 'srcdoc' ||
+          ((name === 'href' || name === 'src' || name === 'xlink:href' || name === 'action' || name === 'formaction') &&
+            (value.indexOf('javascript:') === 0 || value.indexOf('vbscript:') === 0 || (value.indexOf('data:') === 0 && value.indexOf('data:image/') !== 0)))
+        ) {
+          this.removeAttribute(this.attributes[i].name);
+        }
+      }
+    });
+  return doc.body.innerHTML;
 }
 function changeAdminFormGmp(formId) {
   if (jQuery.inArray(formId, gmpAdminFormChanged) == -1) gmpAdminFormChanged.push(formId);

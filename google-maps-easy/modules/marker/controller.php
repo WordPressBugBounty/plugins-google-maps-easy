@@ -218,13 +218,13 @@ class markerControllerGmp extends controllerGmp
    */
   public function getNoncedMethods()
   {
-    return ['save', 'removeMarker', 'getMarkerForm', 'getListForTable', 'getMarker', 'removeList', 'getMapMarkers', 'updatePos'];
+    return ['save', 'removeMarker', 'getMarkerForm', 'getListForTable', 'getListForTbl', 'getMarker', 'removeList', 'getMapMarkers', 'updatePos', 'findAddress', 'saveFindAddressStat'];
   }
   public function getPermissions()
   {
     return [
       GMP_USERLEVELS => [
-        GMP_ADMIN => ['save', 'removeMarker', 'getMarkerForm', 'getListForTable', 'getMarker', 'removeList', 'getMapMarkers', 'updatePos'],
+        GMP_ADMIN => ['save', 'removeMarker', 'getMarkerForm', 'getListForTable', 'getListForTbl', 'getMarker', 'removeList', 'getMapMarkers', 'updatePos', 'findAddress', 'saveFindAddressStat'],
       ],
     ];
   }

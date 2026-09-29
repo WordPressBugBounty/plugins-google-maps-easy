@@ -295,10 +295,23 @@ class markerModelGmp extends modelGmp
     }
     return $markers;
   }
+  /**
+   * Category links live in a separate table; drop them together with the markers.
+   */
+  private function _removeGroupRelations($markerIds)
+  {
+    $markerIds = array_filter(array_map('intval', (array) $markerIds));
+    if (empty($markerIds)) {
+      return;
+    }
+    global $wpdb;
+    $wpdb->query("DELETE FROM {$wpdb->prefix}gmp_marker_groups_relation WHERE marker_id IN (" . implode(',', $markerIds) . ')');
+  }
   public function removeMarker($markerId)
   {
     dispatcherGmp::doAction('beforeMarkerRemove', $markerId);
     global $wpdb;
+    $this->_removeGroupRelations($markerId);
     $tableName = $wpdb->prefix . 'gmp_markers';
     $data_where = [
       'id' => $markerId,
@@ -309,6 +322,7 @@ class markerModelGmp extends modelGmp
   {
     $ids = array_map('intval', $ids);
     global $wpdb;
+    $this->_removeGroupRelations($ids);
     foreach ($ids as $id) {
       $tableName = $wpdb->prefix . 'gmp_markers';
       $data_where = [
@@ -346,6 +360,7 @@ class markerModelGmp extends modelGmp
   public function removeMarkersFromMap($mapId)
   {
     global $wpdb;
+    $this->_removeGroupRelations($wpdb->get_col($wpdb->prepare("SELECT id FROM {$wpdb->prefix}gmp_markers WHERE map_id = %d", $mapId)));
     $tableName = $wpdb->prefix . 'gmp_markers';
     $data_where = [
       'map_id' => $mapId,

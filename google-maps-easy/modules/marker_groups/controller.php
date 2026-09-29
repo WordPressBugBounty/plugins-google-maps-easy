@@ -121,13 +121,13 @@ class marker_groupsControllerGmp extends controllerGmp
   }
   public function getNoncedMethods()
   {
-    return ['getAllMarkerGroups', 'save', 'remove', 'removeGroup', 'saveMarkerGroupsOptions'];
+    return ['getAllMarkerGroups', 'save', 'remove', 'removeGroup', 'clear', 'updateMarkerGroups', 'saveMarkerGroupsOptions'];
   }
   public function getPermissions()
   {
     return [
       GMP_USERLEVELS => [
-        GMP_ADMIN => ['getAllMarkerGroups', 'save', 'remove', 'removeGroup', 'saveMarkerGroupsOptions'],
+        GMP_ADMIN => ['getAllMarkerGroups', 'save', 'remove', 'removeGroup', 'clear', 'updateMarkerGroups', 'saveMarkerGroupsOptions'],
       ],
     ];
   }

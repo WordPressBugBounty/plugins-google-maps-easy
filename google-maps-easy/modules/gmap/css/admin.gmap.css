@@ -343,3 +343,35 @@
   background: #4ae8ea !important;
   border-color: #4ae8ea !important;
 }
+.gmpMapIdNotice {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-left: 3px solid #2271b1;
+  background: #f0f6fc;
+  color: #1d2327;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.gmpMapIdNotice p {
+  margin: 0 0 8px;
+  overflow: visible;
+  white-space: normal;
+  text-overflow: clip;
+}
+.gmpMapIdNotice ol {
+  margin: 0 0 0 18px;
+}
+.gmpMapIdNotice li {
+  margin-bottom: 4px;
+}
+.gmpStylizationCloudBtns .button {
+  margin-right: 6px;
+}
+.gmpStylizationCloudBtns .button.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+#gmpStylizationCloudMsg {
+  color: #008a20;
+  font-weight: 600;
+}
