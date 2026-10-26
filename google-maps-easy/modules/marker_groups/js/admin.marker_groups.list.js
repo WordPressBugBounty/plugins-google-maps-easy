@@ -87,11 +87,11 @@ jQuery(document).ready(function () {
     }
     return false;
   });
-  jQuery('#gmpMgrTblSearchTxt').on('keyup', function () {
-    var search = jQuery(this).val();
+  jQuery('#gmpMgrTblSearchTxt').on('keyup search', function () {
+    var search = jQuery.trim(jQuery(this).val() || '').toLowerCase();
 
     tbl.tree('getNodeByCallback', function (node) {
-      if (node.name.indexOf(search) != -1) {
+      if (String(node.name).toLowerCase().indexOf(search) != -1) {
         jQuery(node.element).find('.jqtree-element').show();
       } else {
         jQuery(node.element).find('.jqtree-element').hide();

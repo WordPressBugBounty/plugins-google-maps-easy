@@ -15,11 +15,18 @@ class markerModelGmp extends modelGmp
     $marker['title'] = isset($marker['title']) ? trim($marker['title']) : '';
     $marker['coord_x'] = isset($marker['coord_x']) ? (float) $marker['coord_x'] : 0;
     $marker['coord_y'] = isset($marker['coord_y']) ? (float) $marker['coord_y'] : 0;
-    if (!empty($marker['period_date_from']) && strtotime($marker['period_date_from'])) {
-      $marker['period_from'] = date('Y-m-d', strtotime($marker['period_date_from']));
+    // Display period (PRO): the admin form sends period_date_*, the KML import sends period_*.
+    // Only the keys that were sent are saved, so other callers never reset an existing period.
+    $periodData = [];
+    foreach (['from', 'to'] as $edge) {
+      if (array_key_exists('period_date_' . $edge, $marker)) {
+        $periodData['period_' . $edge] = $this->preparePeriodDate($marker['period_date_' . $edge], $edge);
+      } elseif (array_key_exists('period_' . $edge, $marker)) {
+        $periodData['period_' . $edge] = $this->preparePeriodDate($marker['period_' . $edge], $edge);
+      }
     }
-    if (!empty($marker['period_date_to']) && strtotime($marker['period_date_to'])) {
-      $marker['period_to'] = date('Y-m-d', strtotime($marker['period_date_to']));
+    if (!$this->hasPeriodColumns()) {
+      $periodData = [];
     }
     $update = (bool) $id;
     if (!empty($marker['title'])) {
@@ -79,6 +86,7 @@ class markerModelGmp extends modelGmp
         if (!empty($marker['sort_order'])) {
           $data_update['sort_order'] = $marker['sort_order'];
         }
+        $data_update = array_merge($data_update, $periodData);
         $data_where = [
           'id' => $id,
         ];
@@ -121,20 +129,28 @@ class markerModelGmp extends modelGmp
         dispatcherGmp::doAction('beforeMarkerInsert', $marker);
 
         global $wpdb;
+        // 0 when the insert fails: afterMarkerInsert below got an undefined variable
+        $dbResId = 0;
         $tableName = $wpdb->prefix . 'gmp_markers';
-        $dbRes = $wpdb->insert($tableName, [
-          'title' => $marker['title'],
-          'description' => $marker['description'],
-          'icon' => $marker['icon'],
-          'address' => $marker['address'],
-          'coord_x' => $marker['coord_x'],
-          'coord_y' => $marker['coord_y'],
-          'params' => $marker['params'],
-          'map_id' => $marker['map_id'],
-          'marker_group_id' => $marker['marker_group_id'],
-          'create_date' => $marker['create_date'],
-          'sort_order' => !empty($marker['sort_order']) ? $marker['sort_order'] : '',
-        ]);
+        $dbRes = $wpdb->insert(
+          $tableName,
+          array_merge(
+            [
+              'title' => $marker['title'],
+              'description' => isset($marker['description']) ? $marker['description'] : '',
+              'icon' => $marker['icon'],
+              'address' => isset($marker['address']) ? $marker['address'] : '',
+              'coord_x' => $marker['coord_x'],
+              'coord_y' => $marker['coord_y'],
+              'params' => $marker['params'],
+              'map_id' => $marker['map_id'],
+              'marker_group_id' => $marker['marker_group_id'],
+              'create_date' => $marker['create_date'],
+              'sort_order' => !empty($marker['sort_order']) ? $marker['sort_order'] : '',
+            ],
+            $periodData,
+          ),
+        );
         if ($dbRes) {
           $dbResId = $wpdb->insert_id;
         }
@@ -198,6 +214,35 @@ class markerModelGmp extends modelGmp
     $row = $wpdb->get_row("SELECT * FROM {$wpdb->prefix}gmp_markers WHERE " . $wpdb->prepare('title = %s', $title), ARRAY_A);
     return $this->_afterGet($row);
   }
+  public function hasPeriodColumns()
+  {
+    static $hasColumns = null;
+    if ($hasColumns === null) {
+      global $wpdb;
+      $hasColumns = (bool) $wpdb->get_var("SHOW COLUMNS FROM `{$wpdb->prefix}gmp_markers` LIKE 'period_to'");
+    }
+    return $hasColumns;
+  }
+  /**
+   * Period date/time as "Y-m-d H:i:s" in the site's time, null for an empty or wrong value.
+   * Accepts the datetime-local field ("2026-06-01T10:30"), the old date picker ("01-06-2026") and DB values.
+   */
+  public function preparePeriodDate($value, $edge)
+  {
+    $value = trim((string) $value);
+    if ($value === '' || strpos($value, '0000-00-00') === 0) {
+      return null;
+    }
+    $time = strtotime(str_replace('T', ' ', $value));
+    if (!$time) {
+      return null;
+    }
+    // A date without time: "to" lasts until the end of that day
+    if ($edge === 'to' && !preg_match('/\d{1,2}:\d{2}/', $value)) {
+      return date('Y-m-d 23:59:59', $time);
+    }
+    return date('Y-m-d H:i:s', $time);
+  }
   public function _afterGet($marker, $widthMapData = false, $withoutIcons = false)
   {
     if (!empty($marker)) {
@@ -221,7 +266,8 @@ class markerModelGmp extends modelGmp
 
       $siteUrl = uriGmp::isHttps() ? uriGmp::makeHttps(GMP_SITE_URL) : GMP_SITE_URL;
       // Go to absolute path as "../wp-content/" will not work on frontend
-      $marker['description'] = str_replace('../wp-content/', $siteUrl . 'wp-content/', $marker['description']);
+      // (string): the column may hold NULL, str_replace() with null is deprecated since PHP 8.1
+      $marker['description'] = str_replace('../wp-content/', $siteUrl . 'wp-content/', (string) $marker['description']);
       //Replace site url in markers descriptions frontend.
       $marker['description'] = str_replace('GMP_SITE_URL', $siteUrl, $marker['description']);
 
@@ -391,9 +437,10 @@ class markerModelGmp extends modelGmp
     global $wpdb;
     if (!empty($search)) {
       if ($mapId) {
-        $count = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) AS total FROM {$wpdb->prefix}gmp_markers WHERE map_id = %s AND (id = %s OR label = %s)", $mapId, $search, $search));
+        // Markers have a title, not a label column
+        $count = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) AS total FROM {$wpdb->prefix}gmp_markers WHERE map_id = %s AND (id = %s OR title = %s)", $mapId, $search, $search));
       } else {
-        $count = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) AS total FROM {$wpdb->prefix}gmp_markers WHERE (id = %s OR label = %s)", $search, $search));
+        $count = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) AS total FROM {$wpdb->prefix}gmp_markers WHERE (id = %s OR title = %s)", $search, $search));
       }
     } else {
       if ($mapId) {
@@ -407,10 +454,12 @@ class markerModelGmp extends modelGmp
   public function getListForTblBySearch($search, $limitStart, $rowsLimit, $mapId)
   {
     global $wpdb;
+    // In the order of the list (sort_order): ordered by id, the list loading saved the id order back
+    // (markerControllerGmp::_prepareListForTbl) and the markers dragged in the list returned to their places
     if (!empty($search)) {
-      $data = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}gmp_markers WHERE " . $wpdb->prepare(' map_id = %s AND (id = %s OR label = %s) ORDER BY id ASC LIMIT %1s,%1s', $mapId, $search, $search, (int) $limitStart, (int) $rowsLimit), ARRAY_A);
+      $data = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}gmp_markers WHERE " . $wpdb->prepare(' map_id = %s AND (id = %s OR title = %s) ORDER BY sort_order ASC, id ASC LIMIT %1s,%1s', $mapId, $search, $search, (int) $limitStart, (int) $rowsLimit), ARRAY_A);
     } else {
-      $data = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}gmp_markers WHERE " . $wpdb->prepare(' map_id = %s ORDER BY id ASC LIMIT %1s,%1s', $mapId, (int) $limitStart, (int) $rowsLimit), ARRAY_A);
+      $data = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}gmp_markers WHERE " . $wpdb->prepare(' map_id = %s ORDER BY sort_order ASC, id ASC LIMIT %1s,%1s', $mapId, (int) $limitStart, (int) $rowsLimit), ARRAY_A);
     }
     foreach ($data as $i => &$m) {
       $data[$i] = $this->_afterGet($data[$i]);

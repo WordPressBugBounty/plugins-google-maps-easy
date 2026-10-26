@@ -25,6 +25,8 @@ class csvgeneratorGmp
       }
       $strData = implode($this->_enclosure, $rows);
     }
+    // UTF-8 BOM: without it Excel opens the file in the Windows code page and non-Latin text is unreadable
+    $strData = "\xEF\xBB\xBF" . $strData;
     filegeneratorGmp::_($this->_filename, $strData, 'csv')->generate();
   }
   public function setDelimiter($delimiter)

@@ -72,7 +72,8 @@ class marker_groupsModelGmp extends modelGmp
         $tableName = $wpdb->prefix . 'gmp_markers';
         $data_update = ['marker_group_id' => 0];
         $data_where = ['marker_group_id' => $markerGroupId];
-        return $res = $wpdb->update($tableName, $data_update, $data_where);
+        // The count of updated markers is 0 for most categories, the category itself is removed
+        return $wpdb->update($tableName, $data_update, $data_where) !== false;
       }
     } else {
       $this->pushError(__('Invalid ID', GMP_LANG_CODE));
@@ -121,11 +122,12 @@ class marker_groupsModelGmp extends modelGmp
       $data_where = ['id' => (int) $params['id']];
       $data_update = [
         'title' => !empty($data['title']) ? $data['title'] : '',
-        'parent' => !empty($data['parent']) ? $data['parent'] : '',
+        'parent' => !empty($data['parent']) ? (int) $data['parent'] : 0,
         'description' => !empty($data['description']) ? $data['description'] : '',
         'params' => !empty($data['params']) ? $data['params'] : '',
       ];
-      return $res = $wpdb->update($tableName, $data_update, $data_where);
+      // 0 rows for a save without changes is not an error
+      return $wpdb->update($tableName, $data_update, $data_where) !== false;
     }
     return false;
   }
@@ -160,6 +162,22 @@ class marker_groupsModelGmp extends modelGmp
     }
     return false;
   }
+  /**
+   * "Clear All" on the categories page. The base model clear() goes through dbGmp, which runs no queries:
+   * nothing was removed and the button showed "Database error detected".
+   */
+  public function clear()
+  {
+    global $wpdb;
+    if ($wpdb->query("DELETE FROM {$wpdb->prefix}gmp_marker_groups") === false) {
+      $this->pushError(__('Database error detected', GMP_LANG_CODE));
+      return false;
+    }
+    // Markers keep existing, they just lose their categories (as for a single removal)
+    $wpdb->query("DELETE FROM {$wpdb->prefix}gmp_marker_groups_relation WHERE groups_id <> 0");
+    $wpdb->query("UPDATE {$wpdb->prefix}gmp_markers SET marker_group_id = 0 WHERE marker_group_id <> 0");
+    return true;
+  }
   public function saveNewMarkerGroup($params)
   {
     if (!empty($params)) {
@@ -169,8 +187,8 @@ class marker_groupsModelGmp extends modelGmp
         $tableName = $wpdb->prefix . 'gmp_marker_groups';
         $dbRes = $wpdb->insert($tableName, [
           'title' => $insertData['title'],
-          'parent' => $insertData['parent'],
-          'description' => $insertData['description'],
+          'parent' => isset($insertData['parent']) ? (int) $insertData['parent'] : 0,
+          'description' => isset($insertData['description']) ? $insertData['description'] : '',
           'params' => $insertData['params'],
         ]);
         if ($dbRes) {
@@ -307,7 +325,8 @@ class marker_groupsModelGmp extends modelGmp
   }
   public function saveMarkerGroupsOptions($options)
   {
-    return update_option('gmp_marker_groups_opts', $options);
+    // update_option() returns false for unchanged options too
+    return get_option('gmp_marker_groups_opts', []) === $options || update_option('gmp_marker_groups_opts', $options);
   }
   public function _updateTitleForTreeView($title, $group, $allMarkerGroups)
   {

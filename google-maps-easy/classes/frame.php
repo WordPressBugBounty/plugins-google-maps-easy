@@ -200,7 +200,32 @@ class frameGmp
       return false;
     }
     $method = new ReflectionMethod($controller, $action);
-    return $method->isPublic() && !$method->isStatic();
+    if (!$method->isPublic() || $method->isStatic()) {
+      return false;
+    }
+    // List/remove/clear actions inherited from controllerGmp work only for modules built for them (a model
+    // with its own table), so a controller has to declare them: removeGroup on icons was a fatal error
+    if ($method->getDeclaringClass()->getName() === 'controllerGmp') {
+      return in_array($action, $this->_getDeclaredActions($controller), true);
+    }
+    return true;
+  }
+  /**
+   * Actions a controller names in getNoncedMethods() and getPermissions(), lowercase.
+   */
+  protected function _getDeclaredActions($controller)
+  {
+    $actions = (array) $controller->getNoncedMethods();
+    $permissions = (array) $controller->getPermissions();
+    if (!empty($permissions[GMP_METHODS]) && is_array($permissions[GMP_METHODS])) {
+      $actions = array_merge($actions, array_keys($permissions[GMP_METHODS]));
+    }
+    if (!empty($permissions[GMP_USERLEVELS]) && is_array($permissions[GMP_USERLEVELS])) {
+      foreach ($permissions[GMP_USERLEVELS] as $methods) {
+        $actions = array_merge($actions, (array) $methods);
+      }
+    }
+    return array_map('strtolower', $actions);
   }
   /**
    * Actions of the module that visitors without admin rights may call.
@@ -261,6 +286,8 @@ class frameGmp
     if ($res) {
       // Additional check for nonces
       $noncedMethods = array_map('strtolower', (array) $controller->getNoncedMethods());
+      // Data changing actions every controller inherits: a nonce even where the controller does not list them
+      $noncedMethods = array_merge($noncedMethods, ['removegroup', 'clear']);
       if (in_array($action, $noncedMethods, true)) {
         $nonce = isset($_REQUEST['_wpnonce']) ? $_REQUEST['_wpnonce'] : reqGmp::getVar('_wpnonce');
         $nonceAction = is_admin() && !in_array($action, $publicActions, true) ? 'gmp_nonce' : 'gmp_nonce_frontend';

@@ -19,7 +19,7 @@ class supsystic_promoViewGmp extends viewGmp
           'Your map suddenly stopped working and you get the following error?' .
             "<blockquote style='color: gray; font-style: italic;'>Oops! Something went wrong.This page didn't load Google Maps correctly. See the JavaScript console for technical details.</blockquote>" .
             "Please check you browser console, if you'll see such error <blockquote style='color: gray; font-style: italic;'>This site has exceeded its daily quota for maps.</blockquote>" .
-            " - this <a href='//supsystic.com/documentation/create-google-maps-api-key/' target='_blank'>article</a> is written for you and required for reading.",
+            " - this <a href='https://supsystic.com/documentation/create-google-maps-api-key/' target='_blank'>article</a> is written for you and required for reading.",
           GMP_LANG_CODE,
         ),
         $this->getModule()->getMainLink(),

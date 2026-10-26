@@ -155,6 +155,13 @@ class gmapModelGmp extends modelGmp
       // dispatcherGmp::doAction('beforeMapUpdate', $params['id'], $data);
       global $wpdb;
       $tableName = $wpdb->prefix . 'gmp_maps';
+      // Options of modules that are not active now (PRO deactivated) are not in the keys list:
+      // keep them, a save without PRO erased KML layers, directions, custom controls and other PRO settings
+      $savedParams = utilsGmp::unserialize($wpdb->get_var($wpdb->prepare("SELECT params FROM {$tableName} WHERE id = %d", $params['id'])));
+      if (is_array($savedParams)) {
+        $newParams = utilsGmp::unserialize($data['params']);
+        $data['params'] = utilsGmp::serialize(array_merge(array_diff_key($savedParams, array_flip($this->getParamsList())), $newParams));
+      }
       $data_update = ['title' => $data['title'], 'html_options' => $data['html_options'], 'params' => $data['params']];
       $data_where = ['id' => $params['id']];
       $res = $wpdb->update($tableName, $data_update, $data_where);
@@ -259,6 +266,8 @@ class gmapModelGmp extends modelGmp
 
           global $wpdb;
           $tableName = $wpdb->prefix . 'gmp_maps';
+          // Reset for every map: a failed insert must not copy markers into the previous clone
+          $clonedMapId = 0;
           $res = $wpdb->insert($tableName, [
             'title' => $map['title'],
             'html_options' => $map['html_options'],
@@ -274,36 +283,44 @@ class gmapModelGmp extends modelGmp
             $markers = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}gmp_markers WHERE " . $wpdb->prepare('map_id = %s', $mapId) . ' ORDER BY sort_order ASC', ARRAY_A);
             if ($markers) {
               foreach ($markers as $marker) {
+                $sourceMarkerId = (int) $marker['id'];
                 $marker = $this->prepareDataToClone($marker, $clonedMapId, true);
 
                 $tableName = $wpdb->prefix . 'gmp_markers';
-                $dbMarkerRes = $wpdb->insert($tableName, [
-                  'title' => $marker['title'],
-                  'description' => $marker['description'],
-                  'icon' => $marker['icon'],
-                  'address' => $marker['address'],
-                  'coord_x' => $marker['coord_x'],
-                  'coord_y' => $marker['coord_y'],
-                  'params' => $marker['params'],
-                  'map_id' => $clonedMapId,
-                  'marker_group_id' => $marker['marker_group_id'],
-                  'create_date' => $marker['create_date'],
-                  'sort_order' => $marker['sort_order'],
-                ]);
+                $dbMarkerRes = $wpdb->insert(
+                  $tableName,
+                  array_merge(
+                    [
+                      'title' => $marker['title'],
+                      'description' => $marker['description'],
+                      'icon' => $marker['icon'],
+                      'address' => $marker['address'],
+                      'coord_x' => $marker['coord_x'],
+                      'coord_y' => $marker['coord_y'],
+                      'params' => $marker['params'],
+                      'map_id' => $clonedMapId,
+                      'marker_group_id' => $marker['marker_group_id'],
+                      'create_date' => $marker['create_date'],
+                      'sort_order' => $marker['sort_order'],
+                    ],
+                    // Columns of newer versions, copied when the table has them
+                    array_intersect_key($marker, array_flip(['period_from', 'period_to', 'user_id', 'kml_source'])),
+                  ),
+                );
                 if ($dbMarkerRes) {
                   $dbMarkerResId = $wpdb->insert_id;
+                  // All categories of the marker: marker_group_id keeps only the first one
+                  $groupIds = $wpdb->get_col($wpdb->prepare("SELECT groups_id FROM {$wpdb->prefix}gmp_marker_groups_relation WHERE marker_id = %d", $sourceMarkerId));
+                  foreach ((array) $groupIds as $groupId) {
+                    $wpdb->insert($wpdb->prefix . 'gmp_marker_groups_relation', ['marker_id' => $dbMarkerResId, 'groups_id' => (int) $groupId]);
+                  }
                 }
 
                 if (!$dbMarkerRes) {
-                  $this->pushError(frameGmp::_()->getTable('marker')->getErrors());
-                  return $this->haveErrors(); // To break foreach cycle
+                  $this->pushError(__('Database error detected', GMP_LANG_CODE));
+                  return false; // To break foreach cycle
                 }
-                // 	$this->pushError(frameGmp::_()->getTable('marker')->getErrors());
-                // 	return $this->haveErrors();	// To break foreach cycle
-                // }
               }
-            } else {
-              $this->pushError(frameGmp::_()->getTable('marker')->getErrors());
             }
             // Shapes
             if (frameGmp::_()->getModule('shape') && ($shapes = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}gmp_shapes WHERE " . $wpdb->prepare('map_id = %s', $mapId) . ' ORDER BY sort_order ASC', ARRAY_A))) {
@@ -312,53 +329,54 @@ class gmapModelGmp extends modelGmp
 
                 global $wpdb;
                 $tableName = $wpdb->prefix . 'gmp_shapes';
-                $dbRes = $wpdb->insert($tableName, [
-                  'id' => $shape['id'],
-                  'title' => $shape['title'],
-                  'description' => $shape['description'],
-                  'coords' => $shape['coords'],
-                  'type' => $shape['type'],
-                  'map_id' => $shape['map_id'],
-                  'params' => $shape['params'],
-                  'sort_order' => $shape['sort_order'],
-                ]);
+                $dbRes = $wpdb->insert(
+                  $tableName,
+                  array_merge(
+                    [
+                      'title' => $shape['title'],
+                      'description' => $shape['description'],
+                      'coords' => $shape['coords'],
+                      'type' => $shape['type'],
+                      'map_id' => $shape['map_id'],
+                      'params' => $shape['params'],
+                      'sort_order' => $shape['sort_order'],
+                    ],
+                    // Columns of newer versions (PRO), copied when the table has them
+                    array_intersect_key($shape, array_flip(['period_from', 'period_to', 'kml_source'])),
+                  ),
+                );
                 if ($dbRes) {
                   $dbResId = $wpdb->insert_id;
                 }
                 if (!$dbRes) {
-                  $this->pushError(frameGmp::_()->getTable('shape')->getErrors());
-                  return $this->haveErrors(); // To break foreach cycle
+                  $this->pushError(__('Database error detected', GMP_LANG_CODE));
+                  return false; // To break foreach cycle
                 }
-
-                // 	$this->pushError(frameGmp::_()->getTable('shape')->getErrors());
-                // 	return $this->haveErrors();	// To break foreach cycle
-                // }
               }
-            } else {
-              $this->pushError(frameGmp::_()->getTable('shape')->getErrors());
             }
             // Heatmap layer
             if (frameGmp::_()->getModule('heatmap') && ($heatmap = $wpdb->get_row("SELECT * FROM {$wpdb->prefix}gmp_heatmaps WHERE " . $wpdb->prepare('map_id = %s', $mapId), ARRAY_A))) {
               $heatmap = $this->prepareDataToClone($heatmap, $clonedMapId);
 
-              if (!frameGmp::_()->getTable('heatmap')->insert($heatmap)) {
-                $this->pushError(frameGmp::_()->getTable('heatmap')->getErrors());
+              // Not through the table class: its queries go to dbGmp, which does not run them, the heatmap was never copied
+              if (!$wpdb->insert($wpdb->prefix . 'gmp_heatmaps', $heatmap)) {
+                $this->pushError(__('Database error detected', GMP_LANG_CODE));
               }
-            } else {
-              $this->pushError(frameGmp::_()->getTable('heatmap')->getErrors());
             }
           } else {
-            $this->pushError(frameGmp::_()->getTable('map')->getErrors());
+            $this->pushError(__('Database error detected', GMP_LANG_CODE));
           }
         } else {
-          $this->pushError(frameGmp::_()->getTable('map')->getErrors());
+          $this->pushError(__('Invalid Map ID', GMP_LANG_CODE));
         }
       }
     } else {
       $this->pushError(__('Invalid ID', GMP_LANG_CODE));
     }
 
-    return $this->haveErrors();
+    // A map without markers, figures or heatmap pushed an empty error, and this returned haveErrors():
+    // "Done" came from those empty errors and real errors were shown as "Done" too
+    return !$this->haveErrors();
   }
   public function prepareDataToClone($data, $newMapId = false, $date = false)
   {
@@ -380,9 +398,9 @@ class gmapModelGmp extends modelGmp
   }
   public function getMapByTitle($title)
   {
-    $map = frameGmp::_()
-      ->getTable('maps')
-      ->get('*', ['title' => $title], '', 'row');
+    global $wpdb;
+    // The table class queries go to dbGmp::get(), which is a stub
+    $map = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}gmp_maps WHERE title = %s", $title), ARRAY_A);
     if (!empty($map)) {
       $map['html_options'] = utilsGmp::unserialize($map['html_options']);
       $map['params'] = utilsGmp::unserialize($map['params']);
@@ -420,12 +438,9 @@ class gmapModelGmp extends modelGmp
   public function existsId($id)
   {
     if ($id) {
-      $map = frameGmp::_()
-        ->getTable('maps')
-        ->get('*', ['id' => (int) $id], '', 'row');
-      if (!empty($map)) {
-        return true;
-      }
+      global $wpdb;
+      // Through the table class it was always false (dbGmp::get() is a stub): CSV import added existing maps again
+      return (bool) $wpdb->get_var($wpdb->prepare("SELECT id FROM {$wpdb->prefix}gmp_maps WHERE id = %d", $id));
     }
     return false;
   }
@@ -481,7 +496,8 @@ class gmapModelGmp extends modelGmp
   }
   public function getCount($d = [])
   {
-    return frameGmp::_()->getTable('maps')->get('COUNT(*)', $d, '', 'one');
+    global $wpdb;
+    return (int) $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}gmp_maps");
   }
   public function resortMarkers($d = [])
   {
@@ -513,18 +529,11 @@ class gmapModelGmp extends modelGmp
       $shapesList = frameGmp::_()->getModule('shape')->getModel()->getMapShapesIds($mapId);
     }
     if ($shapesList) {
+      global $wpdb;
       $i = 1;
+      // As for markers: through the table class nothing was saved, dragged figures went back after reload
       foreach ($shapesList as $mId) {
-        frameGmp::_()
-          ->getTable('shape')
-          ->update(
-            [
-              'sort_order' => $i++,
-            ],
-            [
-              'id' => $mId,
-            ],
-          );
+        $wpdb->update($wpdb->prefix . 'gmp_shapes', ['sort_order' => $i++], ['id' => (int) $mId]);
       }
     }
     return true;

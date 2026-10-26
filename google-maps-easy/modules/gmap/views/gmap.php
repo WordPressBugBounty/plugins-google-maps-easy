@@ -105,9 +105,21 @@ class gmapViewGmp extends viewGmp
   {
     $mapObj = [];
     $mapMarkersGroupsList = [];
+    // Maps found in the post's shortcodes are prepared (and styled in the head) in advance, one per shortcode.
+    // Only the one prepared for these very parameters is used: blocks are rendered before shortcodes and are not
+    // prepared, so "the first map with this id" gave a block the sizes and settings of a shortcode of the page.
+    $postsParams = $this->getModule()->_mapsInPostsParams;
+    $normalizeParams = function ($list) {
+      $list = array_map('strval', array_filter((array) $list, 'is_scalar'));
+      ksort($list);
+      return $list;
+    };
 
     foreach ($this->_mapsObj as $view_id => $map) {
       if ($map['id'] == $params['id'] && !$map['isDisplayed']) {
+        if (isset($postsParams[$view_id]) && $normalizeParams($postsParams[$view_id]) != $normalizeParams($params)) {
+          continue;
+        }
         $this->_mapsObj[$view_id]['isDisplayed'] = true;
         $mapObj = $this->_mapsObj[$view_id];
         break;
@@ -221,7 +233,8 @@ class gmapViewGmp extends viewGmp
 
     if ($isPro) {
       frameGmp::_()->addScript('gmap.path.decoder', frameGmp::_()->getModule('heatmap')->getModPath() . 'js/path.decoder.js');
-      frameGmp::_()->addScript('frontend.router.js', frameGmp::_()->getModule('heatmap')->getModPath() . 'js/frontend.router.js');
+      // filemtime(): the file belongs to PRO, the default version is the free plugin's one
+      frameGmp::_()->addScript('frontend.router.js', frameGmp::_()->getModule('heatmap')->getModPath() . 'js/frontend.router.js', [], filemtime(frameGmp::_()->getModule('heatmap')->getModDir() . 'js' . DS . 'frontend.router.js'));
       $apiKey = frameGmp::_()->getModule('options')->get('user_api_key');
       frameGmp::_()->addJSVar('frontend.router.js', 'gmpApiKey', $apiKey);
       $routeData = frameGmp::_()->getModule('heatmap')->getModel()->getRouteByMapId($params['id']);
@@ -272,6 +285,12 @@ class gmapViewGmp extends viewGmp
   }
   public function applyShortcodeHtmlParams($mapObj, $params)
   {
+    // width="400px" / width="50%" (shortcode, block, widget): the unit was dropped and the map's own one used,
+    // so a map set in % showed width="400px" at 100%. A number without a unit keeps the map's unit.
+    if (isset($params['width']) && preg_match('/^\s*(\d+(?:\.\d+)?)\s*(px|%)\s*$/i', (string) $params['width'], $match)) {
+      $params['width'] = $match[1];
+      $mapObj['params']['width_units'] = strtolower($match[2]);
+    }
     foreach ($this->_shortCodeHtmlParams as $code) {
       if (isset($params[$code])) {
         if (in_array($code, $this->_paramsCanNotBeEmpty) && empty($params[$code])) {
@@ -416,9 +435,9 @@ class gmapViewGmp extends viewGmp
     $adminGmapEditPath = $this->getModule()->getModPath() . 'js/admin.gmap.edit.js';
     $adminGmapEditFile = $this->getModule()->getModDir() . 'js' . DS . 'admin.gmap.edit.js';
     frameGmp::_()->addScript('admin.gmap.edit', $adminGmapEditPath, [], filemtime($adminGmapEditFile));
-    frameGmp::_()->addScript('admin.marker.edit', frameGmp::_()->getModule('marker')->getModPath() . 'js/admin.marker.edit.js');
+    frameGmp::_()->addScript('admin.marker.edit', frameGmp::_()->getModule('marker')->getModPath() . 'js/admin.marker.edit.js', [], filemtime(frameGmp::_()->getModule('marker')->getModDir() . 'js' . DS . 'admin.marker.edit.js'));
 
-    frameGmp::_()->addStyle('admin.gmap', $this->getModule()->getModPath() . 'css/admin.gmap.css');
+    frameGmp::_()->addStyle('admin.gmap', $this->getModule()->getModPath() . 'css/admin.gmap.css', [], filemtime($this->getModule()->getModDir() . 'css' . DS . 'admin.gmap.css'));
 
     frameGmp::_()->addJSVar('admin.gmap.edit', 'gmpMapShortcode', GMP_SHORTCODE);
     frameGmp::_()->addJSVar('admin.gmap.edit', 'gmpAllStylizationsList', $allStylizationsList);
@@ -471,7 +490,7 @@ class gmapViewGmp extends viewGmp
 
       if ($isPro) {
         frameGmp::_()->addScript('gmap.path.decoder', frameGmp::_()->getModule('heatmap')->getModPath() . 'js/path.decoder.js');
-        frameGmp::_()->addScript('admin.router.js', frameGmp::_()->getModule('heatmap')->getModPath() . 'js/admin.router.js');
+        frameGmp::_()->addScript('admin.router.js', frameGmp::_()->getModule('heatmap')->getModPath() . 'js/admin.router.js', [], filemtime(frameGmp::_()->getModule('heatmap')->getModDir() . 'js' . DS . 'admin.router.js'));
         $apiKey = frameGmp::_()->getModule('options')->get('user_api_key');
         frameGmp::_()->addJSVar('admin.router.js', 'gmpApiKey', $apiKey);
         $routeData = frameGmp::_()->getModule('heatmap')->getModel()->getRouteByMapId($id);

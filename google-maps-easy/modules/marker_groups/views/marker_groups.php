@@ -10,7 +10,7 @@ class marker_groupsViewGmp extends viewGmp
     }
     frameGmp::_()->addStyle('admin.mgr', $this->getModule()->getModPath() . 'css/admin.marker.groups.css');
     frameGmp::_()->getModule('templates')->loadJqTreeView();
-    frameGmp::_()->addScript('admin.mgr.list', $this->getModule()->getModPath() . 'js/admin.marker_groups.list.js');
+    frameGmp::_()->addScript('admin.mgr.list', $this->getModule()->getModPath() . 'js/admin.marker_groups.list.js', [], filemtime($this->getModule()->getModDir() . 'js' . DS . 'admin.marker_groups.list.js'));
     frameGmp::_()->addJSVar('admin.mgr.list', 'mgrTblData', $markerGroups);
     return parent::getContent('mgrAdmin');
   }

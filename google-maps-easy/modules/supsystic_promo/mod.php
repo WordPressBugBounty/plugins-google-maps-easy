@@ -50,7 +50,7 @@ class supsystic_promoGmp extends moduleGmp
     $notices = [
       'user_api_key_msg' => [
         'class' => 'updated notice is-dismissible ' . $class,
-        'html' => sprintf(__("Please, set your own Google API key in Easy Google Maps plugin <a href='%s'>Settings</a>! More info about Maps and API keys you can find <a href='%s' target='_blank'>here</a>.", GMP_LANG_CODE), $settingsLink, '//supsystic.com/google-maps-api-key/'),
+        'html' => sprintf(__("Please, set your own Google API key in Easy Google Maps plugin <a href='%s'>Settings</a>! More info about Maps and API keys you can find <a href='%s' target='_blank'>here</a>.", GMP_LANG_CODE), $settingsLink, 'https://supsystic.com/documentation/create-google-maps-api-key/'),
         'mod' => 'options',
       ],
     ];

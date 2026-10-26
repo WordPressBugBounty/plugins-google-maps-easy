@@ -35,7 +35,7 @@
 								</a>
 								<div id="mgrFontSizeLevelExample" class="mgrFontSizeLevel" style="display: none;">
 									<i class="fa fa-arrows-v mgrMoveHandle"></i>
-									<input type="text" name="options[lvl_font_size][]" placeholder="14px" disabled="disabled" />
+									<input type="text" name="options[lvl_font_size][]" placeholder="14" disabled="disabled" />
 									<a href="#" class="button mgrFontSizeLevelRemoveBtn" title="<?php _e('Remove', GMP_LANG_CODE); ?>">
 										<i class="fa fa-trash-o"></i>
 									</a>

@@ -187,6 +187,7 @@ class reqGmp
         }
         break;
       case 'files':
+        $files = null;
         if (!empty($_FILES['kml_file']) && !empty($_FILES['kml_file']['name'])) {
           $fileInfo = wp_check_filetype(basename($_FILES['kml_file']['name']));
           if (!empty($fileInfo['ext']) && !empty($files['kml_file'])) {

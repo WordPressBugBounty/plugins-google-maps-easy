@@ -161,7 +161,7 @@ class optionsGmp extends moduleGmp
             ],
             'user_api_key' => [
               'label' => __('User API key', GMP_LANG_CODE),
-              'desc' => __("You can use your own Google API key, check the <a href='//supsystic.com/google-maps-api-key/' target='_blank'>instruction</a> how to create it. To use plugin's default API key leave this field blank.", GMP_LANG_CODE),
+              'desc' => __("You can use your own Google API key, check the <a href='https://supsystic.com/documentation/create-google-maps-api-key/' target='_blank'>instruction</a> how to create it. To use plugin's default API key leave this field blank.", GMP_LANG_CODE),
               'def' => '',
               'html' => 'text',
               'attrs' => 'style="width: 300px;"',

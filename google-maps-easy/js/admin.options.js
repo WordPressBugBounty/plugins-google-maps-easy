@@ -494,6 +494,10 @@ function gmpInitMainPromoPopup() {
   if (!GMP_DATA.isPro) {
     var $proOptWnd = gmpGetMainPromoPopup();
 
+    // Values to put back after the popup: without PRO the option is not saved, but it looked turned on
+    jQuery('.gmpProOpt').each(function () {
+      jQuery(this).data('gmpProOptVal', jQuery(this).is(':checkbox') ? this.checked : jQuery(this).val());
+    });
     jQuery('.gmpProOpt').change(function (e) {
       e.stopPropagation();
       var needShow = true,
@@ -504,6 +508,15 @@ function gmpInitMainPromoPopup() {
       }
       if (!needShow) {
         return;
+      }
+      if (isCheck) {
+        this.checked = !!jQuery(this).data('gmpProOptVal');
+        // checkboxHiddenVal(): the value is sent by the hidden field
+        if (jQuery(this).attr('data-hideid')) {
+          jQuery('#' + jQuery(this).attr('data-hideid')).val(this.checked ? 1 : 0);
+        }
+      } else if (jQuery(this).is('select')) {
+        jQuery(this).val(jQuery(this).data('gmpProOptVal'));
       }
       if (isRadio) {
         jQuery('input[name="' + jQuery(this).attr('name') + '"]:first')

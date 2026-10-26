@@ -68,7 +68,7 @@ function gmpInitMapOnPage(mapData) {
   if (mapData.markers && mapData.markers.length) {
     mapData.markers = _gmpPrepareMarkersList(mapData.markers);
 
-    for (var i in mapData.markers) {
+    for (var i = 0; i < mapData.markers.length; i++) {
       mapMarkersIds.push(mapData.markers[i].id);
     }
     if (toeInArray(markerIdToShow, mapMarkersIds) == -1) {

@@ -1,8 +1,7 @@
 var g_gmpCurrentEditMarker = null,
   g_gmpMarkerFormChanged = false,
   g_gmpTinyMceMarkerEditorUpdateBinded = false,
-  g_gmpGrid = jQuery('#gmpMarkersListGrid'),
-  g_gmpGridData = null;
+  g_gmpGrid = jQuery('#gmpMarkersListGrid');
 jQuery(document).ready(function () {
   // Marker Link checkbox - toggles the #link_options submenu.
   // Bound here (not inline onclick) because wp_kses strips onclick= from admin output.
@@ -32,13 +31,14 @@ jQuery(document).ready(function () {
       viewrecords: true,
       emptyrecords: toeLangGmp('You have no markers for now.'),
       loadComplete: function (res) {
-        if (g_gmpGridData === null) g_gmpGridData = res.rows;
         gmpRefreshMapMarkersList(res.rows);
         if (res.rows.length) {
           g_gmpMap.applyZoomTypeAdmin(); // Apply zoom type fit_bounds after all markers load in admin area
         }
         _gmpResizeRightSidebar(jQuery('#gmpMarkersListGrid'));
         jQuery('#gmpMarkersSearchInput').show();
+        // A reload (marker saved or removed) keeps the search
+        gmpFilterMarkersList();
       },
     })
     .jqGrid('sortableRows', {
@@ -61,26 +61,9 @@ jQuery(document).ready(function () {
       },
     });
 
-  // Search by markers name functionality
-  jQuery('#gmpMarkersSearchInput').on('keyup', function (e) {
-    var result = [],
-      value = e.target.value,
-      valueLength = value.length;
-
-    if (valueLength === 0) {
-      console.log('Value length == 0');
-      result = g_gmpGridData;
-    } else {
-      result = g_gmpGridData.filter(function (item) {
-        var result = item.title.substr(0, valueLength) == value;
-        return result;
-      });
-    }
-
-    g_gmpGrid.jqGrid('clearGridData');
-    g_gmpGrid.jqGrid('setGridParam', { datatype: 'local', data: result });
-    g_gmpGrid.trigger('reloadGrid');
-  });
+  // Search by markers name: the list rows are filtered, the markers on the map stay.
+  // The grid used to be switched to the data of the first load, so markers saved later disappeared from the list and the map.
+  jQuery('#gmpMarkersSearchInput').on('keyup search', gmpFilterMarkersList);
   // Markers form functionality
   jQuery('#gmpAddNewMarkerBtn').click(function () {
     var currentEditId = parseInt(jQuery('#gmpMarkerForm input[name="marker_opts[id]"]').val());
@@ -270,6 +253,15 @@ jQuery(document).ready(function () {
 		}
 	});*/
 });
+function gmpFilterMarkersList() {
+  var value = jQuery.trim(jQuery('#gmpMarkersSearchInput').val() || '').toLowerCase();
+
+  jQuery('#gmpMarkersListGrid tr.jqgrow').each(function () {
+    var title = jQuery(this).find('td[aria-describedby="gmpMarkersListGrid_title"]').text().toLowerCase();
+
+    jQuery(this).toggle(value === '' || title.indexOf(value) !== -1);
+  });
+}
 function gmpSetCurrentMarker(marker) {
   g_gmpCurrentEditMarker = marker;
 }
@@ -352,6 +344,8 @@ function gmpResetMarkerForm() {
   jQuery('#marker_opts_marker_group_id').trigger('chosen:updated');
 
   jQuery(document).trigger('gmpAfterResetMarkerForm');
+  // An empty form has nothing to lose
+  _gmpUnchangeMarkerForm();
 }
 function _gmpCreateNewMapMarker(params) {
   params = params || {};
@@ -374,6 +368,18 @@ function _gmpCreateNewMapMarker(params) {
   gmpSetCurrentMarker(g_gmpMap.addMarker(newMarkerData));
   jQuery('#gmpMarkerForm [name="marker_opts[coord_x]"]').val(lat);
   jQuery('#gmpMarkerForm [name="marker_opts[coord_y]"]').val(lng);
+}
+function _gmpSetMarkerPeriodField(name, value) {
+  var input = jQuery('#gmpMarkerForm input[name="marker_opts[' + name + ']"]');
+  if (!value || String(value).indexOf('0000-00-00') === 0) {
+    input.val('');
+    return;
+  }
+  if (input.attr('type') === 'datetime-local') {
+    // DB "2026-06-01 10:30:00" -> "2026-06-01T10:30"
+    value = String(value).replace(' ', 'T').substr(0, 16);
+  }
+  input.val(value);
 }
 function gmpMarkerEditBtnClick(btn) {
   var markerId = jQuery(btn).data('marker_id');
@@ -406,12 +412,8 @@ function gmpOpenMarkerEdit(id) {
     }
     jQuery('#marker_opts_marker_group_id').trigger('chosen:updated');
 
-    if (markerParams.period_from) {
-      jQuery('#gmpMarkerForm input[name="marker_opts[period_date_from]"]').val(markerParams.period_from);
-    }
-    if (markerParams.period_to) {
-      jQuery('#gmpMarkerForm input[name="marker_opts[period_date_to]"]').val(markerParams.period_to);
-    }
+    _gmpSetMarkerPeriodField('period_date_from', markerParams.period_from);
+    _gmpSetMarkerPeriodField('period_date_to', markerParams.period_to);
 
     if (parseInt(markerParams.params.show_description)) {
       jQuery('#gmpMarkerForm input[name="marker_opts[params][show_description]"]').prop('checked', true);
@@ -463,6 +465,8 @@ function gmpOpenMarkerEdit(id) {
     gmpSetCurrentMarker(marker);
     marker.showInfoWnd();
     jQuery(document).trigger('gmpMarkerFormEdit', marker);
+    // Filling the form fires "change" on its fields - that is not a change made by the user
+    _gmpUnchangeMarkerForm();
   }
 }
 function gmpRemoveMarkerFromMapTblClick(markerId, params) {
@@ -638,7 +642,14 @@ function gmpInitIconsWnd() {
           if (!res.error) {
             drawNewIcon(res.data);
           } else {
-            respElem.html(data.error.join(','));
+            // The errors were in res.errors: "data" was not defined and the message was never shown
+            respElem.text(
+              jQuery
+                .map(res.errors || {}, function (error) {
+                  return error;
+                })
+                .join(', ')
+            );
           }
         },
       });
@@ -658,7 +669,8 @@ function gmpAddLinkOptions() {
 function gmpRefreshMapMarkers(map, markers) {
   map.clearMarkers();
   markers = _gmpPrepareMarkersListAdmin(markers);
-  for (var i in markers) {
+  // Index loop: for..in would also walk methods other scripts add to Array.prototype
+  for (var i = 0; i < markers.length; i++) {
     var newMarker = map.addMarker(markers[i]);
     newMarker.setTitle(markers[i].title, true);
     newMarker.setDescription(markers[i].description);

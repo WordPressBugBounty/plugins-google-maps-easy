@@ -99,7 +99,9 @@ class marker_groupsControllerGmp extends controllerGmp
     if (!$this->getModel()->resortMarkerGroups($postData['ids'])) {
       $res->pushError($this->getModel()->getErrors());
     }
-    if (!$this->getModel()->updateMarkerGroupParent($postData['current'], $postData['parent'])) {
+    // A category dropped to the top level has no parent id
+    $parentId = isset($postData['parent']) ? (int) $postData['parent'] : 0;
+    if ($this->getModel()->updateMarkerGroupParent((int) $postData['current'], $parentId) === false) {
       $res->pushError($this->getModel()->getErrors());
     }
     return $res->ajaxExec();
@@ -108,11 +110,20 @@ class marker_groupsControllerGmp extends controllerGmp
   {
     $res = new responseGmp();
     $data = reqGmp::get('post');
-    if (!isset($data['options'])) {
-      $res->pushError(__('Marker Category Options data not found', GMP_LANG_CODE));
-      return $res->ajaxExec();
+    // Without any level the form sends no "options" at all: that is an empty list, removing all levels did not work
+    $options = isset($data['options']) && is_array($data['options']) ? $data['options'] : [];
+    if (isset($options['lvl_font_size'])) {
+      // Pixels as numbers: the categories list adds "px" itself, "16px" became "16pxpx"
+      $sizes = [];
+      foreach ((array) $options['lvl_font_size'] as $size) {
+        $size = (float) $size;
+        if ($size > 0) {
+          $sizes[] = (string) $size;
+        }
+      }
+      $options['lvl_font_size'] = $sizes;
     }
-    if ($this->getModel()->saveMarkerGroupsOptions($data['options'])) {
+    if ($this->getModel()->saveMarkerGroupsOptions($options)) {
       $res->addMessage(__('Done', GMP_LANG_CODE));
     } else {
       $res->pushError($this->getModel()->getErrors());

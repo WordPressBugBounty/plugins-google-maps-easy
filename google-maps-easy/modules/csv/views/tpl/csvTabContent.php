@@ -51,6 +51,9 @@
             </label>
           </th>
           <td>
+            <?php if (!$this->hasFigures) { ?>
+              <span class="gmpProOptMiniLabel"><a target="_blank" href="<?php echo esc_attr($this->proLink); ?>"><?php _e('PRO option', GMP_LANG_CODE); ?></a></span>
+            <?php } else { ?>
             <button id="gmpCsvExportFiguresBtn" class="button">
               <?php _e('Export', GMP_LANG_CODE); ?>
             </button>
@@ -63,6 +66,7 @@
               'onComplete' => 'gmpCsvImportOnComplete',
               'btn_class' => 'button',
             ]); ?>
+            <?php } ?>
           </td>
         </tr>
         <tr>
@@ -72,6 +76,9 @@
             </label>
           </th>
           <td>
+            <?php if (!$this->hasHeatmap) { ?>
+              <span class="gmpProOptMiniLabel"><a target="_blank" href="<?php echo esc_attr($this->proLink); ?>"><?php _e('PRO option', GMP_LANG_CODE); ?></a></span>
+            <?php } else { ?>
             <button id="gmpCsvExportHeatmapBtn" class="button">
               <?php _e('Export', GMP_LANG_CODE); ?>
             </button>
@@ -84,6 +91,7 @@
               'onComplete' => 'gmpCsvImportOnComplete',
               'btn_class' => 'button',
             ]); ?>
+            <?php } ?>
           </td>
         </tr>
         <tr>

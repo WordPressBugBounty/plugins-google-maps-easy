@@ -3,7 +3,7 @@ Contributors: supsysticcom
 Tags: google maps, google map, maps, map, map markers
 Tested up to: 7.1
 Requires PHP: 7.3
-Stable tag: 1.15.4
+Stable tag: 1.16.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -167,6 +167,35 @@ Please report security issues through the [Patchstack Vulnerability Disclosure P
 == Changelog ==
 
 = 2026 =
+
+= 1.16.0 — October 26, 2026 =
+
+* Added Excel-friendly CSV: exported files open correctly in Excel, and Excel files (UTF-8 with BOM, Windows-1251/1252, "," or ";" delimiter) can be imported.
+* CSV import now explains why rows were skipped and ignores empty rows.
+* Fixed CSV import of maps creating duplicates instead of updating existing maps.
+* Fixed CSV export and import losing map options.
+* Fixed CSV import adding backslashes before apostrophes and losing marker categories and Excel dates.
+* Fixed saving a map while PRO is deactivated erasing its PRO settings.
+* Fixed "Clear All" in Marker Categories doing nothing.
+* Fixed case-sensitive category search and category font size levels that could not be cleared.
+* Fixed markers from old versions missing from category filters.
+* Fixed missing default marker icons on new sites.
+* Fixed manual marker order being reset in the map editor.
+* Fixed marker search in the map editor.
+* Fixed marker hover titles not showing.
+* Fixed info windows not showing when "Hide marker tooltip" is on.
+* Fixed the "Hide info window close button" option with the current Google Maps API.
+* Fixed maps staying draggable when dragging is turned off.
+* Hiding the zoom control now also hides Google's new camera control.
+* Fixed the map widget missing in Appearance → Widgets.
+* Shortcode and widget width now accept "%" and "px".
+* Fixed several shortcodes of the same map with different parameters on one page.
+* Fixed map cloning losing marker categories and display periods.
+* Fixed PRO options in the free version looking enabled after the upgrade notice.
+* Fixed the "Display period for the markers" tooltip text.
+* Security: admin actions without a valid nonce are rejected, and generic actions no longer run for modules that do not support them.
+* Accessibility: list checkboxes and icons keep their screen reader labels.
+* Fixed PHP 8.1+ warnings and deprecation notices.
 
 = 1.15.4 — October 16, 2026 =
 

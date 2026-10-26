@@ -142,6 +142,10 @@ gmpGoogleMarker.prototype._prepareAdvancedMarkerParams = function (params) {
   if (typeof params.collisionBehavior !== 'undefined') {
     markerParams.collisionBehavior = params.collisionBehavior;
   }
+  // Hover tooltip, as legacy markers have (not set with "Hide Tooltips of Markers")
+  if (params.title) {
+    markerParams.title = jQuery('<div/>').html(String(params.title)).text();
+  }
   markerParams.content = gmpCreateAdvancedMarkerContent(params.icon);
 
   return markerParams;
@@ -193,10 +197,8 @@ gmpGoogleMarker.prototype.init = function () {
     this._markerObj.draggable = !!this._markerParams.draggable;
     this._useAdvancedMarker = true;
   } else {
+    // The marker's title is its hover tooltip; with "Hide Tooltips of Markers" it was removed from the params above
     this._markerObj = new google.maps.Marker(markerParamsForCreate);
-    if (typeof this._markerObj.setTitle === 'function') {
-      this._markerObj.setTitle('');
-    }
   }
   if (this._markerParams.dragend) {
     this._bindMarkerListener('dragend', jQuery.proxy(this._markerParams.dragend, this));
@@ -459,10 +461,15 @@ gmpGoogleMarker.prototype._setInfoWndContent = function (newContentHtmlObj) {
   if (!this._infoWindow) {
     var mapWidth = GMP_DATA.isAdmin ? jQuery('#gmpMapPreview').width() : jQuery('#' + map.getViewHtmlId()).width(),
       infoWndType = map.getParam('marker_infownd_type'),
-      infoWndWidth = map.getParam('marker_infownd_width_units') == 'px' ? map.getParam('marker_infownd_width') : mapWidth - 20,
+      infoWndWidth = map.getParam('marker_infownd_width_units') == 'px' ? parseInt(map.getParam('marker_infownd_width')) || mapWidth - 20 : mapWidth - 20,
       infoWndHeight = map.getParam('marker_infownd_height_units') == 'px' ? map.getParam('marker_infownd_height') + 'px' : false,
       maxWndWidth = mapWidth * 0.6,
       infoWndParams = { maxWidth: infoWndWidth < maxWndWidth ? infoWndWidth : maxWndWidth };
+
+    // "Hide Close Button": Google's own option, for every appearance (the header holds only the close button)
+    if (parseInt(map.getParam('marker_infownd_hide_close_btn'))) {
+      infoWndParams.headerDisabled = true;
+    }
 
     switch (infoWndType) {
       case 'rounded_edges':

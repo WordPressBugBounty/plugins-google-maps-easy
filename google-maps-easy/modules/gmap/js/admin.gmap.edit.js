@@ -3,6 +3,7 @@ var g_gmpMap = null,
   g_gmpMapShapesIdsAdded = [], // Shapes, added for map
   g_gmpEditMap = false, // Adding or editing map
   g_gmpMapFormChanged = false,
+  g_gmpMapFormInitialState = null, // Map form values after the page has loaded, see _gmpIsMapFormChanged()
   g_gmpMarkerTitleColorTimeoutSet = false,
   g_gmpMarkerTitleColorLast = '',
   g_gmpMarkerBgColorTimeoutSet = false,
@@ -75,6 +76,7 @@ jQuery(document).ready(function () {
     routerMainBtn = jQuery('#gmpRouterMainBtns'),
     markerList = jQuery('#gmpMarkerList'),
     shapeList = jQuery('#gmpShapeList'),
+    mapListsTabs = jQuery('#gmpMapListsTabs'),
     rightStickyBar = jQuery('#gmpMapRightStickyBar'),
     gmpUnsavedMapTabs = ['#gmpMarkerTab', '#gmpShapeTab', '#gmpHeatmapTab', '#gmpRouterTab'];
 
@@ -94,6 +96,8 @@ jQuery(document).ready(function () {
 
   propTabs.wpTabs({
     change: function (selector) {
+      // Only the Map tab switches between both lists (PRO), the Markers / Figures tabs show their own
+      mapListsTabs.hide();
       switch (selector) {
         case '#gmpMarkerTab':
           if (!GMP_DATA.isPro) {
@@ -160,14 +164,28 @@ jQuery(document).ready(function () {
           markerMainBtns.hide();
           shapeMainBtns.hide();
           heatmapMainBtns.hide();
-          markerList.show();
-          shapeList.hide();
+          mapListsTabs.show();
+          gmpShowMapList(mapListsTabs.find('.gmpMapListsTabActive').hasClass('gmpMapListsTabShapes') ? 'shapes' : 'markers');
           routerMainBtn.hide();
           break;
       }
     },
   });
   propTabs.show();
+  mapListsTabs.on('click', '.gmpMapListsTab', function () {
+    mapListsTabs.find('.gmpMapListsTab').removeClass('gmpMapListsTabActive');
+    jQuery(this).addClass('gmpMapListsTabActive');
+    // A class, not a data attribute: the admin page output keeps only allowed attributes
+    gmpShowMapList(jQuery(this).hasClass('gmpMapListsTabShapes') ? 'shapes' : 'markers');
+    return false;
+  });
+  jQuery('#gmpMarkersListGrid, #gmpShapesListGrid').on('jqGridLoadComplete', gmpUpdateMapListsCounts);
+  // Search by figures name: the list rows are filtered, the figures on the map stay
+  jQuery('#gmpShapesListGrid').on('jqGridLoadComplete', function () {
+    jQuery('#gmpShapesSearchInput').show();
+    gmpFilterShapesList();
+  });
+  jQuery('#gmpShapesSearchInput').on('keyup search', gmpFilterShapesList);
 
   // Custom Map Controls checkbox - toggles the #custom_controls_options submenu.
   // Bound here (not inline onclick) because wp_kses strips onclick= from admin output.
@@ -606,14 +624,6 @@ jQuery(document).ready(function () {
     })
     .trigger('change');
   // Map Marker Info Window width and height units
-  jQuery('#gmpMapForm #map_opts_enable_google_kml_api').change(function () {
-    if (this.checked) {
-      jQuery('#gmpMapForm #map_opts_enable_kml_filter_text').closest('div').addClass('gmpHidden');
-    } else {
-      jQuery('#gmpMapForm #map_opts_enable_kml_filter_text').closest('div').removeClass('gmpHidden');
-    }
-  });
-  // Map Marker Info Window width and height units
   jQuery('#gmpMapForm select[name="map_opts[marker_infownd_type]"]').change(function () {
     gmpToggleSubOptionsByDataParam(jQuery(this).val());
   });
@@ -679,6 +689,14 @@ jQuery(document).ready(function () {
     .change(function () {
       _gmpChangeMapForm();
     });
+  // Remember the initial values once all add-ons (their ready handlers run after this one) set up the form
+  if (document.readyState === 'complete') {
+    setTimeout(_gmpUnchangeMapForm, 0);
+  } else {
+    jQuery(window).on('load', function () {
+      setTimeout(_gmpUnchangeMapForm, 0);
+    });
+  }
   //Show 'Close description by mouse hover' checkbox only if 'Show description by mouse hover' if checked
   jQuery('#gmpMarkerTab input[name="marker_opts[params][description_mouse_hover]"]').change(function () {
     if (jQuery(this).prop('checked') === true) gmpShowCloseDescriptionCheckbox();
@@ -752,7 +770,15 @@ function gmpInitMapMarkersListWnd() {
   }
 }
 // Map form check change actions
+function _gmpGetMapFormState() {
+  return jQuery('#gmpMapForm').serialize();
+}
 function _gmpIsMapFormChanged() {
+  // Add-ons trigger 'change' on map fields while initializing their UI, so the flag alone made the browser
+  // ask "Leave site?" on every map: compare the values with the state after the page has loaded
+  if (g_gmpMapFormChanged && g_gmpMapFormInitialState !== null) {
+    return _gmpGetMapFormState() !== g_gmpMapFormInitialState;
+  }
   return g_gmpMapFormChanged;
 }
 function _gmpChangeMapForm() {
@@ -760,12 +786,14 @@ function _gmpChangeMapForm() {
 }
 function _gmpUnchangeMapForm() {
   g_gmpMapFormChanged = false;
+  g_gmpMapFormInitialState = _gmpGetMapFormState();
 }
 function _gmpResizeRightSidebar(container) {
   jQuery(window).trigger('scroll');
 
-  var listContainers = container && container instanceof jQuery ? container : jQuery('#gmpMarkersListGrid, #gmpShapeListGrid'),
+  var listContainers = container && container instanceof jQuery ? container : jQuery('#gmpMarkersListGrid, #gmpShapesListGrid'),
     rightBar = jQuery('#gmpMapRightStickyBar'),
+    mapListsTabs = jQuery('#gmpMapListsTabs'),
     wnd = jQuery(window),
     wndWd = wnd.width(),
     wndHt = wnd.height(),
@@ -778,17 +806,50 @@ function _gmpResizeRightSidebar(container) {
 
   if (wndWd > 991) {
     newHeight = wndHt - jQuery('#wpadminbar').outerHeight() - jQuery('#gmpMapPreview').outerHeight() - jQuery('.gmpControlBtns:first').outerHeight() - jQuery('.ui-jqgrid-htable:first').outerHeight();
+    if (mapListsTabs.is(':visible')) {
+      newHeight -= mapListsTabs.outerHeight(true);
+    }
   }
   listContainers.each(function () {
-    var self = jQuery(this);
+    var self = jQuery(this),
+      searchInput = jQuery(self.attr('id') == 'gmpShapesListGrid' ? '#gmpShapesSearchInput' : '#gmpMarkersSearchInput'),
+      height = newHeight - (searchInput.length ? searchInput.outerHeight() : 0);
 
-    if (self.attr('id') == 'gmpMarkersListGrid') {
-      newHeight = newHeight - jQuery('#gmpMarkersSearchInput').outerHeight();
+    // The figures list exists in PRO only
+    if (!this.grid) {
+      return;
     }
-    newHeight = newHeight > 250 ? newHeight : 250;
+    height = height > 250 ? height : 250;
 
     self.jqGrid('setGridWidth', rightBarWd);
-    self.jqGrid('setGridHeight', newHeight);
+    self.jqGrid('setGridHeight', height);
+  });
+}
+// Map tab: shows the markers or the figures list under the map
+function gmpShowMapList(list) {
+  var isShapes = list === 'shapes' && jQuery('#gmpMapListsTabs').length;
+
+  jQuery('#gmpMarkerList').toggle(!isShapes);
+  jQuery('#gmpShapeList').toggle(!!isShapes);
+  _gmpResizeRightSidebar(jQuery(isShapes ? '#gmpShapesListGrid' : '#gmpMarkersListGrid'));
+}
+function gmpUpdateMapListsCounts() {
+  jQuery('#gmpMapListsTabs .gmpMapListsTab').each(function () {
+    var grid = jQuery(jQuery(this).hasClass('gmpMapListsTabShapes') ? '#gmpShapesListGrid' : '#gmpMarkersListGrid'),
+      count = grid.length && grid[0].grid ? grid.jqGrid('getGridParam', 'records') : null;
+
+    jQuery(this)
+      .find('.gmpMapListsTabCount')
+      .text(count === null ? '' : '(' + count + ')');
+  });
+}
+function gmpFilterShapesList() {
+  var value = jQuery.trim(jQuery('#gmpShapesSearchInput').val() || '').toLowerCase();
+
+  jQuery('#gmpShapesListGrid tr.jqgrow').each(function () {
+    var title = jQuery(this).find('td[aria-describedby="gmpShapesListGrid_title"]').text().toLowerCase();
+
+    jQuery(this).toggle(value === '' || title.indexOf(value) !== -1);
   });
 }
 function gmpAddCustomControlsOptions() {
@@ -813,15 +874,9 @@ function gmpSwitchClustererSubOpts(clusterType) {
   }
 }
 function gmpSwitchTooltipWindow(tooltip) {
-  if (parseInt(tooltip)) {
-    jQuery('.gm-style .gm-style-iw-a').fadeOut();
-    if (!jQuery('#gtmTooltipWindowStyles').length) {
-      var style = jQuery('<style>.gm-style .gm-style-iw-a{display:none!important;}</style>').attr('id', 'gtmTooltipWindowStyles').appendTo('head');
-    }
-  } else {
-    jQuery('#gtmTooltipWindowStyles').remove();
-    jQuery('.gm-style .gm-style-iw-a').fadeIn();
-  }
+  // "Hide Tooltips of Markers" is about the browser tooltips on markers (their titles, see core.marker.js),
+  // info windows stay: hiding .gm-style-iw-a here hid every info window of the preview
+  jQuery('#gtmTooltipWindowStyles').remove();
 }
 function gmpToggleSubOptionsByDataParam(value) {
   var subOpts = jQuery('#gmpMarkerInfoWndTypeSubOpts .gmpSubOpt'),

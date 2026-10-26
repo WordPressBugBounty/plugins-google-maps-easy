@@ -76,6 +76,8 @@ gmpGoogleMap.prototype._beforeInit = function () {
       this._mapParams.zoomControl = true;
     } else {
       this._mapParams.zoomControl = false;
+      // Google's newer "Map camera controls" zoom (and pan) too: "None" hides them as well
+      this._mapParams.cameraControl = false;
     }
   }
   if (typeof this._mapParams.street_view_control !== 'undefined') {
@@ -93,6 +95,10 @@ gmpGoogleMap.prototype._beforeInit = function () {
     } else {
       this._mapParams.overviewMapControl = false;
     }
+  }
+  if (typeof this._mapParams.draggable !== 'undefined') {
+    // Saved as "1" / "0": Google needs a boolean, the string "0" left the map draggable
+    this._mapParams.draggable = parseInt(this._mapParams.draggable) ? true : false;
   }
   if (typeof this._mapParams.dbl_click_zoom !== 'undefined') {
     this._mapParams.disableDoubleClickZoom = parseInt(this._mapParams.dbl_click_zoom) ? false : true; // False/true in revert order - because option actually is for disabling this feature
@@ -133,7 +139,13 @@ gmpGoogleMap.prototype._afterInit = function () {
   this.resizeMapByHeight();
   jQuery(window).bind('resize', jQuery.proxy(this.resizeMapByHeight, this));
   jQuery(window).bind('orientationchange', jQuery.proxy(this.resizeMapByHeight, this));
-  jQuery(document).trigger('gmapAfterMapInit', this);
+  // An exception in an add-on handler (e.g. a Google Maps API feature removed by Google) must not
+  // break the map constructor - otherwise the map object is never created and admin/markers stop working.
+  try {
+    jQuery(document).trigger('gmapAfterMapInit', this);
+  } catch (e) {
+    if (window.console) console.error(e);
+  }
 };
 gmpGoogleMap.prototype._setMinZoomLevel = function () {
   var curZoom = this.getZoom();
@@ -415,7 +427,7 @@ gmpGoogleMap.prototype.addRouter = function (params) {
 };
 gmpGoogleMap.prototype.getMarkerById = function (id) {
   if (this._markers && this._markers.length) {
-    for (var i in this._markers) {
+    for (var i = 0; i < this._markers.length; i++) {
       if (this._markers[i].getId && this._markers[i].getId() == id) return this._markers[i];
     }
   }

@@ -12,7 +12,7 @@
 				<li><?php _e('Enable the "Maps JavaScript API" for that project.', GMP_LANG_CODE); ?></li>
 				<li><?php _e('Copy the generated key and paste it into the field below.', GMP_LANG_CODE); ?></li>
 			</ol>
-			<p><?php printf(__("A full step-by-step guide is also available <a href='%s' target='_blank'>here</a>.", GMP_LANG_CODE), '//supsystic.com/google-maps-api-key/'); ?></p>
+			<p><?php printf(__("A full step-by-step guide is also available <a href='%s' target='_blank'>here</a>.", GMP_LANG_CODE), 'https://supsystic.com/documentation/create-google-maps-api-key/'); ?></p>
 		</div>
 	</div>
 <?php } ?>

@@ -14,6 +14,7 @@ class csvControllerGmp extends controllerGmp
     }
 
     // Remove unneeded values
+    $keys = [];
     foreach ($maps as $key => $val) {
       unset($maps[$key]['original_id']);
       unset($maps[$key]['view_id']);
@@ -21,9 +22,13 @@ class csvControllerGmp extends controllerGmp
       unset($maps[$key]['params']['view_id']);
       unset($maps[$key]['params']['view_html_id']);
       unset($maps[$key]['params']['id']);
+      // Built from "map_stylization" when a map is loaded
+      unset($maps[$key]['params']['map_stylization_data']);
+      unset($maps[$key]['params']['center_on_cur_user_pos_icon_path']);
+      // Keys of all maps: with the first map's keys only, options it did not have were lost for the others
+      $keys = array_unique(array_merge($keys, $this->_getKeys($maps[$key])));
     }
-
-    $keys = $this->_getKeys($maps[0]);
+    $keys = $this->_dropParentKeys($keys);
     $c = $r = 0;
     $this->_connectCsvLib();
     $csvGenerator = toeCreateObjGmp('csvgeneratorGmp', [$fileName]);
@@ -72,7 +77,7 @@ class csvControllerGmp extends controllerGmp
       $marker_keys = array_unique(array_merge($marker_keys, $this->_getKeys($m)));
     }
     sort($marker_keys);
-    $keys = array_unique(array_merge($keys, $marker_keys));
+    $keys = $this->_dropParentKeys(array_unique(array_merge($keys, $marker_keys)));
     foreach ($keys as $k) {
       $csvGenerator->addCell($r, $c, $k);
       $c++;
@@ -118,7 +123,7 @@ class csvControllerGmp extends controllerGmp
       $figures_keys = array_unique(array_merge($figures_keys, $this->_getKeys($m)));
     }
     sort($figures_keys);
-    $keys = array_unique(array_merge($keys, $figures_keys));
+    $keys = $this->_dropParentKeys(array_unique(array_merge($keys, $figures_keys)));
     foreach ($keys as $k) {
       $csvGenerator->addCell($r, $c, $k);
       $c++;
@@ -164,7 +169,7 @@ class csvControllerGmp extends controllerGmp
       $heatmap_keys = array_unique(array_merge($heatmap_keys, $this->_getKeys($m)));
     }
     sort($heatmap_keys);
-    $keys = array_unique(array_merge($keys, $heatmap_keys));
+    $keys = $this->_dropParentKeys(array_unique(array_merge($keys, $heatmap_keys)));
     foreach ($keys as $k) {
       $csvGenerator->addCell($r, $c, $k);
       $c++;
@@ -215,14 +220,28 @@ class csvControllerGmp extends controllerGmp
     }
     if (!$res->error()) {
       $fileArray = [];
-      $handle = fopen($file['tmp_name'], 'r');
-      $csvParams['delimiter'] = !empty($data['delimiter']) ? $data['delimiter'] : $csvGenerator->getDelimiter();
-      $csvParams['enclosure'] = $csvGenerator->getEnclosure();
-      $csvParams['escape'] = $csvGenerator->getEscape();
-      //if(version_compare( phpversion(), '5.3.0' ) == -1) //for PHP lower than 5.3.0 third parameter - escape - is not implemented
-      while ($row = @fgetcsv($handle, 0, $csvParams['delimiter'], '"')) {
+      $content = (string) file_get_contents($file['tmp_name']);
+      // Excel "CSV UTF-8" starts with a BOM: it stuck to the first column name, "id" was not found
+      // and every row was added again
+      if (strpos($content, "\xEF\xBB\xBF") === 0) {
+        $content = substr($content, 3);
+      }
+      // Excel "CSV" is saved in the system code page: rows with non-Latin text were not saved at all
+      if (!$this->_isUtf8($content)) {
+        $content = $this->_toUtf8($content);
+      }
+      $csvParams['delimiter'] = $this->_detectDelimiter($content, !empty($data['delimiter']) ? $data['delimiter'] : $csvGenerator->getDelimiter());
+      $handle = fopen('php://temp', 'w+');
+      fwrite($handle, $content);
+      rewind($handle);
+      while (($row = fgetcsv($handle, 0, $csvParams['delimiter'], '"', '\\')) !== false) {
+        // Empty lines, and the rows Excel keeps after the data (";;;;"), were counted as failed rows
+        if (!array_filter($row, [$this, '_isNotEmptyCell'])) {
+          continue;
+        }
         $fileArray[] = $row;
       }
+      fclose($handle);
       /*else
        while($row = @fgetcsv( $handle, 0, $csvParams['delimiter'], $csvParams['enclosure'], $csvParams['escape'] )) $fileArray[] = $row;*/
       //			/*var_dump($fileArray);
@@ -232,38 +251,36 @@ class csvControllerGmp extends controllerGmp
       if (!empty($fileArray)) {
         if (count($fileArray) > 1) {
           //$overwriteSameNames = (int) reqGmp::getVar('overwrite_same_names');
-          $keys = array_shift($fileArray);
+          $keys = array_map('trim', array_shift($fileArray));
           $imported = 0;
+          $failReasons = [];
           switch ($type) {
             case 'maps':
               $mapModel = frameGmp::_()->getModule('gmap')->getModel();
               foreach ($fileArray as $i => $row) {
                 $map = [];
                 foreach ($keys as $j => $key) {
-                  $value = $this->_prepareValueToImport($row[$j]);
-                  if (strpos($key, '.')) {
-                    $realKeys = explode('.', $key);
-                    $realKey = array_pop($realKeys);
-                    $realPreKey = array_pop($realKeys);
-                    if ($realPreKey == 'map_center') {
-                      $valueMapCenter = isset($map['map_center']) ? $map['map_center'] : [];
-                      $valueMapCenter[$realKey] = $value;
-                      $value = $valueMapCenter;
-                      $realKey = 'map_center';
-                    }
-                  } else {
-                    $realKey = $key;
-                  }
+                  $value = $this->_prepareValueToImport(isset($row[$j]) ? $row[$j] : '');
                   if ($value === '') {
                     $value = null;
                   }
-                  $map[$realKey] = $value;
+                  // "params.zoom" and "html_options.width" are saved as "zoom" and "width", nested options
+                  // ("params.selectors.content_before", "params.markers_list_autoplay.enable") stay arrays:
+                  // only "map_center" was kept as an array, the others were lost
+                  $realKeys = explode('.', $key);
+                  if (count($realKeys) > 1 && in_array($realKeys[0], ['params', 'html_options'])) {
+                    array_shift($realKeys);
+                  }
+                  $this->_setKeyVal($map, implode('.', $realKeys), $value);
                 }
+                // Options the map does not use come as empty cells ("params.kml_file_url.0"):
+                // they gave [null] where the map had no value, and the KML script failed on it
+                $map = $this->_dropEmptyArrays($map);
                 if (isset($map['id']) && $mapModel->existsId($map['id'])) {
                   $mapModel->updateMap($map);
                   $imported++;
                 } else {
-                  $originalMapId = isset($map['id']) ? $map['id'] : 0;
+                  $originalMapId = isset($map['id']) ? (int) $map['id'] : 0;
                   if (isset($map['id'])) {
                     unset($map['id']);
                   }
@@ -271,10 +288,12 @@ class csvControllerGmp extends controllerGmp
                   if ($newMapId) {
                     $imported++;
                   }
+                  // The map keeps its id from the file, markers in a markers file refer to it.
+                  // dbGmp::query() is a stub, the id was never set.
                   if ($newMapId && $originalMapId) {
-                    dbGmp::query("UPDATE @__maps SET id = '$originalMapId' WHERE id = '$newMapId'");
-                    if ($originalMapId > $newMapId) {
-                      dbGmp::setAutoIncrement('@__maps', $originalMapId + 1);
+                    global $wpdb;
+                    if ($wpdb->update($wpdb->prefix . 'gmp_maps', ['id' => $originalMapId], ['id' => $newMapId]) && $originalMapId > $newMapId) {
+                      $wpdb->query('ALTER TABLE ' . $wpdb->prefix . 'gmp_maps AUTO_INCREMENT = ' . ($originalMapId + 1));
                     }
                   }
                 }
@@ -285,15 +304,34 @@ class csvControllerGmp extends controllerGmp
               foreach ($fileArray as $i => $row) {
                 $marker = [];
                 foreach ($keys as $j => $key) {
-                  $this->_setKeyVal($marker, $key, $this->_prepareValueToImport($row[$j]));
+                  $this->_setKeyVal($marker, $key, $this->_prepareValueToImport(isset($row[$j]) ? $row[$j] : ''));
                 }
                 if (isset($marker['id']) && !$markerModel->existsId($marker['id'])) {
                   unset($marker['id']);
                 }
+                // Excel saves dates in the system format ("25.10.2026 14:02"): MySQL got 0000-00-00 00:00:00
+                if (isset($marker['create_date'])) {
+                  $time = $marker['create_date'] !== '' ? strtotime($marker['create_date']) : false;
+                  if ($time) {
+                    $marker['create_date'] = date('Y-m-d H:i:s', $time);
+                  } else {
+                    unset($marker['create_date']);
+                  }
+                }
+                // Categories go to save() as a list, like from the marker form. The file has the list in
+                // "marker_group_ids" and the first one in "marker_group_id": new markers got no category
+                // and markers with several categories kept only the first one.
+                $groupIds = isset($marker['marker_group_ids']) && is_array($marker['marker_group_ids']) ? array_values(array_filter(array_map('intval', $marker['marker_group_ids']))) : [];
+                if (!$groupIds && !empty($marker['marker_group_id'])) {
+                  $groupIds = array_values(array_filter(array_map('intval', (array) $marker['marker_group_id'])));
+                }
+                $marker['marker_group_id'] = $groupIds ? $groupIds : 0;
+                unset($marker['marker_group_ids']);
                 if ($markerModel->save($marker)) {
                   $imported++;
                 }
               }
+              $failReasons = $markerModel->getErrors();
               break;
             case 'figures':
               if (!frameGmp::_()->getModule('shape')) {
@@ -315,6 +353,7 @@ class csvControllerGmp extends controllerGmp
                   $imported++;
                 }
               }
+              $failReasons = $figuresModel->getErrors();
               break;
             case 'heatmap':
               if (!frameGmp::_()->getModule('heatmap')) {
@@ -340,6 +379,11 @@ class csvControllerGmp extends controllerGmp
           }
           if (!$res->error()) {
             $res->addMessage(sprintf(__('Imported %d of %d rows', GMP_LANG_CODE), $imported, count($fileArray)));
+            // Why the other rows were not imported, the message gave only the count
+            $failReasons = array_unique(array_filter(array_map('strval', array_filter((array) $failReasons, 'is_scalar'))));
+            if ($imported < count($fileArray)) {
+              $res->addMessage($failReasons ? sprintf(__('Not imported: %s', GMP_LANG_CODE), implode('; ', $failReasons)) : sprintf(__('Check that the file uses the "%s" delimiter and has the column names in the first row.', GMP_LANG_CODE), $csvParams['delimiter']));
+            }
           }
           /*$importRes = $this->getModel()->import($fileArray, $overwriteSameNames);
 					if($importRes) {
@@ -395,6 +439,90 @@ class csvControllerGmp extends controllerGmp
     }
     return $keys;
   }
+  private function _isNotEmptyCell($value)
+  {
+    return trim((string) $value) !== '';
+  }
+  /**
+   * Removes nested arrays that hold only empty values.
+   */
+  private function _dropEmptyArrays($data)
+  {
+    foreach ($data as $key => $value) {
+      if (is_array($value)) {
+        $value = $this->_dropEmptyArrays($value);
+        if (array_filter($value, [$this, '_isNotEmptyValue'])) {
+          $data[$key] = $value;
+        } else {
+          unset($data[$key]);
+        }
+      }
+    }
+    return $data;
+  }
+  private function _isNotEmptyValue($value)
+  {
+    return is_array($value) || ($value !== null && $value !== '');
+  }
+  private function _isUtf8($content)
+  {
+    return function_exists('mb_check_encoding') ? mb_check_encoding($content, 'UTF-8') : (bool) preg_match('//u', $content);
+  }
+  /**
+   * A file in the Windows code page of Excel. Cyrillic words are runs of bytes 0xC0-0xFF,
+   * in Western texts such letters stand alone ("café"), so that tells Windows-1251 from Windows-1252.
+   */
+  private function _toUtf8($content)
+  {
+    $from = preg_match('/[\xC0-\xFF]{3,}/', $content) ? 'Windows-1251' : 'Windows-1252';
+    if (function_exists('mb_convert_encoding')) {
+      return mb_convert_encoding($content, 'UTF-8', $from);
+    }
+    $converted = function_exists('iconv') ? @iconv($from, 'UTF-8//IGNORE', $content) : false;
+    return $converted !== false ? $converted : $content;
+  }
+  /**
+   * The delimiter of the file: Excel uses "," or ";" depending on the system settings, with the other one
+   * selected in CSV Options nothing was imported
+   */
+  private function _detectDelimiter($content, $preferred)
+  {
+    $firstLine = strtok($content, "\n");
+    if ($firstLine === false || strpos($firstLine, $preferred) !== false) {
+      return $preferred;
+    }
+    $best = $preferred;
+    $bestCount = 0;
+    foreach ([';', ',', "\t"] as $candidate) {
+      $count = substr_count($firstLine, $candidate);
+      if ($count > $bestCount) {
+        $best = $candidate;
+        $bestCount = $count;
+      }
+    }
+    return $best;
+  }
+  /**
+   * An option empty for one row and an array for another gives both "a" and "a.b" keys:
+   * "a" exported the array as "Array" and on import it overwrote "a.b". Keep the nested keys only.
+   */
+  private function _dropParentKeys($keys)
+  {
+    $res = [];
+    foreach ($keys as $key) {
+      $isParent = false;
+      foreach ($keys as $other) {
+        if (strpos($other, $key . '.') === 0) {
+          $isParent = true;
+          break;
+        }
+      }
+      if (!$isParent) {
+        $res[] = $key;
+      }
+    }
+    return $res;
+  }
   private function _getKeyVal($data, $key)
   {
     if (strpos($key, '.')) {
@@ -410,7 +538,7 @@ class csvControllerGmp extends controllerGmp
     if (strpos($key, '.')) {
       $keys = explode('.', $key);
       $firstKey = array_shift($keys);
-      if (!isset($data[$firstKey])) {
+      if (!isset($data[$firstKey]) || !is_array($data[$firstKey])) {
         $data[$firstKey] = [];
       }
       $this->_setKeyVal($data[$firstKey], implode('.', $keys), $val);
@@ -429,7 +557,8 @@ class csvControllerGmp extends controllerGmp
   private function _prepareValueToImport($val)
   {
     $sitePath = $this->_getSitePath();
-    return str_replace('[GMP_SITE_PATH]', $sitePath, htmlspecialchars_decode(addslashes($val)));
+    // No addslashes(): values from the file are saved through $wpdb, "O'Brien" was saved as "O\'Brien"
+    return str_replace('[GMP_SITE_PATH]', $sitePath, htmlspecialchars_decode($val));
   }
   private function _toYesNo($val)
   {

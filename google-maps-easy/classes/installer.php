@@ -323,10 +323,13 @@ class installerGmp
 					`params` text  CHARACTER SET utf8 NOT NULL,
 					`sort_order` smallint(1) NOT NULL DEFAULT '0',
 					`user_id` bigint(20),
+					`period_from` datetime NULL DEFAULT NULL,
+					`period_to` datetime NULL DEFAULT NULL,
 					PRIMARY KEY (`id`)
 				) DEFAULT CHARSET=utf8",
       );
     }
+    self::addMarkersPeriodColumns();
     /**
      * Create table for marker Icons
      */
@@ -398,14 +401,22 @@ class installerGmp
       );
     }
 
-    if (!get_option($wpPrefix . 'gmp_markers_groups_multiple_updated')) {
-      $markersData = $wpdb->get_results("SELECT id, marker_group_id FROM `{$wpdb->prefix}gmp_markers`", ARRAY_A);
-      if ($markersData) {
-        foreach ($markersData as $marker) {
-          $wpdb->insert('gmp_marker_groups_relation', ['marker_id' => $marker['id'], 'groups_id' => $marker['marker_group_id']]);
-        }
-        update_option($wpPrefix . 'gmp_markers_groups_multiple_updated', 1);
+    // Markers saved before the relations table: their category goes there. The insert had no table prefix,
+    // so nothing was copied and the markers were out of the category filters. A new flag runs it once more;
+    // only markers without relations and with an existing category, so nothing is added twice.
+    if (!get_option($wpPrefix . 'gmp_markers_groups_relations_fixed')) {
+      $markersData = $wpdb->get_results(
+        "SELECT mk.id, mk.marker_group_id FROM `{$wpdb->prefix}gmp_markers` mk
+					INNER JOIN `{$wpdb->prefix}gmp_marker_groups` g ON g.id = mk.marker_group_id
+					LEFT JOIN `{$wpdb->prefix}gmp_marker_groups_relation` r ON r.marker_id = mk.id
+					WHERE mk.marker_group_id > 0 AND r.id IS NULL",
+        ARRAY_A,
+      );
+      foreach ((array) $markersData as $marker) {
+        $wpdb->insert($wpdb->prefix . 'gmp_marker_groups_relation', ['marker_id' => $marker['id'], 'groups_id' => $marker['marker_group_id']]);
       }
+      update_option($wpPrefix . 'gmp_markers_groups_multiple_updated', 1);
+      update_option($wpPrefix . 'gmp_markers_groups_relations_fixed', 1);
     }
     // Ensure all core (free) modules are always active
     $wpdb->query("UPDATE `{$wpdb->prefix}gmp_modules` SET active = 1 WHERE type_id = 1");
@@ -525,6 +536,20 @@ class installerGmp
         ]);
       }
       update_option($wpPrefix . 'gmp_db_version', GMP_VERSION_PLUGIN);
+    }
+  }
+  /**
+   * Markers' display period (PRO "Period From / To"): the columns were declared in the table class
+   * but never created on existing sites, so the period was not saved at all
+   */
+  public static function addMarkersPeriodColumns()
+  {
+    global $wpdb;
+    $tableName = $wpdb->prefix . 'gmp_markers';
+    foreach (['period_from', 'period_to'] as $column) {
+      if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM `{$tableName}` LIKE %s", $column))) {
+        $wpdb->query("ALTER TABLE `{$tableName}` ADD COLUMN `{$column}` datetime NULL DEFAULT NULL");
+      }
     }
   }
   public static function updateIcon()

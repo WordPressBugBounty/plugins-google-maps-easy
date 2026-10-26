@@ -19,6 +19,9 @@ class iconsModelGmp extends modelGmp
 
   public function getIconsByIds($ids)
   {
+    // The frontend reads icons here: on a new site, before the marker editor was opened, the table was empty
+    // and the markers had no icons
+    $this->ensureDefaultIconsInstalled();
     global $wpdb;
     $ids = implode(',', array_map('absint', $ids));
     $icons = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}gmp_icons WHERE id IN (%1s)", $ids), ARRAY_A);

@@ -7,18 +7,12 @@ class gmap_widgetViewGmp extends viewGmp
       foreach ($instance as $key => $val) {
         if (empty($instance[$key])) {
           unset($instance[$key]);
-        } else {
-          if ($key == 'width') {
-            $measures = ['px', '%'];
-            foreach ($measures as $m) {
-              if (strpos($instance[$key], $m) !== -1) {
-                str_replace($m, '', $instance[$key]);
-                $instance['width_units'] = $m;
-                break;
-              }
-            }
-          }
         }
+      }
+      // "250" is pixels, as the widget always used; "250px" / "50%" are passed on (gmapViewGmp::applyShortcodeHtmlParams).
+      // The unit check here always found "px" (strpos() never returns -1), so "50%" did not work.
+      if (isset($instance['width']) && is_numeric(trim((string) $instance['width']))) {
+        $instance['width'] = trim((string) $instance['width']) . 'px';
       }
       echo frameGmp::_()->getModule('gmap')->drawMapFromShortcode($instance);
     }

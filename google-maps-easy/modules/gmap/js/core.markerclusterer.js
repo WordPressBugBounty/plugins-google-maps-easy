@@ -252,7 +252,9 @@ MarkerClusterer.prototype.fitMapToMarkers = function () {
   var markers = this.getMarkers();
   var bounds = new google.maps.LatLngBounds();
   for (var i = 0, marker; (marker = markers[i]); i++) {
-    bounds.extend(marker.getPosition());
+    if (marker.getPosition()) {
+      bounds.extend(marker.getPosition());
+    }
   }
 
   this.map_.fitBounds(bounds);
@@ -613,7 +615,9 @@ MarkerClusterer.prototype.getExtendedBounds = function (bounds) {
  * @private
  */
 MarkerClusterer.prototype.isMarkerInBounds_ = function (marker, bounds) {
-  return bounds.contains(marker.getPosition());
+  // A marker without position (e.g. saved with 0,0 coordinates) makes contains() throw and stops clustering
+  var position = marker.getPosition();
+  return !!position && bounds.contains(position);
 };
 
 /**

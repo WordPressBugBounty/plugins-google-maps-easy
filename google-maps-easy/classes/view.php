@@ -115,6 +115,9 @@ abstract class viewGmp extends baseObjectGmp
           'title' => 1,
           'id' => 1,
           'data-tooltip-content' => 1,
+          // Texts of the PRO full screen button: without them it kept "Open Full Screen" in full screen
+          'data-disabletxt' => 1,
+          'data-enabletxt' => 1,
         ],
         'section' => ['style' => 1, 'title' => 1, 'align' => 1, 'class' => 1, 'width' => 1, 'height' => 1, 'title' => 1, 'id' => 1],
         'nav' => ['style' => 1, 'title' => 1, 'align' => 1, 'class' => 1, 'width' => 1, 'height' => 1, 'title' => 1, 'id' => 1],
@@ -188,14 +191,23 @@ abstract class viewGmp extends baseObjectGmp
         'option' => ['name' => 1, 'checked' => 1, 'disabled' => 1, 'selected' => 1, 'style' => 1, 'title' => 1, 'align' => 1, 'class' => 1, 'width' => 1, 'height' => 1, 'id' => 1, 'value' => 1],
         'sup' => [],
         'sub' => [],
-        'button' => ['data-wp-editor-id' => 1, 'style' => 1, 'class' => 1, 'id' => 1, 'data-mapid' => 1, 'data-viewid' => 1],
+        // "title" was cut: the icon-only buttons of the directions form had no hint and no accessible name
+        'button' => ['data-wp-editor-id' => 1, 'style' => 1, 'class' => 1, 'id' => 1, 'data-mapid' => 1, 'data-viewid' => 1, 'title' => 1, 'aria-label' => 1, 'type' => 1, 'disabled' => 1],
         'img' => ['src' => 1, 'style' => 1, 'width' => 1, 'height' => 1, 'id' => 1, 'class' => 1, 'alt' => 1, 'border' => 1],
         'track' => ['src' => 1, 'kind' => 1, 'label' => 1, 'srclang' => 1],
         'source' => ['src' => 1, 'type' => 1],
         'audio' => ['src' => 1, 'style' => 1, 'width' => 1, 'height' => 1, 'id' => 1, 'class' => 1, 'autoplay' => 1, 'controls' => 1, 'crossorigin' => 1, 'loop' => 1, 'muted' => 1, 'preload' => 1],
         'iframe' => ['src' => 1, 'style' => 1, 'width' => 1, 'height' => 1, 'id' => 1, 'class' => 1, 'title' => 1, 'allow' => 1, 'allowfullscreen' => 1, 'allowpaymentrequest' => 1, 'csp' => 1, 'height' => 1, 'loading' => 1, 'name' => 1, 'referrerpolicy' => 1, 'sandbox' => 1],
       ];
-      self::$_allowedHtml = array_merge($allowedHtml, $allowedDiv);
+      $allowedHtml = array_merge($allowedHtml, $allowedDiv);
+      // ARIA attributes of the templates were cut: list checkboxes had no names for screen readers,
+      // decorative icons were not hidden from them
+      foreach ($allowedHtml as $tag => $attrs) {
+        if (is_array($attrs) && $tag !== 'style') {
+          $allowedHtml[$tag] = array_merge($attrs, ['aria-label' => 1, 'aria-hidden' => 1, 'aria-live' => 1, 'aria-current' => 1, 'role' => 1]);
+        }
+      }
+      self::$_allowedHtml = $allowedHtml;
     }
     return self::$_allowedHtml;
   }

@@ -226,6 +226,7 @@ if ($this->isPro) {
           ); ?>
 										<div style="margin-top: 6px; color: #666;">
 											<?php _e('Leave empty to keep legacy behavior and automatic fallback to classic markers.', GMP_LANG_CODE); ?>
+											<a href="https://supsystic.com/documentation/create-google-maps-api-key/" target="_blank" rel="noopener"><?php _e('How to create a Map ID', GMP_LANG_CODE); ?></a>
 										</div>
 										<div id="gmpMapIdChangedNotice" class="gmpMapIdNotice" style="display: none;">
 											<?php _e('Save the map and reload the page to apply the Map ID change to the preview.', GMP_LANG_CODE); ?>
@@ -578,11 +579,19 @@ if ($this->isPro) {
 											<i style="float: right;" class="fa fa-question supsystic-tooltip" title="<?php _e('Make your map unique with our Map Themes, just try to change it here - and you will see results on your Map Preview.', GMP_LANG_CODE); ?>"></i>
 										</th>
 										<td>
+											<?php
+           $stylizationOptions = $this->stylizationsForSelect;
+           $currentStylization = $this->editMap && isset($this->map['params']['map_stylization']) ? html_entity_decode($this->map['params']['map_stylization'], ENT_QUOTES, 'UTF-8') : 'none';
+           // A PRO theme of this map while PRO is not active: without it in the list the map was saved with "None"
+           if ($currentStylization !== '' && !isset($stylizationOptions[$currentStylization])) {
+             $stylizationOptions[$currentStylization] = sprintf(__('%s (PRO)', GMP_LANG_CODE), $currentStylization);
+           }
+           ?>
 											<?php echo htmlGmp::wpKsesHtml(
              htmlGmp::selectbox('map_opts[map_stylization]', [
-               'options' => $this->stylizationsForSelect,
+               'options' => $stylizationOptions,
                // Compared against the raw style names (option keys); the value itself is not printed.
-               'value' => $this->editMap && isset($this->map['params']['map_stylization']) ? html_entity_decode($this->map['params']['map_stylization'], ENT_QUOTES, 'UTF-8') : 'none',
+               'value' => $currentStylization,
                'attrs' => 'style="width: ' . ($this->isPro ? '100%' : 'calc(100% - 200px)') . ';" id="map_opts_map_stylization"',
              ]),
            ); ?>
@@ -887,7 +896,8 @@ if ($this->isPro) {
 												<?php
             _e(
               'Add KML files to display custom layers on the map. Additional options:' .
-                '<br /><br /><b>Enable KML layers filter</b> - add form to map for dynamically enable / disable KML layers and sublayers. <br /><br />  <b>Load KML faster</b> - Use for large KML files. <b>Warning </b>-  filters will stop working!<br />',
+                '<br /><br /><b>Enable KML layers filter</b> - add form to map for dynamically enable / disable KML layers and sublayers.' .
+                '<br /><br /><b>Import markers / Import figures</b> - save the named points, lines and polygons of an uploaded file or a link as markers and figures of the map. The layer does not show them twice, importing again skips what is already on the map.<br />',
               GMP_LANG_CODE,
             );
             if (!$this->isPro) {
@@ -901,23 +911,6 @@ if ($this->isPro) {
 										</th>
 										<td>
 											<div style="margin-top: 10px;">
-												<label for="map_opts_enable_google_kml_api">
-													<?php echo htmlGmp::wpKsesHtml(
-               htmlGmp::checkboxHiddenVal('map_opts[enable_google_kml_api]', [
-                 'value' => $this->editMap && isset($this->map['params']['enable_google_kml_api']) ? esc_attr($this->map['params']['enable_google_kml_api']) : false,
-                 'attrs' => 'class="gmpProOpt" id="map_opts_enable_google_kml_api"',
-               ]),
-             ); ?>
-													<?php _e('Load kml faster', GMP_LANG_CODE); ?>
-												</label>
-											</div>
-											<?php
-           $hiddenClass = '';
-           if (isset($this->map['params']['enable_google_kml_api']) && !empty($this->map['params']['enable_google_kml_api'])) {
-             $hiddenClass = 'gmpHidden';
-           }
-           ?>
-											<div style="margin-top: 10px;" class="<?php echo $hiddenClass; ?>" >
 												<label for="map_opts_enable_kml_filter">
 													<?php echo htmlGmp::wpKsesHtml(
                htmlGmp::checkboxHiddenVal('map_opts[enable_kml_filter]', [
@@ -929,54 +922,45 @@ if ($this->isPro) {
 												</label>
 											</div>
 
-											<div id="gmpKmlFileRowExample" class="gmpKmlFileRow" style="display: none; margin-top: 10px;">
-												<div style="clear: both;"></div>
-												<label><?php _e('Enter KML file URL', GMP_LANG_CODE); ?></label>
-												<label class="gmpShowSublayersLabel" style="float: right;">
-													<?php echo htmlGmp::wpKsesHtml(htmlGmp::hidden('map_opts[kml_filter][show_sublayers][]', ['value' => '', 'attrs' => 'class="gmpShowSublayersInput gmpProOpt" disabled="disabled"'])); ?>
-													<?php _e('Hide Sublayers at KML filter', GMP_LANG_CODE); ?>
-												</label>
-												<div style="clear: both;"></div>
-												<a href="#" title="<?php _e('Remove KML field', GMP_LANG_CODE); ?>" class="button gmpProOpt gmpKmlRemoveFileRowBtn">
-													<i class="fa fa-trash-o"></i>
-												</a>
-												<?php echo htmlGmp::wpKsesHtml(htmlGmp::text('map_opts[kml_file_url][]', ['value' => '', 'attrs' => 'class="gmpProOpt" style="width: 86%; float: right;" disabled="disabled"'])); ?>
-												<span class="gmpKmlUploadMsg" style="float: right; width: 100%; text-align: right;" ></span>
-												<a 	href="#"
-													class="gmpKmlUploadFileBtn button gmpProOpt"
-													data-nonce="<?php echo wp_create_nonce('upload-kml-file'); ?>"
-													data-url="<?php echo uriGmp::_([
-               'baseUrl' => admin_url('admin-ajax.php'),
-               'page' => 'kml',
-               'action' => 'addFromFile',
-               'reqType' => 'ajax',
-               '_wpnonce' => wp_create_nonce('gmp_nonce'),
-               'pl' => GMP_CODE,
-             ]); ?>"
-													id="gmpKmlUploadFileBtn"
-													style="margin: 5px 0px; float: right;">
-													<?php _e('or Upload KML file', GMP_LANG_CODE); ?>
-												</a><br />
-												<label class="gmpKmlImportToMarkerLbl">
-													<span class="gmpKitmLblText"><?php _e('Import markers from layer', GMP_LANG_CODE); ?></span>
-												</label>
+											<div id="gmpKmlFileRowExample" class="gmpKmlFileRow" style="display: none;">
+												<div class="gmpKmlFileRowHead">
+													<span class="gmpKmlFileRowTitle"><?php _e('KML layer', GMP_LANG_CODE); ?></span>
+													<a href="#" title="<?php _e('Remove KML field', GMP_LANG_CODE); ?>" class="button gmpProOpt gmpKmlRemoveFileRowBtn">
+														<i class="fa fa-trash-o"></i>
+													</a>
+												</div>
+												<div class="gmpKmlFileRowSource">
+													<?php echo htmlGmp::wpKsesHtml(htmlGmp::text('map_opts[kml_file_url][]', ['value' => '', 'attrs' => 'class="gmpProOpt gmpKmlFileUrlInput" placeholder="' . esc_attr__('Enter KML file URL', GMP_LANG_CODE) . '" disabled="disabled"'])); ?>
+													<a 	href="#"
+														class="gmpKmlUploadFileBtn button gmpProOpt"
+														data-nonce="<?php echo wp_create_nonce('upload-kml-file'); ?>"
+														data-url="<?php echo uriGmp::_([
+                'baseUrl' => admin_url('admin-ajax.php'),
+                'page' => 'kml',
+                'action' => 'addFromFile',
+                'reqType' => 'ajax',
+                '_wpnonce' => wp_create_nonce('gmp_nonce'),
+                'pl' => GMP_CODE,
+              ]); ?>"
+														id="gmpKmlUploadFileBtn">
+														<i class="fa fa-upload"></i>
+														<?php _e('or Upload KML file', GMP_LANG_CODE); ?>
+													</a>
+												</div>
+												<span class="gmpKmlUploadMsg"></span>
+												<div class="gmpKmlFileRowFoot">
+													<label class="gmpKmlImportToMarkerLbl">
+														<span class="gmpKitmLblText"><?php _e('Import markers from layer', GMP_LANG_CODE); ?></span>
+													</label>
+													<label class="gmpShowSublayersLabel">
+														<?php echo htmlGmp::wpKsesHtml(htmlGmp::hidden('map_opts[kml_filter][show_sublayers][]', ['value' => '', 'attrs' => 'class="gmpShowSublayersInput gmpProOpt" disabled="disabled"'])); ?>
+														<?php _e('Hide Sublayers at KML filter', GMP_LANG_CODE); ?>
+													</label>
+												</div>
 											</div>
-											<?php if (!empty($this->map['params']['kml_import_to_marker']) && count($this->map['params']['kml_import_to_marker'])) {
-             foreach ($this->map['params']['kml_import_to_marker'] as $omKey => $oneMarker) {
-               $isKmlImpToMarkerVal = 0;
-               if ($oneMarker == 'on') {
-                 $isKmlImpToMarkerVal = 1;
-               }
-               echo htmlGmp::wpKsesHtml(
-                 htmlGmp::hidden('map_opts[kml_import_to_marker][]', [
-                   'value' => esc_attr($isKmlImpToMarkerVal),
-                   'attrs' => ' class="gmpProOpt gmpKmlImportToMarkerHid" data-order="' . esc_attr($omKey) . '" ',
-                 ]),
-               );
-             }
-           } ?>
 											<div id="gmpKmlFileRowsShell"></div>
-											<a href="#" class="button gmpProOpt" id="gmpKmlAddFileRowBtn" style="margin: 5px 5px 5px 0px; float: left;">
+											<a href="#" class="button gmpProOpt" id="gmpKmlAddFileRowBtn">
+												<i class="fa fa-plus"></i>
 												<?php _e('Add more files', GMP_LANG_CODE); ?>
 											</a>
 										</td>
@@ -1490,7 +1474,7 @@ if ($this->isPro) {
 													</label></br>
 													<?php echo htmlGmp::wpKsesHtml(
                htmlGmp::text('map_opts[places][slider_step]', [
-                 'value' => $this->editMap && isset($this->map['params']['places][slider_step']) ? esc_attr($this->map['params']['places][slider_step']) : '10',
+                 'value' => $this->editMap && isset($this->map['params']['places']['slider_step']) ? esc_attr($this->map['params']['places']['slider_step']) : '10',
                  'attrs' => 'class="gmpProOpt" style="width: 100%;" id="map_opts_places_slider_step"',
                ]),
              ); ?>
@@ -2095,12 +2079,13 @@ if ($this->isPro) {
 											<label>
 												<?php _e('Display period for the markers', GMP_LANG_CODE); ?>:
 											</label>
-											<i style="float: right;" class="fa fa-question supsystic-tooltip" data-tooltip-content="#tooltip_12"></i>
-											<span class="tooltipContent" id="tooltip_12">
+											<?php // Own id: "tooltip_12" is the "Autoplay options" tooltip of the Map tab ?>
+											<i style="float: right;" class="fa fa-question supsystic-tooltip" data-tooltip-content="#tooltip_marker_period"></i>
+											<span class="tooltipContent" id="tooltip_marker_period">
 												<?php _e(
               'Display markers on the map by a selected period. A marker will automatically start to appear on the specified date and disappear automatically at the appointed time.',
               GMP_LANG_CODE,
-            ); ?> </br> <a href='https://supsystic.com/example/markers-displaying-by-period/'>https://supsystic.com/example/markers-displaying-by-period/</a> </br></br> <img style='width:100%' src=''>
+            ); ?> </br> <a href='https://supsystic.com/example/markers-displaying-by-period/' target='_blank'>https://supsystic.com/example/markers-displaying-by-period/</a>
 											</span>
 
 											<?php if (!$this->isPro) { ?>
@@ -2308,6 +2293,31 @@ if ($this->isPro) {
 											</div>
 										</td>
 									</tr>
+									<?php
+         // Display period of figures - only with a PRO version that saves it
+         $shapeModule = frameGmp::_()->getModule('shape');
+         if ($shapeModule && method_exists($shapeModule->getModel(), 'preparePeriodDate')) { ?>
+									<tr>
+										<th scope="row">
+											<label for="shapePeriodDateFrom">
+												<?php _e('Display period for the figure', GMP_LANG_CODE); ?>:
+											</label>
+											<i style="float: right;" class="fa fa-question supsystic-tooltip" title="<?php esc_attr_e('The figure is shown on the map only within this period (date and time of the site). An empty field means no limit on that side.', GMP_LANG_CODE); ?>"></i>
+										</th>
+										<td>
+											<div class="gmpShapePeriod">
+												<label>
+													<?php _e('Period From', GMP_LANG_CODE); ?>
+													<?php echo htmlGmp::wpKsesHtml(htmlGmp::text('shape_opts[period_date_from]', ['value' => '', 'attrs' => 'id="shapePeriodDateFrom"'])); ?>
+												</label>
+												<label>
+													<?php _e('Period To', GMP_LANG_CODE); ?>
+													<?php echo htmlGmp::wpKsesHtml(htmlGmp::text('shape_opts[period_date_to]', ['value' => '', 'attrs' => 'id="shapePeriodDateTo"'])); ?>
+												</label>
+											</div>
+										</td>
+									</tr>
+									<?php } ?>
 									<tr>
 										<th scope="row">
 											<label for="shape_opts_coords">
@@ -2837,11 +2847,27 @@ if ($this->isPro) {
 						</div>
 						<div style="clear: both;"></div>
 					</div>
+					<?php if ($this->isPro) { ?>
+						<?php // Map tab: switches between the markers and the figures list ?>
+						<div id="gmpMapListsTabs" class="gmpMapListsTabs" style="display: none;">
+							<a href="#" class="gmpMapListsTab gmpMapListsTabMarkers gmpMapListsTabActive">
+								<i class="fa fa-map-marker"></i>
+								<?php _e('Markers', GMP_LANG_CODE); ?>
+								<span class="gmpMapListsTabCount"></span>
+							</a>
+							<a href="#" class="gmpMapListsTab gmpMapListsTabShapes">
+								<i class="fa fa-cubes"></i>
+								<?php _e('Figures', GMP_LANG_CODE); ?>
+								<span class="gmpMapListsTabCount"></span>
+							</a>
+						</div>
+					<?php } ?>
 					<div id="gmpMarkerList">
 						<input id="gmpMarkersSearchInput" type="text" placeholder="<?php _e('Search by name', GMP_LANG_CODE); ?>" style="display: none; width: 100%; margin: 0;" >
 						<table id="gmpMarkersListGrid" class="supsystic-tbl-pagination-shell"></table>
 					</div>
 					<div id="gmpShapeList">
+						<input id="gmpShapesSearchInput" type="text" placeholder="<?php _e('Search by name', GMP_LANG_CODE); ?>" style="display: none; width: 100%; margin: 0;" >
 						<table id="gmpShapesListGrid" class="supsystic-tbl-pagination-shell"></table>
 					</div>
 					<?php
@@ -2933,10 +2959,10 @@ If you already use own Google Maps API key - you should open <a target="_blank" 
 </ul>',
       GMP_LANG_CODE,
     ),
-    '//developers.google.com/maps/pricing-and-plans/standard-plan-2016-update',
-    '//supsystic.com/google-maps-api-key/',
+    'https://mapsplatform.google.com/pricing/',
+    'https://supsystic.com/documentation/create-google-maps-api-key/',
     frameGmp::_()->getModule('options')->getTabUrl('settings'),
-    '//console.developers.google.com/apis/credentials',
+    'https://console.cloud.google.com/google/maps-apis/credentials',
     frameGmp::_()->getModule('options')->getTabUrl('settings'),
     '//developers.google.com/maps/documentation/javascript/error-messages#checking-errors',
     '//developers.google.com/maps/documentation/javascript/error-messages#deverrorcodes',

@@ -4,11 +4,22 @@ class gmap_widgetGmp extends moduleGmp
   public function init()
   {
     parent::init();
-    add_action('widgets_init', [$this, 'registerWidget']);
+    // Modules are initialized on "init" with priority 5, WordPress runs "widgets_init" on "init" with priority 1:
+    // waiting for it, the widget was never registered
+    if (did_action('widgets_init')) {
+      $this->registerWidget(true);
+    } else {
+      add_action('widgets_init', [$this, 'registerWidget']);
+    }
   }
-  public function registerWidget()
+  public function registerWidget($late = false)
   {
-    return register_widget('gmpMapsWidget');
+    global $wp_widget_factory;
+    register_widget('gmpMapsWidget');
+    // After "widgets_init" the factory does not register new widgets itself
+    if ($late === true && isset($wp_widget_factory->widgets['gmpMapsWidget'])) {
+      $wp_widget_factory->widgets['gmpMapsWidget']->_register();
+    }
   }
 }
 /**

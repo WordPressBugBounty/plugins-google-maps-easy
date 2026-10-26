@@ -38,9 +38,5 @@ if (empty($this->currentMap)) {
 			font-size: <?php echo esc_attr($this->currentMap['params']['infownd_title_size']); ?>px !important;
 		}
 	<?php } ?>
-    <?php if (isset($this->currentMap['params']['hide_marker_tooltip']) && $this->currentMap['params']['hide_marker_tooltip']) { ?>
-        .gm-style .gm-style-iw-t {
-            display: none !important;
-        }
-    <?php } ?>
+    <?php // "Hide Tooltips of Markers" is done in core.marker.js (markers get no title): hiding .gm-style-iw-t here hid every info window of the page ?>
 </style>
