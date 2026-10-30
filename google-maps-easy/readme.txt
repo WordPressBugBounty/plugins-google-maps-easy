@@ -3,7 +3,7 @@ Contributors: supsysticcom
 Tags: google maps, google map, maps, map, map markers
 Tested up to: 7.1
 Requires PHP: 7.3
-Stable tag: 1.16.0
+Stable tag: 1.16.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -167,6 +167,10 @@ Please report security issues through the [Patchstack Vulnerability Disclosure P
 == Changelog ==
 
 = 2026 =
+
+= 1.16.1 — October 30, 2026 =
+
+* Tested up to 7.1.4 - General code improvements.
 
 = 1.16.0 — October 26, 2026 =
 

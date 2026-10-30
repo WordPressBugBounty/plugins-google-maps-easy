@@ -4,7 +4,7 @@
  * Plugin Name: Easy Google Maps
  * Plugin URI: https://supsystic.com/plugins/google-maps-plugin/
  * Description: Google Maps with unlimited markers, custom icons, marker categories, clustering and map themes. Gutenberg block, Elementor widget, no coding.
- * Version: 1.16.0
+ * Version: 1.16.1
  * Author: supsystic.com
  * Author URI: https://supsystic.com
  * Text Domain: google-maps-easy
@@ -58,5 +58,21 @@ frameGmp::_()->parseRoute();
 frameGmp::_()->init();
 frameGmp::_()->exec();
 installerGmp::updateIcon();
+
+/**
+ * Spooky Sale banner on the plugin admin pages
+ */
+if (is_admin()) {
+  require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'promo' . DIRECTORY_SEPARATOR . 'spooky-sale.php';
+  SupsysticSpookySale2026::register('google-maps-easy', plugin_dir_url(__FILE__) . 'promo/', [
+    'proPid' => 185,
+    'proUrl' => 'https://supsystic.com/plugins/google-maps-plugin/',
+    'isPro' => function () {
+      $promo = frameGmp::_()->getModule('supsystic_promo');
+      return $promo && $promo->isPro();
+    },
+    'utmCampaign' => 'googlemaps',
+  ]);
+}
 
 //var_dump(frameGmp::_()->getActivationErrors()); exit();
