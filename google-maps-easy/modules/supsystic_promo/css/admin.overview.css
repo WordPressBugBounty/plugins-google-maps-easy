@@ -8,9 +8,12 @@
   --gmp-blue: #377dff;
   --gmp-violet: #7259ef;
   box-sizing: border-box;
-  width: calc(100% - 20px);
+  /* At most 1200px wide, in the middle of the area right of the menu rail, as the Overview of Data Tables and the
+     other Supsystic plugins (493.5-1693.5 at 1920px). The page frame keeps 30px on the right and Data Tables 10px,
+     so the middle is 10px to the right of the middle of this box. Narrower: the whole width of the page. */
+  width: 100%;
   max-width: 1200px;
-  margin: 20px auto 32px;
+  margin: 0 0 0 clamp(0px, calc((100% - 1180px) / 2), calc(100% - 1200px));
   color: var(--gmp-ink);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
@@ -93,7 +96,13 @@
 .gmp-overview-locator-layers i.is-zone { border: 1.5px solid #4285f4; background: rgba(66,133,244,.18); }
 .gmp-overview-locator-layers i.is-route { height: 4px; border-radius: 2px; background: #4285f4; }
 .gmp-overview-map-canvas { position: relative; min-width: 0; overflow: hidden; aspect-ratio: 1 / 1; background: #f1f3f4; }
-.gmp-overview-map-svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+/*
+ * The streets (img/map-city.svg) and the layers over them (img/overview-map.svg): two pictures of the same box,
+ * 1200 x 640 from -240/-40, placed so that its part from 180/90, 360 wide, fills the width of the canvas. Both are
+ * sized by the width only (margin-top in % is a share of the width), so they stay on each other at any canvas height.
+ */
+.gmp-overview-map-city,
+.gmp-overview-map-svg { position: absolute; top: 0; left: -116.6667%; display: block; width: 333.3333%; max-width: none; height: auto; margin-top: -36.1111%; aspect-ratio: 1200 / 640; }
 .gmp-overview-map-fullscreen, .gmp-overview-map-zoom { position: absolute; right: 8px; background: #fff; color: #666; box-shadow: 0 1px 4px rgba(0,0,0,.3); }
 .gmp-overview-map-fullscreen { top: 8px; display: flex; width: 26px; height: 26px; align-items: center; justify-content: center; border-radius: 2px; font-size: 12px; }
 .gmp-overview-map-zoom { bottom: 24px; overflow: hidden; border-radius: 2px; }
@@ -247,7 +256,7 @@
 }
 
 @media (max-width: 782px) {
-  .gmp-overview { padding: 14px 12px 28px; }
+  .gmp-overview { padding: 0; }
   .gmp-overview-hero { min-height: 0; padding: 28px 22px; }
   .gmp-overview-hero h1 { font-size: 31px; }
   .gmp-overview-map-window { transform: none; }

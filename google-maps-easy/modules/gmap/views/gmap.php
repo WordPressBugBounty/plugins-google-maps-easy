@@ -402,7 +402,7 @@ class gmapViewGmp extends viewGmp
         'cloned' => __('Maps cloned.', GMP_LANG_CODE),
       ],
     ]);
-    frameGmp::_()->addStyle('admin.gmap.list', $this->getModule()->getModPath() . 'css/admin.gmap.list.css', [], GMP_VERSION_PLUGIN . '-native-list-4');
+    frameGmp::_()->addStyle('admin.gmap.list', $this->getModule()->getModPath() . 'css/admin.gmap.list.css', [], GMP_VERSION_PLUGIN . '-native-list-6');
 
     $this->assign('addNewLink', frameGmp::_()->getModule('options')->getTabUrl('gmap_add_new'));
     $this->assign('list', $list);
@@ -438,6 +438,10 @@ class gmapViewGmp extends viewGmp
     frameGmp::_()->addScript('admin.marker.edit', frameGmp::_()->getModule('marker')->getModPath() . 'js/admin.marker.edit.js', [], filemtime(frameGmp::_()->getModule('marker')->getModDir() . 'js' . DS . 'admin.marker.edit.js'));
 
     frameGmp::_()->addStyle('admin.gmap', $this->getModule()->getModPath() . 'css/admin.gmap.css', [], filemtime($this->getModule()->getModDir() . 'css' . DS . 'admin.gmap.css'));
+    // Editor layout: group tabs, search, cards and switches over the same rows and fields
+    frameGmp::_()->addScript('admin.gmap.settings-ui', $this->getModule()->getModPath() . 'js/admin.gmap.settings-ui.js', ['jquery'], GMP_VERSION_PLUGIN . '-mapui-3', true);
+    frameGmp::_()->addStyle('admin.gmap.settings-ui', $this->getModule()->getModPath() . 'css/admin.gmap.settings-ui.css', [], GMP_VERSION_PLUGIN . '-mapui-4');
+    frameGmp::_()->addJSVar('admin.gmap.settings-ui', 'gmpMapUi', $this->getModule()->getSettingsUiTexts());
 
     frameGmp::_()->addJSVar('admin.gmap.edit', 'gmpMapShortcode', GMP_SHORTCODE);
     frameGmp::_()->addJSVar('admin.gmap.edit', 'gmpAllStylizationsList', $allStylizationsList);
@@ -555,7 +559,7 @@ class gmapViewGmp extends viewGmp
         frameGmp::_()->addScript('core.markerclusterer', $coreMarkerClustererPath, [], filemtime($coreMarkerClustererFile));
       }
 
-      frameGmp::_()->addStyle('core.gmap', $this->getModule()->getModPath() . 'css/core.gmap.css');
+      frameGmp::_()->addStyle('core.gmap', $this->getModule()->getModPath() . 'css/core.gmap.css', [], filemtime($this->getModule()->getModDir() . 'css' . DS . 'core.gmap.css'));
 
       dispatcherGmp::doAction('afterConnectMapAssets', $params, $forAdminArea);
     }

@@ -800,7 +800,8 @@ function _gmpResizeRightSidebar(container) {
     rightBarWd,
     newHeight;
 
-  rightBar.width(jQuery('.supsistic-half-side-box').width());
+  // As wide as its own column (the first column has the gutter between the two on its right)
+  rightBar.width(rightBar.parent().width());
   rightBarWd = rightBar.outerWidth();
   newHeight = 400;
 
@@ -821,8 +822,19 @@ function _gmpResizeRightSidebar(container) {
     }
     height = height > 250 ? height : 250;
 
-    self.jqGrid('setGridWidth', rightBarWd);
+    // The frame of the list (its 1px border) stays inside the column too
+    var box = jQuery('#gbox_' + this.id),
+      frame = box.length ? box.outerWidth() - box.innerWidth() : 0;
+    self.jqGrid('setGridWidth', rightBarWd - frame);
     self.jqGrid('setGridHeight', height);
+    // The sum above misses margins, the list tabs and the pager: the whole column must fit the screen under the admin
+    // bar, or it runs below the screen while it sticks
+    if (wndWd > 991 && self.is(':visible')) {
+      var over = rightBar.outerHeight() - (wndHt - jQuery('#wpadminbar').outerHeight() - 16);
+      if (over > 0) {
+        self.jqGrid('setGridHeight', Math.max(150, height - over));
+      }
+    }
   });
 }
 // Map tab: shows the markers or the figures list under the map

@@ -466,6 +466,12 @@ gmpGoogleMarker.prototype._setInfoWndContent = function (newContentHtmlObj) {
       maxWndWidth = mapWidth * 0.6,
       infoWndParams = { maxWidth: infoWndWidth < maxWndWidth ? infoWndWidth : maxWndWidth };
 
+    // The map is not measured yet (the editor preview while hidden): a width of 0 meant "no limit" and the window
+    // took the whole map. The width set in px stays the limit; with Auto there is no limit, as before
+    if (!mapWidth) {
+      infoWndParams.maxWidth = map.getParam('marker_infownd_width_units') == 'px' ? parseInt(map.getParam('marker_infownd_width')) || 0 : 0;
+    }
+
     // "Hide Close Button": Google's own option, for every appearance (the header holds only the close button)
     if (parseInt(map.getParam('marker_infownd_hide_close_btn'))) {
       infoWndParams.headerDisabled = true;

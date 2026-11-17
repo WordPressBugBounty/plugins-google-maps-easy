@@ -11,17 +11,19 @@
   --gmp-border: #dce3ea;
   --gmp-muted: #6e7d8d;
   --gmp-surface: #fff;
-  margin-top: 10px;
+  margin: 0;
   max-width: 100%;
 }
 
+/* As in Ultimate Maps: the white frame of the page is the surface, the toolbar and the table go to its edges */
 #gmp-maps-list .gmp-list-panel {
   box-sizing: border-box;
+  min-height: 0;
   margin: 0;
-  padding: 16px 18px 18px !important;
-  border-radius: 10px;
-  background: #f7f9fb;
-  box-shadow: 0 8px 24px rgba(30, 49, 70, 0.07);
+  padding: 0 !important;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 #gmp-maps-list .gmp-table-toolbar {
@@ -477,7 +479,7 @@
 
 @media (max-width: 782px) {
   #gmp-maps-list .gmp-list-panel {
-    padding: 12px;
+    padding: 0 !important;
   }
 
   #gmp-maps-list .gmp-table-toolbar-left,
@@ -499,4 +501,49 @@
   #gmp-maps-list .gmp-pagination-controls {
     flex-wrap: wrap;
   }
+}
+
+/* Checkboxes of the list in the look of Data Tables and Photo Gallery: an 18 px square, 1.5 px frame, the teal
+   check; the one in the head stands in the middle of its column like those of the rows */
+#gmp-maps-list .gmp-maps-table thead th.gmp-col-check,
+#gmp-maps-list .gmp-maps-table tbody td.gmp-col-check {
+  width: 48px;
+  padding-right: 12px;
+  padding-left: 12px;
+  text-align: center;
+}
+#gmp-maps-list .gmp-native-check {
+  border: 1.5px solid #94a3b8;
+  border-radius: 5px;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+#gmp-maps-list .gmp-native-check:hover {
+  border-color: #0e8a93;
+}
+#gmp-maps-list .gmp-native-check:focus-visible {
+  box-shadow: 0 0 0 3px rgba(14, 138, 147, 0.25);
+  outline: none;
+}
+#gmp-maps-list .gmp-maps-table thead .gmp-native-check {
+  border-color: rgba(255, 255, 255, 0.85);
+  background: transparent;
+}
+#gmp-maps-list .gmp-native-check:checked,
+#gmp-maps-list .gmp-maps-table thead .gmp-native-check:checked {
+  border-color: #0e8a93;
+  background: #0e8a93 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 12px no-repeat;
+}
+#gmp-maps-list .gmp-native-check:checked::before,
+#gmp-maps-list .gmp-native-check:indeterminate::before {
+  content: none;
+}
+#gmp-maps-list .gmp-native-check:indeterminate {
+  border-color: #0e8a93;
+  background: #0e8a93 linear-gradient(#fff, #fff) center / 9px 2px no-repeat;
+}
+/* A block in the middle of its cell: no half-pixel drift from the text baseline */
+#gmp-maps-list .gmp-maps-table th.gmp-col-check .gmp-native-check,
+#gmp-maps-list .gmp-maps-table td.gmp-col-check .gmp-native-check {
+  display: block !important;
+  margin: 0 auto !important;
 }

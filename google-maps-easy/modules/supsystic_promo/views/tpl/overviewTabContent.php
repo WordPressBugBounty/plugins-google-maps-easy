@@ -8,7 +8,9 @@ $settingsUrl = $adminBase . '&tab=settings';
 $proUrl = $promoModule->generateMainLink('utm_source=plugin&utm_medium=overview&utm_campaign=google_maps_upsell');
 $featureGridUrl = $promoModule->generateMainLink('utm_source=plugin&utm_medium=overview&utm_campaign=google_maps_upsell&utm_content=feature_grid');
 $pricingUrl = $promoModule->generateMainLink('utm_source=plugin&utm_medium=overview&utm_campaign=google_maps_upsell&utm_content=pro_powerhouse');
-$comparisonUrl = $promoModule->generateMainLink('utm_source=plugin&utm_medium=overview&utm_campaign=google_maps_upsell&utm_content=free_pro_comparison');
+// FREE / PRO tags only while something is locked: with PRO the cards carry no labels
+$tagFree = $isPro ? '' : '<span class="gmp-overview-tag is-free">FREE</span>';
+$tagPro = $isPro ? '' : '<span class="gmp-overview-tag is-pro">PRO</span>';
 ?>
 
 <div class="gmp-overview">
@@ -55,7 +57,8 @@ $comparisonUrl = $promoModule->generateMainLink('utm_source=plugin&utm_medium=ov
             </div>
           </div>
           <div class="gmp-overview-map-canvas">
-            <img class="gmp-overview-map-svg" src="<?php echo esc_url(GMP_PLUGINS_URL . '/' . GMP_PLUG_NAME . '/modules/supsystic_promo/img/overview-map.svg'); ?>" alt="">
+            <img class="gmp-overview-map-city" src="<?php echo esc_url(GMP_PLUGINS_URL . '/' . GMP_PLUG_NAME . '/modules/supsystic_promo/img/map-city.svg?ver=' . GMP_VERSION_PLUGIN . '-roads-1'); ?>" alt="">
+            <img class="gmp-overview-map-svg" src="<?php echo esc_url(GMP_PLUGINS_URL . '/' . GMP_PLUG_NAME . '/modules/supsystic_promo/img/overview-map.svg?ver=' . GMP_VERSION_PLUGIN . '-roads-1'); ?>" alt="">
             <span class="gmp-overview-map-fullscreen"><i class="fa fa-expand"></i></span>
             <div class="gmp-overview-map-zoom"><span>+</span><span>−</span></div>
             <div class="gmp-overview-map-scale"><i></i>200 m</div>
@@ -76,6 +79,11 @@ $comparisonUrl = $promoModule->generateMainLink('utm_source=plugin&utm_medium=ov
     </div>
   </section>
 
+  <?php if (!$isPro) { ?>
+    <?php // Free vs PRO matrix and prices (views/tpl/overviewProOffer.php), moved here from the footer by js/admin.design.js ?>
+    <div id="gmp-pro-offer-slot"></div>
+  <?php } ?>
+
   <?php if ($isPro) { ?>
     <section class="gmp-overview-license-banner">
       <div class="gmp-overview-license-aside" aria-hidden="true"><i class="fa fa-check-circle"></i><strong>PRO</strong><span><?php esc_html_e('mapping toolkit active', GMP_LANG_CODE); ?></span></div>
@@ -92,18 +100,18 @@ $comparisonUrl = $promoModule->generateMainLink('utm_source=plugin&utm_medium=ov
     <div class="gmp-overview-main">
       <div class="gmp-overview-section-heading">
         <div><span class="gmp-overview-pill"><?php esc_html_e('51 mapping capabilities', GMP_LANG_CODE); ?></span><h2><?php esc_html_e('From a single pin to a complete store locator.', GMP_LANG_CODE); ?></h2></div>
-        <p><?php esc_html_e('Free covers the essentials. PRO adds the tools that turn location data into a guided customer journey.', GMP_LANG_CODE); ?></p>
+        <?php if (!$isPro) { ?><p><?php esc_html_e('Free covers the essentials. PRO adds the tools that turn location data into a guided customer journey.', GMP_LANG_CODE); ?></p><?php } ?>
       </div>
 
       <div class="gmp-overview-feature-grid">
-        <div class="gmp-overview-feature-card"><i class="fa fa-map-marker"></i><h3><?php esc_html_e('Unlimited maps and markers', GMP_LANG_CODE); ?></h3><p><?php esc_html_e('Create as many maps and locations as the site needs. Search an address, click the map or use exact coordinates.', GMP_LANG_CODE); ?></p><span class="gmp-overview-tag is-free">FREE</span></div>
-        <div class="gmp-overview-feature-card"><i class="fa fa-picture-o"></i><h3><?php esc_html_e('Rich marker stories', GMP_LANG_CODE); ?></h3><p><?php esc_html_e('Combine text, photos, video, links, phone numbers and custom icons inside informative marker popups.', GMP_LANG_CODE); ?></p><span class="gmp-overview-tag is-free">FREE</span></div>
-        <div class="gmp-overview-feature-card"><i class="fa fa-object-group"></i><h3><?php esc_html_e('Categories and clustering', GMP_LANG_CODE); ?></h3><p><?php esc_html_e('Organize locations into filterable categories and group dense marker sets into clusters as visitors zoom.', GMP_LANG_CODE); ?></p><span class="gmp-overview-tag is-free">FREE</span></div>
-        <div class="gmp-overview-feature-card"><i class="fa fa-exchange"></i><h3><?php esc_html_e('Import, export and publish', GMP_LANG_CODE); ?></h3><p><?php esc_html_e('Move maps and markers with CSV, then publish through shortcode, PHP, Gutenberg, Elementor or a sidebar widget.', GMP_LANG_CODE); ?></p><span class="gmp-overview-tag is-free">FREE</span></div>
-        <div class="gmp-overview-feature-card"><i class="fa fa-location-arrow"></i><h3><?php esc_html_e('Directions and routes', GMP_LANG_CODE); ?></h3><p><?php esc_html_e('Keep visitors on the site with Get Direction buttons, alternate routes, current-position starts and turn-by-turn steps.', GMP_LANG_CODE); ?></p><span class="gmp-overview-tag is-pro">PRO</span></div>
-        <div class="gmp-overview-feature-card"><i class="fa fa-paint-brush"></i><h3><?php esc_html_e('300+ map themes', GMP_LANG_CODE); ?></h3><p><?php esc_html_e('Match the map to the brand with a large style library, advanced controls, fullscreen, print and cleaner points of interest.', GMP_LANG_CODE); ?></p><span class="gmp-overview-tag is-pro">PRO</span></div>
-        <div class="gmp-overview-feature-card"><i class="fa fa-list-alt"></i><h3><?php esc_html_e('Marker lists and sliders', GMP_LANG_CODE); ?></h3><p><?php esc_html_e('Add searchable tables, photo sliders, description cards and exposition layouts beside or below the map.', GMP_LANG_CODE); ?></p><span class="gmp-overview-tag is-pro">PRO</span></div>
-        <div class="gmp-overview-feature-card"><i class="fa fa-area-chart"></i><h3><?php esc_html_e('Layers, zones and density', GMP_LANG_CODE); ?></h3><p><?php esc_html_e('Visualize KML, heatmaps, traffic, transit, cycling, polygons, circles, polylines and road-following paths.', GMP_LANG_CODE); ?></p><span class="gmp-overview-tag is-pro">PRO</span></div>
+        <div class="gmp-overview-feature-card"><i class="fa fa-map-marker"></i><h3><?php esc_html_e('Unlimited maps and markers', GMP_LANG_CODE); ?></h3><p><?php esc_html_e('Create as many maps and locations as the site needs. Search an address, click the map or use exact coordinates.', GMP_LANG_CODE); ?></p><?php echo $tagFree; ?></div>
+        <div class="gmp-overview-feature-card"><i class="fa fa-picture-o"></i><h3><?php esc_html_e('Rich marker stories', GMP_LANG_CODE); ?></h3><p><?php esc_html_e('Combine text, photos, video, links, phone numbers and custom icons inside informative marker popups.', GMP_LANG_CODE); ?></p><?php echo $tagFree; ?></div>
+        <div class="gmp-overview-feature-card"><i class="fa fa-object-group"></i><h3><?php esc_html_e('Categories and clustering', GMP_LANG_CODE); ?></h3><p><?php esc_html_e('Organize locations into filterable categories and group dense marker sets into clusters as visitors zoom.', GMP_LANG_CODE); ?></p><?php echo $tagFree; ?></div>
+        <div class="gmp-overview-feature-card"><i class="fa fa-exchange"></i><h3><?php esc_html_e('Import, export and publish', GMP_LANG_CODE); ?></h3><p><?php esc_html_e('Move maps and markers with CSV, then publish through shortcode, PHP, Gutenberg, Elementor or a sidebar widget.', GMP_LANG_CODE); ?></p><?php echo $tagFree; ?></div>
+        <div class="gmp-overview-feature-card"><i class="fa fa-location-arrow"></i><h3><?php esc_html_e('Directions and routes', GMP_LANG_CODE); ?></h3><p><?php esc_html_e('Keep visitors on the site with Get Direction buttons, alternate routes, current-position starts and turn-by-turn steps.', GMP_LANG_CODE); ?></p><?php echo $tagPro; ?></div>
+        <div class="gmp-overview-feature-card"><i class="fa fa-paint-brush"></i><h3><?php esc_html_e('300+ map themes', GMP_LANG_CODE); ?></h3><p><?php esc_html_e('Match the map to the brand with a large style library, advanced controls, fullscreen, print and cleaner points of interest.', GMP_LANG_CODE); ?></p><?php echo $tagPro; ?></div>
+        <div class="gmp-overview-feature-card"><i class="fa fa-list-alt"></i><h3><?php esc_html_e('Marker lists and sliders', GMP_LANG_CODE); ?></h3><p><?php esc_html_e('Add searchable tables, photo sliders, description cards and exposition layouts beside or below the map.', GMP_LANG_CODE); ?></p><?php echo $tagPro; ?></div>
+        <div class="gmp-overview-feature-card"><i class="fa fa-area-chart"></i><h3><?php esc_html_e('Layers, zones and density', GMP_LANG_CODE); ?></h3><p><?php esc_html_e('Visualize KML, heatmaps, traffic, transit, cycling, polygons, circles, polylines and road-following paths.', GMP_LANG_CODE); ?></p><?php echo $tagPro; ?></div>
       </div>
 
       <?php if (!$isPro) { ?>
@@ -143,21 +151,6 @@ $comparisonUrl = $promoModule->generateMainLink('utm_source=plugin&utm_medium=ov
         </div>
       </section>
 
-      <section id="gmp-overview-compare" class="gmp-overview-comparison">
-        <div class="gmp-overview-card-head"><div><span class="gmp-overview-pill"><?php esc_html_e('Free vs PRO', GMP_LANG_CODE); ?></span><h2><?php esc_html_e('Upgrade when the map becomes part of the customer journey.', GMP_LANG_CODE); ?></h2></div><p><?php esc_html_e('Nothing built in Free needs to be rebuilt after upgrading.', GMP_LANG_CODE); ?></p></div>
-        <div class="gmp-overview-compare-table" role="table" aria-label="<?php esc_attr_e('Free and PRO feature comparison', GMP_LANG_CODE); ?>">
-          <div class="gmp-overview-compare-row is-head" role="row"><strong role="columnheader"><?php esc_html_e('Capability', GMP_LANG_CODE); ?></strong><strong role="columnheader">FREE</strong><strong role="columnheader">PRO</strong></div>
-          <div class="gmp-overview-compare-row" role="row"><span role="cell"><?php esc_html_e('Unlimited maps, markers, categories and clustering', GMP_LANG_CODE); ?></span><i class="fa fa-check" role="cell"></i><i class="fa fa-check" role="cell"></i></div>
-          <div class="gmp-overview-compare-row" role="row"><span role="cell"><?php esc_html_e('CSV import/export and WordPress publishing', GMP_LANG_CODE); ?></span><i class="fa fa-check" role="cell"></i><i class="fa fa-check" role="cell"></i></div>
-          <div class="gmp-overview-compare-row" role="row"><span role="cell"><?php esc_html_e('300+ themes and advanced map controls', GMP_LANG_CODE); ?></span><i class="fa fa-minus" role="cell"></i><i class="fa fa-check" role="cell"></i></div>
-          <div class="gmp-overview-compare-row" role="row"><span role="cell"><?php esc_html_e('Directions, routes, steps and visitor position', GMP_LANG_CODE); ?></span><i class="fa fa-minus" role="cell"></i><i class="fa fa-check" role="cell"></i></div>
-          <div class="gmp-overview-compare-row" role="row"><span role="cell"><?php esc_html_e('KML, heatmap, shapes, traffic and transit layers', GMP_LANG_CODE); ?></span><i class="fa fa-minus" role="cell"></i><i class="fa fa-check" role="cell"></i></div>
-          <div class="gmp-overview-compare-row" role="row"><span role="cell"><?php esc_html_e('Marker lists, sliders and frontend editing', GMP_LANG_CODE); ?></span><i class="fa fa-minus" role="cell"></i><i class="fa fa-check" role="cell"></i></div>
-        </div>
-        <?php if (!$isPro) { ?>
-          <div class="gmp-overview-compare-cta"><div><strong><?php esc_html_e('Ready for the complete mapping toolkit?', GMP_LANG_CODE); ?></strong><span><?php esc_html_e('Every PRO license unlocks the same feature set; plans differ by site count.', GMP_LANG_CODE); ?></span></div><a class="button button-primary" href="<?php echo esc_url($comparisonUrl); ?>" target="_blank" rel="noopener"><i class="fa fa-balance-scale"></i> <?php esc_html_e('Compare licenses', GMP_LANG_CODE); ?></a></div>
-        <?php } ?>
-      </section>
 
       <section class="gmp-overview-workflow">
         <div class="gmp-overview-workflow-heading"><span class="gmp-overview-pill"><?php esc_html_e('Fast setup', GMP_LANG_CODE); ?></span><h2><?php esc_html_e('Publish a useful map in four steps.', GMP_LANG_CODE); ?></h2></div>
@@ -186,7 +179,7 @@ $comparisonUrl = $promoModule->generateMainLink('utm_source=plugin&utm_medium=ov
         <a class="gmp-overview-resource-link" href="<?php echo esc_url($addMapUrl); ?>"><i class="fa fa-plus-circle"></i> <?php esc_html_e('Create a new map', GMP_LANG_CODE); ?></a>
         <a class="gmp-overview-resource-link" href="<?php echo esc_url($allMapsUrl); ?>"><i class="fa fa-map"></i> <?php esc_html_e('Manage maps', GMP_LANG_CODE); ?></a>
         <a class="gmp-overview-resource-link" href="<?php echo esc_url($settingsUrl); ?>"><i class="fa fa-key"></i> <?php esc_html_e('Connect API key', GMP_LANG_CODE); ?></a>
-        <a class="gmp-overview-resource-link" href="#gmp-overview-compare"><i class="fa fa-balance-scale"></i> <?php esc_html_e('Compare Free and PRO', GMP_LANG_CODE); ?></a>
+        <?php if (!$isPro) { ?><a class="gmp-overview-resource-link" href="#gmp-compare"><i class="fa fa-balance-scale"></i> <?php esc_html_e('Compare Free and PRO', GMP_LANG_CODE); ?></a><?php } ?>
         <a class="gmp-overview-resource-link" href="#gmp-overview-help"><i class="fa fa-book"></i> <?php esc_html_e('FAQ and documentation', GMP_LANG_CODE); ?></a>
         <a class="gmp-overview-resource-link" href="#gmp-overview-videos"><i class="fa fa-play"></i> <?php esc_html_e('Video tutorials', GMP_LANG_CODE); ?></a>
         <a class="gmp-overview-resource-link" href="#gmp-overview-server"><i class="fa fa-cog"></i> <?php esc_html_e('Server settings', GMP_LANG_CODE); ?></a>

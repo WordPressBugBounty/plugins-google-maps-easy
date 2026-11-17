@@ -21,11 +21,23 @@ class templatesGmp extends moduleGmp
         frameGmp::_()->addStyle('gmpAcPromoStyle', GMP_CSS_PATH . 'acPromoStyle.css', [], GMP_VERSION_PLUGIN . '-modern-shell-4');
         frameGmp::_()->addScript('adminOptionsGmp', GMP_JS_PATH . 'admin.options.js', [], filemtime(GMP_JS_DIR . 'admin.options.js'), true);
         add_action('admin_enqueue_scripts', [$this, 'loadMediaScripts']);
+        // One look for all plugin pages: printed late, after the plugin's own stylesheets
+        add_action('admin_enqueue_scripts', [$this, 'loadDesign'], 100);
       }
       // Some common styles - that need to be on all admin pages - be careful with them
       frameGmp::_()->addStyle('supsystic-for-all-admin-' . GMP_CODE, GMP_CSS_PATH . 'supsystic-for-all-admin.css');
     }
     parent::init();
+  }
+  /**
+   * Buttons, fields, checkboxes, dialogs, pickers and PRO plaques in the look of Photo Gallery and Data Tables
+   * (css/admin.design.css, js/admin.design.js). Rules that must hold with any PRO version live here, in the free plugin.
+   */
+  public function loadDesign()
+  {
+    $version = GMP_VERSION_PLUGIN . '-ds-10';
+    wp_enqueue_style('gmp-admin-design', GMP_CSS_PATH . 'admin.design.css', [], $version);
+    wp_enqueue_script('gmp-admin-design', GMP_JS_PATH . 'admin.design.js', ['jquery'], $version, true);
   }
   public function loadMediaScripts()
   {

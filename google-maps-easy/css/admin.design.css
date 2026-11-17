@@ -1,0 +1,1260 @@
+/*
+ * One look for all admin pages of Easy Google Maps, the same as Photo Gallery and Data Tables: buttons, fields,
+ * selects, checkboxes, toolbars, jQuery UI dialogs, Chosen pickers and color fields. Printed after the old plugin-wide
+ * stylesheets (supsystic-ui.css), so the same selectors win; !important only where the old rules use it.
+ * One accent, teal #0e8a93; navy only for the main action of a screen.
+ */
+.supsystic-plugin,
+.ui-dialog,
+.gmp-up,
+.gmp-review {
+  --gmp-ui-ink: #13202e;
+  --gmp-ui-text: #334155;
+  --gmp-ui-muted: #64748b;
+  --gmp-ui-line: #e2e8f0;
+  --gmp-ui-field: #cbd5e1;
+  --gmp-ui-surface: #f8fafc;
+  --gmp-ui-accent: #0e8a93;
+  --gmp-ui-accent-dark: #0b6e75;
+  --gmp-ui-accent-soft: #e6f6f7;
+  --gmp-ui-navy: linear-gradient(145deg, #26384c 0%, #1d2b3c 100%);
+  --gmp-ui-navy-hover: #17222e;
+  --gmp-ui-radius: 8px;
+  --gmp-ui-control: 34px;
+}
+
+/* ---------- Links: the old bright cyan of the plugin pages is hard to read on white. As specific as the old
+   ".supsystic-plugin a" rule (:where adds nothing), so the own colors of cards, banners and buttons still win ---------- */
+.supsystic-plugin :where(.supsystic-container) a:where(:not(.button):not(.nav-tab)),
+.ui-dialog :where(.ui-dialog-content) a:where(:not(.button)) {
+  color: var(--gmp-ui-accent);
+}
+.supsystic-plugin :where(.supsystic-container) a:where(:not(.button):not(.nav-tab)):hover,
+.ui-dialog :where(.ui-dialog-content) a:where(:not(.button)):hover {
+  color: var(--gmp-ui-accent-dark);
+}
+
+/* ---------- Buttons ---------- */
+.supsystic-plugin .button:not(.wp-color-result):not(.wp-picker-clear):not(.wp-picker-default),
+.supsystic-plugin .button-secondary:not(.wp-color-result),
+.ui-dialog .ui-dialog-buttonpane .button,
+.ui-dialog .ui-dialog-buttonpane .ui-button,
+.ui-dialog .button:not(.wp-color-result) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-sizing: border-box;
+  height: var(--gmp-ui-control);
+  min-height: var(--gmp-ui-control);
+  margin: 0;
+  padding: 0 14px;
+  border: 1px solid var(--gmp-ui-line) !important;
+  border-radius: var(--gmp-ui-radius) !important;
+  background: #fff !important;
+  box-shadow: none !important;
+  color: var(--gmp-ui-text) !important;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1 !important;
+  text-decoration: none;
+  text-shadow: none !important;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+.supsystic-plugin .button .fa,
+.supsystic-plugin .button .dashicons-before:before,
+.ui-dialog .button .fa {
+  width: auto;
+  margin: 0;
+  color: inherit;
+  font-size: 13px;
+  line-height: 1;
+}
+.supsystic-plugin .button .dashicons-before:before {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+}
+.supsystic-plugin .button:not(.wp-color-result):not(.wp-picker-clear):not(.wp-picker-default):hover,
+.supsystic-plugin .button:not(.wp-color-result):not(.wp-picker-clear):not(.wp-picker-default):focus,
+.ui-dialog .button:not(.wp-color-result):hover,
+.ui-dialog .button:not(.wp-color-result):focus,
+.ui-dialog .ui-dialog-buttonpane .ui-button:hover,
+.ui-dialog .ui-dialog-buttonpane .ui-button:focus {
+  border-color: var(--gmp-ui-accent) !important;
+  background: #fff !important;
+  color: var(--gmp-ui-accent) !important;
+}
+.supsystic-plugin .button:not(.wp-color-result):focus-visible,
+.ui-dialog .button:not(.wp-color-result):focus-visible {
+  box-shadow: 0 0 0 3px rgba(14, 138, 147, 0.2) !important;
+  outline: none;
+}
+
+/* Main action of a screen: navy (as specific as the plain rule above, which it follows) */
+.supsystic-plugin .button-primary,
+.supsystic-plugin .button.button-primary:not(.wp-color-result):not(.wp-picker-clear):not(.wp-picker-default),
+.ui-dialog .button-primary:not(.wp-color-result) {
+  border-color: transparent !important;
+  background: var(--gmp-ui-navy) !important;
+  color: #fff !important;
+}
+.supsystic-plugin .button-primary:hover,
+.supsystic-plugin .button-primary:focus,
+.supsystic-plugin .button.button-primary:not(.wp-color-result):not(.wp-picker-clear):not(.wp-picker-default):hover,
+.supsystic-plugin .button.button-primary:not(.wp-color-result):not(.wp-picker-clear):not(.wp-picker-default):focus,
+.ui-dialog .button-primary:not(.wp-color-result):hover,
+.ui-dialog .button-primary:not(.wp-color-result):focus {
+  border-color: transparent !important;
+  background: var(--gmp-ui-navy-hover) !important;
+  color: #fff !important;
+}
+.supsystic-plugin .button.button-hero {
+  height: 44px;
+  min-height: 44px;
+  padding: 0 22px;
+  font-size: 14px;
+}
+
+/* Disabled */
+.supsystic-plugin .button[disabled],
+.supsystic-plugin .button:disabled,
+.supsystic-plugin .button.disabled,
+.supsystic-plugin .button-disabled {
+  border-color: var(--gmp-ui-line) !important;
+  background: var(--gmp-ui-surface) !important;
+  color: #a3adb9 !important;
+  cursor: default;
+}
+
+/* ---------- Fields and selects ---------- */
+.supsystic-plugin input[type='text'],
+.supsystic-plugin input[type='number'],
+.supsystic-plugin input[type='search'],
+.supsystic-plugin input[type='url'],
+.supsystic-plugin input[type='email'],
+.supsystic-plugin input[type='password'],
+.supsystic-plugin input[type='date'],
+.supsystic-plugin input[type='time'],
+.supsystic-plugin input[type='datetime-local'],
+.supsystic-plugin select:not([multiple]),
+.supsystic-plugin textarea {
+  box-sizing: border-box;
+  min-height: var(--gmp-ui-control);
+  border: 1px solid var(--gmp-ui-field);
+  border-radius: var(--gmp-ui-radius);
+  background-color: #fff;
+  box-shadow: none;
+  color: var(--gmp-ui-ink);
+  font-size: 13px;
+}
+.supsystic-plugin input[type='text'],
+.supsystic-plugin input[type='number'],
+.supsystic-plugin input[type='search'],
+.supsystic-plugin input[type='url'],
+.supsystic-plugin input[type='email'],
+.supsystic-plugin input[type='password'],
+.supsystic-plugin input[type='date'],
+.supsystic-plugin input[type='time'],
+.supsystic-plugin input[type='datetime-local'] {
+  padding: 0 10px;
+}
+.supsystic-plugin select:not([multiple]) {
+  padding: 0 28px 0 10px;
+  line-height: 1.2;
+}
+.supsystic-plugin select[multiple] {
+  border: 1px solid var(--gmp-ui-field);
+  border-radius: var(--gmp-ui-radius);
+  padding: 4px;
+}
+.supsystic-plugin textarea {
+  padding: 8px 10px;
+}
+.supsystic-plugin input[type='text']:focus,
+.supsystic-plugin input[type='number']:focus,
+.supsystic-plugin input[type='search']:focus,
+.supsystic-plugin input[type='url']:focus,
+.supsystic-plugin input[type='email']:focus,
+.supsystic-plugin input[type='password']:focus,
+.supsystic-plugin input[type='date']:focus,
+.supsystic-plugin input[type='time']:focus,
+.supsystic-plugin input[type='datetime-local']:focus,
+.supsystic-plugin select:focus,
+.supsystic-plugin textarea:focus {
+  border-color: var(--gmp-ui-accent);
+  box-shadow: 0 0 0 3px rgba(14, 138, 147, 0.15);
+  outline: none;
+}
+.supsystic-plugin input[readonly] {
+  background-color: var(--gmp-ui-surface);
+}
+.supsystic-plugin input::placeholder,
+.supsystic-plugin textarea::placeholder {
+  color: #94a3b8;
+}
+.supsystic-plugin input[type='text'].gmpInputError {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+
+/* ---------- Checkboxes and radios: native, in one modern look (the editor cards turn checkboxes into switches) ---------- */
+.supsystic-plugin input[type='checkbox'],
+.supsystic-plugin input[type='radio'],
+.ui-dialog input[type='checkbox'],
+.ui-dialog input[type='radio'] {
+  -webkit-appearance: none;
+  appearance: none;
+  position: relative;
+  display: inline-block;
+  box-sizing: border-box;
+  flex: none;
+  width: 18px;
+  min-width: 18px;
+  height: 18px;
+  margin: 0 6px 0 0;
+  padding: 0;
+  border: 1.5px solid #94a3b8;
+  background: #fff;
+  box-shadow: none;
+  vertical-align: -4px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+.supsystic-plugin input[type='checkbox'],
+.ui-dialog input[type='checkbox'] {
+  border-radius: 5px;
+}
+.supsystic-plugin input[type='radio'],
+.ui-dialog input[type='radio'] {
+  border-radius: 50%;
+}
+.supsystic-plugin input[type='checkbox']::before,
+.supsystic-plugin input[type='radio']::before,
+.ui-dialog input[type='checkbox']::before,
+.ui-dialog input[type='radio']::before {
+  content: none !important;
+}
+.supsystic-plugin input[type='checkbox']:hover,
+.supsystic-plugin input[type='radio']:hover,
+.ui-dialog input[type='checkbox']:hover,
+.ui-dialog input[type='radio']:hover {
+  border-color: var(--gmp-ui-accent);
+}
+.supsystic-plugin input[type='checkbox']:focus-visible,
+.supsystic-plugin input[type='radio']:focus-visible,
+.ui-dialog input[type='checkbox']:focus-visible,
+.ui-dialog input[type='radio']:focus-visible {
+  box-shadow: 0 0 0 3px rgba(14, 138, 147, 0.2);
+  outline: none;
+}
+.supsystic-plugin input[type='checkbox']:checked,
+.ui-dialog input[type='checkbox']:checked {
+  border-color: var(--gmp-ui-accent);
+  background: var(--gmp-ui-accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 12px no-repeat;
+}
+.supsystic-plugin input[type='radio']:checked,
+.ui-dialog input[type='radio']:checked {
+  border-color: var(--gmp-ui-accent);
+  background: radial-gradient(circle, var(--gmp-ui-accent) 0 4px, #fff 4.5px);
+}
+.supsystic-plugin input[type='checkbox']:disabled,
+.supsystic-plugin input[type='radio']:disabled {
+  border-color: var(--gmp-ui-field);
+  background-color: var(--gmp-ui-surface);
+  cursor: default;
+}
+/* jqGrid row checkboxes keep their place in the cell */
+.supsystic-plugin .ui-jqgrid input[type='checkbox'] {
+  margin: 0;
+  vertical-align: middle;
+}
+
+/* ---------- Toolbars ---------- */
+.supsystic-plugin ul.supsystic-bar-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.supsystic-plugin ul.supsystic-bar-controls > li {
+  margin: 0;
+}
+
+/* ---------- Form pages (Settings, Marker Categories, Import / Export): the page head and cards ---------- */
+.supsystic-plugin .gmp-form-page {
+  padding: 6px 4px 10px;
+  color: var(--gmp-ui-text);
+  line-height: 1.5;
+}
+.supsystic-plugin .gmp-page-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 0 0 18px;
+}
+.supsystic-plugin .gmp-page-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.supsystic-plugin .gmp-page-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(145deg, rgba(74, 232, 234, 0.22), rgba(14, 138, 147, 0.14));
+  color: var(--gmp-ui-accent-dark);
+  font-size: 18px;
+}
+.supsystic-plugin .gmp-page-title h2 {
+  margin: 0;
+  padding: 0;
+  color: var(--gmp-ui-ink);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.supsystic-plugin .gmp-page-title p {
+  margin: 2px 0 0;
+  color: var(--gmp-ui-muted);
+  font-size: 13px;
+}
+.supsystic-plugin .gmp-page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.supsystic-plugin .gmp-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  align-items: start;
+  gap: 18px;
+}
+.supsystic-plugin .gmp-form-card {
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 16px 20px 6px;
+  border: 1px solid var(--gmp-ui-line);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px -8px rgba(15, 23, 42, 0.1);
+}
+.supsystic-plugin .gmp-form-card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0 0 6px;
+  padding: 0 0 14px;
+  border-bottom: 1px solid var(--gmp-ui-line);
+}
+.supsystic-plugin .gmp-form-card-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: var(--gmp-ui-accent-soft);
+  color: var(--gmp-ui-accent);
+  font-size: 15px;
+}
+.supsystic-plugin .gmp-form-card-head h3 {
+  margin: 0;
+  padding: 0;
+  color: var(--gmp-ui-ink);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.supsystic-plugin .gmp-form-card-head p {
+  margin: 2px 0 0;
+  color: var(--gmp-ui-muted);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+.supsystic-plugin .gmp-form-card .form-table {
+  margin: 0;
+}
+.supsystic-plugin .gmp-form-card .form-table tr + tr > th,
+.supsystic-plugin .gmp-form-card .form-table tr + tr > td {
+  border-top: 1px solid #f1f5f9;
+}
+.supsystic-plugin .gmp-form-card .form-table th {
+  width: 210px;
+  padding: 12px 16px 12px 0 !important;
+  color: var(--gmp-ui-ink);
+  font-weight: 600;
+  line-height: 1.4;
+  vertical-align: top;
+}
+.supsystic-plugin .gmp-form-card .form-table th label {
+  display: inline;
+  font-weight: 600;
+}
+.supsystic-plugin .gmp-form-card .form-table td {
+  padding: 12px 0 !important;
+  line-height: 1.4;
+}
+.supsystic-plugin .gmp-form-card .form-table td input[type='text'],
+.supsystic-plugin .gmp-form-card .form-table td select {
+  width: 100% !important;
+  max-width: 420px;
+}
+.supsystic-plugin .gmp-form-card .gmp-field-desc {
+  margin: 6px 0 0;
+  color: var(--gmp-ui-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.supsystic-plugin .gmp-form-card .gmp-field-changed {
+  display: block;
+  margin-top: 2px;
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 400;
+}
+.supsystic-plugin .gmp-form-card .supsystic-tooltip,
+.supsystic-plugin .gmp-help {
+  margin-left: 4px;
+  color: var(--gmp-ui-muted);
+  cursor: help;
+}
+@media screen and (max-width: 960px) {
+  .supsystic-plugin .gmp-cards {
+    grid-template-columns: 1fr;
+  }
+  .supsystic-plugin .gmp-form-card .form-table th,
+  .supsystic-plugin .gmp-form-card .form-table td {
+    display: block;
+    width: auto;
+  }
+  .supsystic-plugin .gmp-form-card .form-table td {
+    padding-top: 0 !important;
+  }
+}
+
+/* ---------- Color fields (WordPress picker): the swatch is the inline background of the button ---------- */
+.supsystic-plugin .wp-picker-container .wp-color-result.button {
+  display: inline-block;
+  height: var(--gmp-ui-control);
+  min-height: var(--gmp-ui-control);
+  margin: 0;
+  padding: 0 0 0 34px;
+  overflow: hidden;
+  border: 1px solid var(--gmp-ui-field) !important;
+  border-radius: var(--gmp-ui-radius) !important;
+  box-shadow: none !important;
+  vertical-align: middle;
+}
+.supsystic-plugin .wp-picker-container .wp-color-result .wp-color-result-text {
+  display: block;
+  height: calc(var(--gmp-ui-control) - 2px);
+  padding: 0 12px;
+  border-left: 1px solid var(--gmp-ui-line);
+  border-radius: 0 7px 7px 0;
+  background: var(--gmp-ui-surface);
+  color: var(--gmp-ui-text);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: calc(var(--gmp-ui-control) - 2px);
+}
+.supsystic-plugin .wp-picker-container .wp-color-result:hover,
+.supsystic-plugin .wp-picker-container .wp-color-result:focus {
+  border-color: var(--gmp-ui-accent) !important;
+}
+.supsystic-plugin .wp-picker-container input.wp-color-picker[type='text'] {
+  width: 90px !important;
+  min-height: 30px;
+}
+.supsystic-plugin .wp-picker-container .button.wp-picker-clear,
+.supsystic-plugin .wp-picker-container .button.wp-picker-default {
+  min-height: 30px;
+  border-radius: 6px;
+}
+
+/* ---------- Chosen pickers (roles, categories, markers): one frame like the other fields ---------- */
+.supsystic-plugin .chosen-container-multi .chosen-choices,
+.supsystic-plugin .chosen-container-single .chosen-single {
+  box-sizing: border-box;
+  min-height: var(--gmp-ui-control);
+  border: 1px solid var(--gmp-ui-field) !important;
+  border-radius: var(--gmp-ui-radius) !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+.supsystic-plugin .chosen-container-single .chosen-single {
+  height: var(--gmp-ui-control);
+  line-height: calc(var(--gmp-ui-control) - 2px);
+  color: var(--gmp-ui-ink);
+}
+.supsystic-plugin .chosen-container-single .chosen-single div b {
+  background-position-y: 7px;
+}
+.supsystic-plugin .chosen-container-active .chosen-choices,
+.supsystic-plugin .chosen-container-active .chosen-single {
+  border-color: var(--gmp-ui-accent) !important;
+  box-shadow: 0 0 0 3px rgba(14, 138, 147, 0.15) !important;
+}
+.supsystic-plugin .chosen-container-multi .chosen-choices li.search-choice {
+  margin: 4px 0 3px 5px;
+  padding: 4px 22px 4px 10px;
+  border: 1px solid #bfe3e6;
+  border-radius: 999px;
+  background: var(--gmp-ui-accent-soft);
+  box-shadow: none;
+  color: var(--gmp-ui-accent-dark);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+}
+.supsystic-plugin .chosen-container-multi .chosen-choices li.search-choice .search-choice-close {
+  top: 6px;
+  right: 6px;
+}
+.supsystic-plugin .chosen-container-multi .chosen-choices li.search-field input[type='text'] {
+  min-height: 0;
+  height: 30px;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+.supsystic-plugin .chosen-container .chosen-drop {
+  border-color: var(--gmp-ui-line);
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 10px 24px -10px rgba(15, 23, 42, 0.25);
+}
+.supsystic-plugin .chosen-container .chosen-results li.highlighted {
+  background: var(--gmp-ui-accent);
+}
+/* The hint of an empty picker made while its tab was hidden: Chosen measured it as 10px wide */
+.supsystic-plugin .chosen-container-multi .chosen-choices li.search-field input.default {
+  min-width: 180px;
+  color: var(--gmp-ui-muted, #8a96a3);
+}
+/* Settings: the roles picker is as wide as the other fields of the card */
+.supsystic-plugin .gmp-settings-page .form-table td .chosen-container {
+  min-width: 0 !important;
+  max-width: min(100%, 420px) !important;
+}
+
+/* ---------- Old jQuery UI dialogs: rounded frame, white title, button bar; the action button dark, Cancel plain ---------- */
+body.wp-admin .ui-dialog.ui-widget {
+  padding: 0;
+  border: 1px solid var(--gmp-ui-line) !important;
+  border-radius: 12px !important;
+  background: #fff;
+  box-shadow: 0 24px 48px -16px rgba(15, 23, 42, 0.35) !important;
+}
+body.wp-admin .ui-dialog .ui-dialog-titlebar.ui-widget-header {
+  padding: 12px 16px !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--gmp-ui-line) !important;
+  border-radius: 12px 12px 0 0 !important;
+  background: #fff !important;
+  color: var(--gmp-ui-ink) !important;
+  font-size: 15px;
+  font-weight: 700;
+}
+body.wp-admin .ui-dialog .ui-dialog-content {
+  padding: 16px !important;
+  color: var(--gmp-ui-text);
+}
+body.wp-admin .ui-dialog .ui-dialog-buttonpane {
+  margin: 0 !important;
+  padding: 10px 16px !important;
+  border-top: 1px solid var(--gmp-ui-line) !important;
+  border-radius: 0 0 12px 12px;
+  background: var(--gmp-ui-surface) !important;
+}
+body.wp-admin .ui-dialog .ui-dialog-buttonpane .ui-dialog-buttonset {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  float: none;
+}
+body.wp-admin .ui-dialog .ui-dialog-buttonpane .ui-dialog-buttonset .button,
+body.wp-admin .ui-dialog .ui-dialog-buttonpane .ui-dialog-buttonset .ui-button {
+  margin: 0 !important;
+}
+body.wp-admin .ui-dialog .ui-dialog-buttonpane .ui-dialog-buttonset .ui-button:not(.gmp-dlg-plain):first-child {
+  border-color: transparent !important;
+  background: var(--gmp-ui-navy) !important;
+  color: #fff !important;
+}
+body.wp-admin .ui-dialog .ui-dialog-buttonpane .ui-dialog-buttonset .ui-button:not(.gmp-dlg-plain):first-child:hover,
+body.wp-admin .ui-dialog .ui-dialog-buttonpane .ui-dialog-buttonset .ui-button:not(.gmp-dlg-plain):first-child:focus {
+  background: var(--gmp-ui-navy-hover) !important;
+  color: #fff !important;
+}
+/* Dialogs sit in the middle of the screen under the admin bar, whatever the page scroll (admin.design.js) */
+body.wp-admin .ui-dialog.gmp-dlg-center {
+  position: fixed !important;
+  inset: var(--wp-admin--admin-bar--height, 32px) 0 0 !important;
+  max-width: calc(100vw - 32px);
+  height: fit-content !important;
+  margin: auto !important;
+}
+body.wp-admin .ui-dialog.gmp-dlg-center .ui-dialog-content {
+  max-height: calc(100vh - var(--wp-admin--admin-bar--height, 32px) - 170px) !important;
+  overflow: auto;
+}
+body.wp-admin .ui-widget-overlay {
+  background: rgba(15, 23, 42, 0.45) !important;
+  opacity: 1 !important;
+}
+/* Close button of the dialogs: a round quiet button with a cross; the old sprite and its "Close" text are hidden */
+body.wp-admin .ui-dialog .ui-dialog-titlebar-close {
+  position: absolute;
+  top: 50% !important;
+  right: 12px !important;
+  width: 30px !important;
+  height: 30px !important;
+  margin: -15px 0 0 !important;
+  padding: 0 !important;
+  overflow: hidden;
+  border: 0 !important;
+  border-radius: 50% !important;
+  background: var(--gmp-ui-surface, #f8fafc) !important;
+  box-shadow: none !important;
+  color: transparent !important;
+  font-size: 0 !important;
+  text-indent: 0 !important;
+}
+body.wp-admin .ui-dialog .ui-dialog-titlebar-close:hover,
+body.wp-admin .ui-dialog .ui-dialog-titlebar-close:focus {
+  background: var(--gmp-ui-line, #e2e8f0) !important;
+}
+body.wp-admin .ui-dialog .ui-dialog-titlebar-close .ui-icon,
+body.wp-admin .ui-dialog .ui-dialog-titlebar-close .ui-button-icon-space {
+  display: none !important;
+}
+/* The old jQuery UI theme of the plugin draws an "x" with !important */
+body.wp-admin .ui-dialog .ui-dialog-titlebar-close::before {
+  content: '\00d7' !important;
+  position: absolute;
+  inset: 0;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  color: var(--gmp-ui-ink, #0f172a) !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-size: 22px !important;
+  font-weight: 400;
+  line-height: 1;
+}
+/* jQuery UI puts the focus on the cross when a window opens: no browser ring, the accent ring for the keyboard */
+body.wp-admin .ui-dialog .ui-dialog-titlebar-close:focus {
+  outline: none !important;
+}
+body.wp-admin .ui-dialog .ui-dialog-titlebar-close:focus-visible {
+  box-shadow: 0 0 0 3px rgba(14, 138, 147, 0.25) !important;
+}
+body.wp-admin .ui-dialog .ui-dialog-titlebar {
+  position: relative;
+  min-height: 24px;
+}
+
+/* Marker icons window: the icons as tiles, the icon of the marker marked; the picture fills the tile, so a click
+   anywhere on it picks the icon (scale-down: small icons keep their size) */
+#gmpIconsWnd .iconsList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 2px;
+  list-style: none;
+}
+#gmpIconsWnd .previewIcon {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  float: none;
+  align-items: center;
+  justify-content: center;
+  min-height: 64px;
+  margin: 0;
+  padding: 4px;
+  border: 1px solid var(--gmp-ui-line, #e2e8f0);
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+}
+#gmpIconsWnd .previewIcon:hover {
+  border-color: var(--gmp-ui-accent, #0e8a93);
+  background: var(--gmp-ui-accent-soft, #e6f6f7);
+  box-shadow: 0 0 0 3px rgba(14, 138, 147, 0.15);
+}
+#gmpIconsWnd .previewIcon.is-current {
+  border-color: var(--gmp-ui-accent, #0e8a93);
+  background: var(--gmp-ui-accent-soft, #e6f6f7);
+  box-shadow: inset 0 0 0 1px var(--gmp-ui-accent, #0e8a93);
+}
+#gmpIconsWnd .previewIcon img {
+  display: block;
+  width: 100%;
+  height: 54px;
+  object-fit: scale-down;
+}
+#gmpIconsWnd .previewIcon i {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  z-index: 1;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #dc2626;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.3);
+  color: #fff;
+  font-size: 10px;
+  line-height: 20px;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+#gmpIconsWnd .previewIcon:hover i,
+#gmpIconsWnd .previewIcon:focus-within i {
+  opacity: 1;
+}
+@media (hover: none) {
+  #gmpIconsWnd .previewIcon i {
+    opacity: 1;
+  }
+}
+
+/* ---------- jqGrid lists (markers, figures, categories, import) ---------- */
+.supsystic-plugin .ui-jqgrid {
+  border: 1px solid var(--gmp-ui-line) !important;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.supsystic-plugin .ui-jqgrid .ui-jqgrid-htable th,
+.supsystic-plugin .ui-jqgrid .ui-jqgrid-labels th {
+  background: #f1f5f9 !important;
+  color: var(--gmp-ui-ink);
+  font-weight: 600;
+}
+.supsystic-plugin .ui-jqgrid tr.jqgrow:hover td {
+  background: #f8fafc;
+}
+.supsystic-plugin .ui-jqgrid tr.jqgrow.ui-state-highlight td {
+  background: var(--gmp-ui-accent-soft) !important;
+}
+
+/* ---------- PRO plaques in the free version (Read more opens the window of the feature, admin.upsell.js) ---------- */
+.supsystic-plugin .gmp-pro-note {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-sizing: border-box;
+  max-width: 100%;
+  margin: 8px 0 0;
+  padding: 8px 10px 8px 8px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #1d2b3c 0%, #24405a 60%, #0f5f66 100%);
+  box-shadow: 0 6px 18px -10px rgba(15, 23, 42, 0.6);
+  color: #dbe7f1;
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+.supsystic-plugin .gmp-pro-note-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffc53d;
+  font-size: 13px;
+}
+.supsystic-plugin .gmp-pro-note-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.supsystic-plugin .gmp-pro-note-tag {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: #ffc53d;
+  color: #1d2b3c;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 16px;
+  vertical-align: 1px;
+}
+.supsystic-plugin a.gmp-pro-note-more,
+.supsystic-plugin .gmp-pro-note-more {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff !important;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none !important;
+  white-space: nowrap;
+  transition: background-color 0.15s ease;
+}
+.supsystic-plugin .gmp-pro-note-more:hover,
+.supsystic-plugin .gmp-pro-note-more:focus {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff !important;
+}
+.supsystic-plugin .gmp-pro-note-more .fa {
+  font-size: 11px;
+}
+.supsystic-plugin .gmp-pro-note[hidden] {
+  display: none !important;
+}
+/* The compact form beside a single option: the label stays a link to the PRO page for the old scripts */
+.supsystic-plugin .gmpProOptMiniLabel.gmp-pro-note {
+  display: inline-flex;
+  width: auto;
+  margin: 6px 0 0 !important;
+  padding: 4px 4px 4px 6px !important;
+  border-radius: 10px;
+  font-size: 12px;
+  vertical-align: middle;
+}
+.supsystic-plugin .gmpProOptMiniLabel.gmp-pro-note .gmp-pro-note-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  font-size: 11px;
+}
+.supsystic-plugin .gmpProOptMiniLabel.gmp-pro-note .gmp-pro-note-tag {
+  margin: 0 6px 0 0;
+}
+.supsystic-plugin .gmpProOptMiniLabel.gmp-pro-note .gmp-pro-note-more {
+  padding: 4px 9px;
+}
+/* A PRO option of the free version looks locked, but stays the field of the form */
+.supsystic-plugin .gmp-pro-locked select.gmpProOpt,
+.supsystic-plugin .gmp-pro-locked input.gmpProOpt {
+  opacity: 0.65;
+}
+
+/* ---------- Footer and old notices on the plugin pages ---------- */
+.supsystic-plugin .supsystic-footer-wrapper .supsystic-footer-add-review a {
+  color: #4ae8ea !important;
+}
+
+/* Settings: the API key row the onboarding links to */
+.supsystic-plugin .gmp-form-card .form-table tr.gmp-onboarding-row > th,
+.supsystic-plugin .gmp-form-card .form-table tr.gmp-onboarding-row > td {
+  background: var(--gmp-ui-accent-soft);
+}
+.supsystic-plugin .gmp-form-card .form-table tr.gmp-onboarding-row > th {
+  padding-left: 10px !important;
+  border-radius: 8px 0 0 8px;
+}
+.supsystic-plugin .gmp-form-card .form-table tr.gmp-onboarding-row > td {
+  padding-right: 10px !important;
+  border-radius: 0 8px 8px 0;
+}
+.supsystic-plugin .gmp-settings-page .gmpProOptMiniLabel.gmp-pro-note {
+  display: flex;
+  width: fit-content;
+}
+
+/* Card pages inside the old white panel (Import / Export) */
+.supsystic-plugin .gmp-form-page p {
+  white-space: normal;
+}
+.supsystic-plugin .gmp-form-page .gmp-card-actions {
+  margin: 4px 0 12px;
+}
+.supsystic-plugin .gmp-csv-page .gmp-form-card .form-table th {
+  width: 140px;
+}
+.supsystic-plugin .gmp-csv-page .gmp-form-card .form-table td {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.supsystic-plugin .gmp-csv-page #gmpCsvImportMsg:empty {
+  display: none;
+}
+
+/* ---------- Marker Categories, as in Ultimate Maps: Add Category in the page head, the search, the toolbar and the
+   tree in one card; rows with a line under each and the edit and delete buttons always shown ---------- */
+.supsystic-plugin .gmp-mgr-page .gmp-mgr-card {
+  padding: 14px 18px 16px;
+}
+.supsystic-plugin .gmp-mgr-card > .supsystic-bar-controls {
+  margin: 0 0 12px;
+  padding: 0;
+  border: 0;
+}
+.supsystic-plugin .gmp-mgr-card > hr {
+  display: none;
+}
+.supsystic-plugin .gmp-mgr-search {
+  position: relative;
+  flex: 0 1 260px;
+}
+.supsystic-plugin .gmp-mgr-search .fa {
+  position: absolute;
+  top: 50%;
+  left: 11px;
+  transform: translateY(-50%);
+  color: var(--gmp-ui-muted);
+  pointer-events: none;
+}
+.supsystic-plugin .gmp-mgr-card .gmp-mgr-search #gmpMgrTblSearchTxt {
+  width: 100%;
+  height: var(--gmp-ui-control);
+  padding-left: 32px;
+}
+/* Delete Selected stays grey until a row is picked (the common rule of the buttons is stronger than the disabled one) */
+.supsystic-plugin .gmp-mgr-card #gmpMgrRemoveGroupBtn:disabled {
+  border-color: var(--gmp-ui-line) !important;
+  background: var(--gmp-ui-surface) !important;
+  color: #a3adb9 !important;
+  cursor: default;
+}
+.supsystic-plugin .gmp-mgr-card #gmpMgrTbl {
+  padding: 0;
+}
+.supsystic-plugin .gmp-mgr-card #gmpMgrTbl ul.jqtree-tree .jqtree-element {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 10px;
+  border-bottom: 1px solid #f1f5f9;
+  border-radius: 0;
+  line-height: 1.4;
+}
+.supsystic-plugin .gmp-mgr-card #gmpMgrTbl ul.jqtree-tree .jqtree-element:hover {
+  background: var(--gmp-ui-surface);
+}
+.supsystic-plugin .gmp-mgr-card #gmpMgrTbl ul.jqtree-tree li.jqtree-selected > .jqtree-element,
+.supsystic-plugin .gmp-mgr-card #gmpMgrTbl ul.jqtree-tree li.jqtree-selected > .jqtree-element:hover {
+  background: var(--gmp-ui-accent-soft) !important;
+}
+.supsystic-plugin .gmp-mgr-card #gmpMgrTbl ul.jqtree-tree .jqtree-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: var(--gmp-ui-ink);
+  font-size: 13.5px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.supsystic-plugin .gmp-mgr-card #gmpMgrTbl ul.jqtree-tree .jqtree-toggler {
+  flex: none;
+  color: var(--gmp-ui-muted);
+  text-decoration: none;
+}
+/* The script shows the buttons only under the mouse (inline display): here they are always shown */
+.supsystic-plugin .gmp-mgr-card #gmpMgrTbl .supsystic-actions-wrap {
+  display: inline-flex !important;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+}
+.supsystic-plugin .gmp-mgr-card #gmpMgrTbl .supsystic-actions-wrap a.button-table-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--gmp-ui-line);
+  border-radius: var(--gmp-ui-radius);
+  background: #fff;
+  color: var(--gmp-ui-muted) !important;
+}
+.supsystic-plugin .gmp-mgr-card #gmpMgrTbl .supsystic-actions-wrap a.button-table-action:hover,
+.supsystic-plugin .gmp-mgr-card #gmpMgrTbl .supsystic-actions-wrap a.button-table-action:focus {
+  border-color: var(--gmp-ui-accent);
+  color: var(--gmp-ui-accent) !important;
+}
+.supsystic-plugin .gmp-mgr-card #gmpMgrTbl .supsystic-actions-wrap a[id^='deleteMarkerGroup']:hover,
+.supsystic-plugin .gmp-mgr-card #gmpMgrTbl .supsystic-actions-wrap a[id^='deleteMarkerGroup']:focus {
+  border-color: #dc2626;
+  color: #dc2626 !important;
+}
+.supsystic-plugin .gmp-mgr-card #gmpMgrTbl .supsystic-actions-wrap > div:empty {
+  display: none !important;
+}
+/* Empty state of a card (no categories yet) */
+.supsystic-plugin .gmp-empty {
+  padding: 36px 20px 30px;
+  color: var(--gmp-ui-muted);
+  text-align: center;
+}
+.supsystic-plugin .gmp-empty-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin: 0 0 12px;
+  border-radius: 16px;
+  background: var(--gmp-ui-accent-soft);
+  color: var(--gmp-ui-accent);
+  font-size: 24px;
+}
+.supsystic-plugin .gmp-empty h3 {
+  margin: 0 0 6px;
+  padding: 0;
+  color: var(--gmp-ui-ink);
+  font-size: 17px;
+  font-weight: 700;
+}
+.supsystic-plugin .gmp-empty p {
+  margin: 0;
+  color: var(--gmp-ui-muted);
+  font-size: 13px;
+}
+
+/* Marker category form and the category options: Save and the links in the page head, the form as one card */
+/* The module sets 450px on #gmpMgrTab */
+.supsystic-plugin .gmp-mgr-form #gmpMgrTab {
+  min-height: 0;
+}
+.supsystic-plugin .gmp-mgr-form #gmpMgrSaveBtn {
+  float: none;
+  margin: 0 !important;
+}
+.supsystic-plugin .gmp-mgr-form #gmpMgrForm {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 8px 20px;
+  border: 1px solid var(--gmp-ui-line);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px -8px rgba(15, 23, 42, 0.1);
+}
+.supsystic-plugin .gmp-mgr-form #gmpMgrForm .form-table {
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+}
+.supsystic-plugin .gmp-mgr-form #gmpMgrForm .form-table tr {
+  border: 0 !important;
+}
+.supsystic-plugin .gmp-mgr-form #gmpMgrForm .form-table tr + tr > th,
+.supsystic-plugin .gmp-mgr-form #gmpMgrForm .form-table tr + tr > td {
+  border-top: 1px solid #f1f5f9;
+}
+.supsystic-plugin .gmp-mgr-form #gmpMgrForm .form-table th {
+  width: 200px;
+  padding: 12px 16px 12px 0 !important;
+  color: var(--gmp-ui-ink);
+  font-size: 13px;
+  font-weight: 600;
+  vertical-align: middle;
+}
+.supsystic-plugin .gmp-mgr-form #gmpMgrForm .form-table td {
+  padding: 10px 0 !important;
+  vertical-align: middle;
+}
+.supsystic-plugin .gmp-mgr-form #gmpMgrForm .form-table th .supsystic-tooltip {
+  float: none !important;
+  margin-left: 6px;
+  color: var(--gmp-ui-muted);
+}
+.supsystic-plugin .gmp-mgr-form #gmpMgrForm .form-table td input[type='text']:not(.wp-color-picker),
+.supsystic-plugin .gmp-mgr-form #gmpMgrForm .form-table td select {
+  width: 100% !important;
+  max-width: 420px;
+}
+/* Cluster icon: the icon in a small tile, then Upload and Default */
+.supsystic-plugin .gmp-mgr-form .gmp-mgr-icon-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.supsystic-plugin .gmp-mgr-form #gmpMgrTab .gmp-mgr-icon-row .gmpSubOpt {
+  margin: 0;
+}
+.supsystic-plugin .gmp-mgr-form .gmp-mgr-icon-tile {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--gmp-ui-line);
+  border-radius: 10px;
+  background: var(--gmp-ui-surface);
+}
+.supsystic-plugin .gmp-mgr-form .gmp-mgr-icon-tile img {
+  display: block;
+  width: auto;
+  max-width: 34px;
+  height: auto;
+  max-height: 34px;
+}
+.supsystic-plugin .gmp-mgr-form .gmpMarkerGroupClastererUplRes:empty {
+  display: none;
+}
+/* Options: the levels of the categories tree, one row each (handle, size, remove) */
+.supsystic-plugin .gmp-mgr-options .gmp-mgr-level-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.supsystic-plugin .gmp-mgr-options .mgrFontSizeLevel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.supsystic-plugin .gmp-mgr-options .mgrFontSizeLevel[style*='none'] {
+  display: none;
+}
+.supsystic-plugin .gmp-mgr-options .mgrFontSizeLevel .mgrMoveHandle {
+  width: 16px;
+  color: var(--gmp-ui-muted);
+  text-align: center;
+  cursor: move;
+}
+.supsystic-plugin .gmp-mgr-form #gmpMgrForm .mgrFontSizeLevel input[type='text'] {
+  width: 90px !important;
+}
+.supsystic-plugin .gmp-mgr-options .mgrFontSizeLevel .mgrFontSizeLevelRemoveBtn {
+  width: var(--gmp-ui-control);
+  margin: 0;
+  padding: 0;
+}
+/* Phones: the label above its field; one line above each row, none between the label and the field */
+@media screen and (max-width: 782px) {
+  .supsystic-plugin .gmp-mgr-form #gmpMgrForm {
+    padding: 4px 16px;
+  }
+  .supsystic-plugin .gmp-mgr-form #gmpMgrForm .form-table th,
+  .supsystic-plugin .gmp-mgr-form #gmpMgrForm .form-table td {
+    display: block;
+    width: auto;
+  }
+  .supsystic-plugin .gmp-mgr-form #gmpMgrForm .form-table th {
+    padding: 12px 0 6px !important;
+  }
+  .supsystic-plugin .gmp-mgr-form #gmpMgrForm .form-table td {
+    padding: 0 0 12px !important;
+  }
+  .supsystic-plugin .gmp-mgr-form #gmpMgrForm .form-table tr + tr > td {
+    border-top: 0;
+  }
+  .supsystic-plugin .gmp-mgr-page .gmp-mgr-card {
+    padding: 14px 14px 12px;
+  }
+  .supsystic-plugin .gmp-mgr-search {
+    flex: 1 1 100%;
+  }
+}
+
+/* ---------- One 1px frame, no thick bar on the left (the look of Data Tables and Photo Gallery) ---------- */
+/* Settings: the API key onboarding card */
+.supsystic-plugin .gmp-onboarding-note {
+  margin: 0 0 16px;
+  padding: 14px 18px;
+  border: 1px solid #bfe3e6;
+  border-radius: 12px;
+  background: var(--gmp-ui-accent-soft);
+  color: var(--gmp-ui-text);
+}
+.supsystic-plugin .gmp-onboarding-note h3 {
+  margin: 0 0 6px;
+  color: var(--gmp-ui-ink);
+  font-size: 15px;
+}
+.supsystic-plugin .gmp-onboarding-note p {
+  margin: 0 0 6px;
+  white-space: normal;
+}
+.supsystic-plugin .gmp-onboarding-note ol {
+  margin: 6px 0 6px 20px;
+}
+/* The plugin's own notices on its pages (API key reminder): the frame of a card instead of the 4px WP edge */
+#wpbody-content .notice.supsystic-admin-notice {
+  border: 1px solid var(--gmp-ui-line);
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+/* ---------- One page frame on every tab, the rule of all Supsystic plugins (the edges of Data Tables) ----------
+   A white page under the breadcrumbs: 20px under the breadcrumbs, 40px from the menu rail, 30px from the right side
+   (10px on phones), 34px above the footer, 16px between the blocks; the blocks of the first level have no side margins
+   of their own. At 1920px the content runs from 297 to 1870, as on the Data Tables pages. The page is at least as tall
+   as the rail (550px with the License tab), so the footer never runs into it. The old white panel inside
+   (.supsystic-item.supsystic-panel, 632px high, its own 40px left padding) and #containerWrapper (408px) gave an empty
+   white area under short pages. */
+.wrap .supsystic-plugin .supsystic-content .supsystic-container {
+  display: flow-root;
+  min-height: 556px;
+  padding: 20px 30px 34px 40px;
+  background: #fff;
+}
+.wrap .supsystic-plugin .supsystic-container .supsystic-item.supsystic-panel {
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.wrap .supsystic-plugin .supsystic-container #containerWrapper {
+  min-height: 0;
+}
+.wrap .supsystic-plugin .supsystic-container .gmp-form-page {
+  padding: 0;
+}
+.wrap .supsystic-plugin .supsystic-container .supsystic-item.gmp-license {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+}
+.wrap .supsystic-plugin .supsystic-container > .gmp-review {
+  margin: 0 0 16px;
+}
+.wrap .supsystic-plugin .supsystic-container .gmp-page-head {
+  margin: 0 0 16px;
+}
+.wrap .supsystic-plugin .supsystic-container .gmp-cards {
+  gap: 16px;
+}
+.wrap .supsystic-plugin .supsystic-container .gmp-onboarding-note {
+  margin: 0 0 16px;
+}
+@media screen and (max-width: 810px) {
+  .wrap .supsystic-plugin .supsystic-content .supsystic-container {
+    min-height: 480px;
+  }
+}
+/* Phones and small tablets: WordPress sets the .wrap margins to 0 12px here, Data Tables keeps 2px and 20px (its
+   wrapper is not a .wrap), so the rail and the page start and end where they do in Data Tables. */
+@media screen and (max-width: 782px) {
+  .wrap > .supsystic-plugin {
+    width: auto;
+    margin-right: 8px;
+    margin-left: 2px;
+  }
+  .wrap .supsystic-plugin .supsystic-content .supsystic-container {
+    padding-right: 10px;
+  }
+}

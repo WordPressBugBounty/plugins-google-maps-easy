@@ -1,4 +1,11 @@
 jQuery(document).ready(function () {
+  // Multiple selects (user roles) as a tag picker, as in Ultimate Maps
+  if (jQuery.fn.chosen) {
+    jQuery('#gmpSettingsForm select.chosen').chosen({
+      disable_search_threshold: 10,
+      width: '100%',
+    });
+  }
   // Onboarding "don't have a key yet?" help toggle - bound here (not inline
   // onclick) because wp_kses strips onclick= from admin output.
   jQuery('#gmpOnboardingApiKeyHelpToggle').on('click', function () {

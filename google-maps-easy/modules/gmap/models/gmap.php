@@ -45,6 +45,14 @@ class gmapModelGmp extends modelGmp
       $icon_data = frameGmp::_()->getModule('icons')->getModel()->getIconFromId($map['params']['center_on_cur_user_pos_icon']);
       $map['params']['center_on_cur_user_pos_icon_path'] = !empty($icon_data['path']) ? $icon_data['path'] : '';
     }
+    // "Hide Close Button" is a PRO option of the Rounded Edges info window, and new maps get it turned on: without PRO,
+    // or with another appearance (where the option is not shown), the info windows keep their close button
+    if (is_array($map['params']) && !empty($map['params']['marker_infownd_hide_close_btn'])) {
+      $isRoundedWnd = isset($map['params']['marker_infownd_type']) && $map['params']['marker_infownd_type'] === 'rounded_edges';
+      if (!$isRoundedWnd || !frameGmp::_()->getModule('supsystic_promo')->isPro()) {
+        $map['params']['marker_infownd_hide_close_btn'] = 0;
+      }
+    }
     // This is for posibility to show multy maps with same ID on one page
     $map['original_id'] = $map['id'];
     $map['view_id'] = $map['id'] . '_' . mt_rand(1, 99999);

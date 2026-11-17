@@ -407,6 +407,25 @@
 .gmpKmlFilterOff .gmpKmlFileRow .gmpShowSublayersLabel {
   display: none;
 }
+/* The own title of a layer in the KML filter: shown while the filter is enabled */
+.gmpKmlFileRow .gmpKmlLayerTitleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin-top: 10px;
+}
+.gmpKmlFileRow .gmpKmlLayerTitleLbl {
+  flex: none;
+  color: #50575e;
+}
+.gmpKmlFileRow .gmpKmlLayerTitleInput {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+.gmpKmlFilterOff .gmpKmlFileRow .gmpKmlLayerTitleRow {
+  display: none;
+}
 #gmpKmlAddFileRowBtn {
   margin: 0 0 5px;
 }

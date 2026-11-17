@@ -277,6 +277,7 @@ function gmpInitStickyItem() {
           if (jQuery(window).width() <= 991) {
             element.removeClass('supsystic-sticky-active');
             element.addClass('sticky-ignore');
+            element.parent().css('min-height', '');
           } else {
             element.removeClass('sticky-ignore');
           }
@@ -296,6 +297,12 @@ function gmpInitStickyItem() {
           }
           if (element.is(':visible') && currentScrollTop > scrollMinPos && !element.hasClass('supsystic-sticky-active')) {
             // Start sticking
+            // A fixed element leaves the page flow: its column keeps the height, so the page does not get shorter.
+            // Without it the page shrank (preview and markers list taller than the settings), the scroll jumped back,
+            // the element stopped sticking and the page grew again - endlessly
+            if (!useNextElementPadding) {
+              element.parent().css('min-height', element.outerHeight(true));
+            }
             element.addClass('supsystic-sticky-active').data('scrollMinPos', scrollMinPos).css({
               top: currentBorderHeight,
             });
@@ -322,6 +329,9 @@ function gmpInitStickyItem() {
             element.removeClass('supsystic-sticky-active').data('scrollMinPos', 0).css({
               top: 0,
             });
+            if (!useNextElementPadding) {
+              element.parent().css('min-height', '');
+            }
             if (element.hasClass('sticky-save-width')) {
               element.removeClass('sticky-full-width');
             }
@@ -341,19 +351,15 @@ function gmpInitStickyItem() {
           } else {
             // Check new stick position
             if (element.hasClass('supsystic-sticky-active')) {
-              if (footerHeight) {
-                var elementHeight = element.height(),
-                  heightCorrection = 32,
-                  topDiff = docHeight - footerHeight - (currentScrollTop + elementHeight + heightCorrection);
-                if (topDiff < 0) {
-                  element.css({
-                    top: currentBorderHeight + topDiff,
-                  });
-                } else {
-                  element.css({
-                    top: currentBorderHeight,
-                  });
-                }
+              // Near the end of the page the element goes up with the page and stops 16px above the plugin footer
+              // (the old footer class .gmpAdminFooterShell is gone, so it ran over the footer)
+              var footerEl = jQuery('.supsystic-footer-wrapper:visible, .gmpAdminFooterShell:visible').first();
+              if (footerEl.length) {
+                var limit = footerEl.offset().top - 16,
+                  bottom = jQuery(window).scrollTop() + currentBorderHeight + element.outerHeight();
+                element.css({
+                  top: currentBorderHeight + Math.min(0, limit - bottom),
+                });
               }
               // If at least on element is still sticking - count it as all is working
               wasSticking = wasUnSticking = false;
@@ -516,7 +522,7 @@ function gmpInitMainPromoPopup() {
           jQuery('#' + jQuery(this).attr('data-hideid')).val(this.checked ? 1 : 0);
         }
       } else if (jQuery(this).is('select')) {
-        jQuery(this).val(jQuery(this).data('gmpProOptVal'));
+        jQuery(this).val(jQuery(this).data('gmpProOptVal')).trigger('chosen:updated');
       }
       if (isRadio) {
         jQuery('input[name="' + jQuery(this).attr('name') + '"]:first')

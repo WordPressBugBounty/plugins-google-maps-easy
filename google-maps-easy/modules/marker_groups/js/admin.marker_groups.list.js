@@ -2,6 +2,10 @@ jQuery(document).ready(function () {
   var tblId = 'gmpMgrTbl',
     tbl = jQuery('#' + tblId);
 
+  // No categories yet: the empty state of the card instead of an empty tree
+  if (typeof mgrTblData == 'undefined' || !mgrTblData || !mgrTblData.length) {
+    jQuery('#gmpMgrTblEmptyMsg').show();
+  }
   tbl.tree({
     data: gmpGetMarkerGroupsTree(),
     autoOpen: true,

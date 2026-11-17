@@ -277,6 +277,70 @@ class gmapGmp extends moduleGmp
     }
     return '[' . GMP_SHORTCODE . ' ' . implode(' ', $shortcodeParamsArr) . ']';
   }
+  /**
+   * Texts of the editor layout (js/admin.gmap.settings-ui.js): the English text is the key, the value its translation.
+   */
+  public function getSettingsUiTexts()
+  {
+    $texts = [
+      'Settings groups' => __('Settings groups', GMP_LANG_CODE),
+      'Search settings' => __('Search settings', GMP_LANG_CODE),
+      'No settings match your search.' => __('No settings match your search.', GMP_LANG_CODE),
+      'Basics' => __('Basics', GMP_LANG_CODE),
+      'Center & Zoom' => __('Center & Zoom', GMP_LANG_CODE),
+      'Controls' => __('Controls', GMP_LANG_CODE),
+      'Look' => __('Look', GMP_LANG_CODE),
+      'Markers' => __('Markers', GMP_LANG_CODE),
+      'Layers' => __('Layers', GMP_LANG_CODE),
+      'Info window' => __('Info window', GMP_LANG_CODE),
+      'More' => __('More', GMP_LANG_CODE),
+      'Map' => __('Map', GMP_LANG_CODE),
+      'Name, size and the Google Cloud Map ID.' => __('Name, size and the Google Cloud Map ID.', GMP_LANG_CODE),
+      'Map center' => __('Map center', GMP_LANG_CODE),
+      'Type an address or coordinates, or drag the map in the preview.' => __('Type an address or coordinates, or drag the map in the preview.', GMP_LANG_CODE),
+      'Zoom' => __('Zoom', GMP_LANG_CODE),
+      'The first zoom of the map, on desktops and phones.' => __('The first zoom of the map, on desktops and phones.', GMP_LANG_CODE),
+      'Interaction' => __('Interaction', GMP_LANG_CODE),
+      'How visitors can move and zoom the map.' => __('How visitors can move and zoom the map.', GMP_LANG_CODE),
+      'Map controls' => __('Map controls', GMP_LANG_CODE),
+      'The buttons Google draws on the map and where they sit.' => __('The buttons Google draws on the map and where they sit.', GMP_LANG_CODE),
+      'Custom controls' => __('Custom controls', GMP_LANG_CODE),
+      'Your own set of buttons over the map: zoom, reset, search, filters.' => __('Your own set of buttons over the map: zoom, reset, search, filters.', GMP_LANG_CODE),
+      'Theme & style' => __('Theme & style', GMP_LANG_CODE),
+      'Map type, color stylization and what the map hides.' => __('Map type, color stylization and what the map hides.', GMP_LANG_CODE),
+      'Clusters, tooltips and how the map follows the markers.' => __('Clusters, tooltips and how the map follows the markers.', GMP_LANG_CODE),
+      'Markers list' => __('Markers list', GMP_LANG_CODE),
+      'A list or slider of the markers next to the map.' => __('A list or slider of the markers next to the map.', GMP_LANG_CODE),
+      'Category filter' => __('Category filter', GMP_LANG_CODE),
+      'The filter of marker categories over the map.' => __('The filter of marker categories over the map.', GMP_LANG_CODE),
+      'Visitors' => __('Visitors', GMP_LANG_CODE),
+      'Markers added by visitors and the search of places.' => __('Markers added by visitors and the search of places.', GMP_LANG_CODE),
+      'Google layers' => __('Google layers', GMP_LANG_CODE),
+      'Live traffic, public transport and bicycle routes.' => __('Live traffic, public transport and bicycle routes.', GMP_LANG_CODE),
+      'KML layers' => __('KML layers', GMP_LANG_CODE),
+      'Zones, routes and points from your KML files.' => __('Zones, routes and points from your KML files.', GMP_LANG_CODE),
+      'The window that opens on a marker: its look, size and fonts.' => __('The window that opens on a marker: its look, size and fonts.', GMP_LANG_CODE),
+      'Info window buttons' => __('Info window buttons', GMP_LANG_CODE),
+      'Directions and printing from the window of a marker.' => __('Directions and printing from the window of a marker.', GMP_LANG_CODE),
+      'More options' => __('More options', GMP_LANG_CODE),
+      'Marker' => __('Marker', GMP_LANG_CODE),
+      'Name, place, icon and what opens on a click.' => __('Name, place, icon and what opens on a click.', GMP_LANG_CODE),
+      'Figure' => __('Figure', GMP_LANG_CODE),
+      'A polygon, polyline or circle drawn on the map.' => __('A polygon, polyline or circle drawn on the map.', GMP_LANG_CODE),
+      'Heatmap layer' => __('Heatmap layer', GMP_LANG_CODE),
+      'Points that show where things happen most.' => __('Points that show where things happen most.', GMP_LANG_CODE),
+      'Path router' => __('Path router', GMP_LANG_CODE),
+      'A route between the points of the map.' => __('A route between the points of the map.', GMP_LANG_CODE),
+    ];
+    // Only the texts that differ are sent to the page
+    return array_filter(
+      $texts,
+      function ($value, $key) {
+        return $value !== $key;
+      },
+      ARRAY_FILTER_USE_BOTH,
+    );
+  }
   public function getControlsPositions()
   {
     return [

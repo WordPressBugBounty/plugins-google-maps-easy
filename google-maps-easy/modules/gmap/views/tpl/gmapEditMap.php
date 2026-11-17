@@ -17,7 +17,7 @@ if ($this->isPro) {
 <section>
 	<div class="supsystic-item supsystic-panel">
 		<div id="containerWrapper">
-			<div class="supsistic-half-side-box" style="position: relative;">
+			<div class="supsistic-half-side-box gmp-ed-head" style="position: relative;">
 				<select name="shortcode_example" id="gmpCopyTextCodeExamples" style="width: 35%; height: 32px; float: left; margin: 0; font-size: 16px;">
 					<option value="shortcode"><?php _e('Map shortcode', GMP_LANG_CODE); ?></option>
 					<option value="php_code"><?php _e('PHP code', GMP_LANG_CODE); ?></option>
@@ -1558,7 +1558,7 @@ if ($this->isPro) {
 												<div class="gmpSubOpt" data-type="rounded_edges" style="display: none; margin-top: 10px;">
 													<?php echo htmlGmp::wpKsesHtml(
                htmlGmp::checkboxHiddenVal('map_opts[marker_infownd_hide_close_btn]', [
-                 'value' => $this->editMap && isset($this->map['params']['marker_infownd_hide_close_btn']) ? esc_attr($this->map['params']['marker_infownd_hide_close_btn']) : true,
+                 'value' => $this->editMap && isset($this->map['params']['marker_infownd_hide_close_btn']) ? esc_attr($this->map['params']['marker_infownd_hide_close_btn']) : (bool) $this->isPro,
                  'attrs' => 'class="gmpProOpt" id="map_opts_marker_infownd_hide_close_btn"',
                ]),
              ); ?>
@@ -2767,7 +2767,8 @@ if ($this->isPro) {
 					<?php if ($this->isPro) { ?>
 						<div id="gmpPathRouterMap" style="width: 100%; height: 500px; display:none;"></div>
 					<?php } ?>
-					<div id="gmpMapPreview" style="width: 100%; height: 350px;"></div>
+					<?php // 440px: Google lets an info window be the map height minus ~177px, so a window with a photo fits whole ?>
+					<div id="gmpMapPreview" style="width: 100%; height: 440px;"></div>
 					<div class="gmpMapProControlsCon" id="gmpMapProControlsCon_<?php echo esc_attr($this->viewId); ?>">
 						<?php dispatcherGmp::doAction('addAdminMapBottomControls', $this->editMap ? $this->map : []); ?>
 					</div>
@@ -2908,7 +2909,7 @@ if ($this->isPro) {
 	</div>
 </section>
 <!--Icons Wnd-->
-<div id="gmpIconsWnd" style="display: none;">
+<div id="gmpIconsWnd" style="display: none;" title="<?php echo esc_attr__('Choose Icon', GMP_LANG_CODE); ?>">
 	<ul class="iconsList">
 		<?php foreach ($this->icons as $icon) { ?>
 			<?php if (!in_array($icon['title'], ['marker', 'flag', 'pin', 'star'], true)): ?>

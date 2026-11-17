@@ -1,9 +1,10 @@
 === Easy Google Maps by Supsystic – Custom Markers, Clustering & Map Themes ===
 Contributors: supsysticcom
 Tags: google maps, google map, maps, map, map markers
+Requires at least: 5.9
 Tested up to: 7.1
 Requires PHP: 7.3
-Stable tag: 1.16.1
+Stable tag: 1.17.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -151,22 +152,33 @@ Please report security issues through the [Patchstack Vulnerability Disclosure P
 
 == Screenshots ==
 
-1. Google Map with custom markers and info windows.
-2. Markers shown in an image slider next to the map (Pro).
-3. Map with figures and a heatmap layer (Pro).
-4. Marker lists that help visitors find a location faster (Pro).
-5. Marker clustering groups nearby markers as you zoom out.
-6. KML layers with a KML filter (Pro).
-7. Route through several points with step-by-step directions, alternate routes and a traffic layer (Pro).
-8. Visitors adding markers from the front end (Pro).
-9. Social share buttons and the Get Direction feature (Pro).
-10. Map themes to match your site design.
-11. Map settings in the admin area.
-12. Marker settings: description with links, images and video.
+1. The map editor: grouped tabs, a search for any option, switches and map styles with a live preview.
+2. A KML layers filter next to the map: visitors switch whole layers and single places on and off.
+3. A store locator map with photos in the info window, a marker slider under the map and the same map on a phone.
+4. Info windows with photos, text, links and a Get Direction button, and a slider of your places under the map.
+5. Colored marker categories with a filter next to the map.
+6. One editor for the whole map: the settings in clear cards next to the live preview.
+7. Markers with rich descriptions, custom icons, address search and categories.
+8. Zones, heatmaps, KML layers and routes on the map.
+9. Path Router (PRO): add the stops in any order, Google finds the shortest trip and draws it with a numbered, titled marker on every stop.
+10. 300+ map styles to match your brand.
+11. Responsive maps on phones, with their own zoom and a marker slider you can swipe.
 
 == Changelog ==
 
 = 2026 =
+
+= 1.17.0 — November 15, 2026 =
+
+* A completely new look: the map editor, settings and every dialog are cleaner and easier to use, in the same style as our other plugins.
+* The map editor now groups its options into tabs with cards and a search, so any setting is a click away; on and off options are simple switches.
+* Settings, Import / Export and the Overview are rebuilt as clear cards, with a full Free vs Pro comparison and prices on the Overview.
+* Every Pro option now explains what it does in its own window, with a picture, before you decide.
+* Cleaner info windows: the close button sits next to the title, and photos fit the window with even margins and keep their proportions.
+* A bigger map preview in the editor, so an info window with a photo fits whole; the editor page no longer jumps while you scroll.
+* Marker categories and user roles are picked as tags, and the icon picker shows the icons as tiles.
+* Fixed the close button missing from info windows on free maps.
+* Your existing maps, markers and settings stay exactly as they were, so updating is safe.
 
 = 1.16.1 — October 30, 2026 =
 

@@ -1,0 +1,780 @@
+/* Map editor in the look of the Data Tables and Photo Gallery editors: tabs as pills, group tabs, search, cards and
+   switches (see js/admin.gmap.settings-ui.js). Only the look: the fields and their rows are the same. */
+
+.supsystic-plugin {
+  --gmp-ink: #0f172a;
+  --gmp-text: #334155;
+  --gmp-muted: #64748b;
+  --gmp-line: #e2e8f0;
+  --gmp-line-soft: #f1f5f9;
+  --gmp-surface: #f8fafc;
+  --gmp-accent: #0e8a93;
+  --gmp-accent-soft: #e6f6f7;
+  --gmp-navy: linear-gradient(145deg, #26384c 0%, #1d2b3c 100%);
+  --gmp-brand: linear-gradient(135deg, #4ae8ea 0%, #0e8a93 100%);
+  --gmp-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px -8px rgba(15, 23, 42, 0.1);
+}
+
+/* ---------- Head: shortcode switcher, a white card as in Ultimate Maps ---------- */
+.supsystic-plugin #containerWrapper > .gmp-ed-head {
+  box-sizing: border-box;
+  display: flex;
+  float: none;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 100%;
+  margin: 4px 0 2px;
+  padding: 12px 16px;
+  border: 1px solid var(--gmp-line);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: var(--gmp-shadow);
+}
+.supsystic-plugin #gmpCopyTextCodeExamples {
+  flex: none;
+  float: none !important;
+  width: auto !important;
+  min-width: 150px;
+  height: 34px !important;
+  margin: 0 !important;
+  font-size: 13px !important;
+}
+.supsystic-plugin #containerWrapper input.gmpMapShortCodeShell {
+  flex: 1 1 260px;
+  float: none !important;
+  width: auto !important;
+  min-width: 0;
+  height: 34px !important;
+  margin: 0 !important;
+  border: 1px solid var(--gmp-line);
+  border-radius: 8px;
+  background: var(--gmp-surface);
+  color: var(--gmp-ink);
+  font-family: Consolas, Monaco, monospace;
+  font-size: 12.5px;
+  text-align: left !important;
+}
+
+/* The content of each editor tab starts at the left edge of the page content, as on the other pages (the old
+   frame gave it 10px of its own on each side) */
+#gmpMapPropertiesTabs.gmp-mapui-tabs .gmpTabContent {
+  padding-right: 0;
+  padding-left: 0;
+}
+
+/* ---------- The tabs of the editor (Map, Markers, Figures, Heatmap, Path Router) as pills ---------- */
+#gmpMapPropertiesTabs.gmp-mapui-tabs .nav-tab-wrapper {
+  display: inline-flex !important;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 14px 0 16px !important;
+  padding: 4px !important;
+  border: 1px solid var(--gmp-line) !important;
+  border-radius: 12px;
+  background: #fff;
+  line-height: 1;
+}
+#gmpMapPropertiesTabs.gmp-mapui-tabs a.nav-tab {
+  display: inline-flex;
+  align-items: center;
+  float: none;
+  height: 34px;
+  margin: 0 !important;
+  padding: 0 12px !important;
+  border: 0 !important;
+  border-radius: 9px;
+  background: none !important;
+  box-shadow: none !important;
+  color: var(--gmp-text) !important;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+}
+#gmpMapPropertiesTabs.gmp-mapui-tabs a.nav-tab p {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 13px !important;
+  font-weight: 600;
+  line-height: 1;
+}
+#gmpMapPropertiesTabs.gmp-mapui-tabs a.nav-tab p .fa {
+  color: var(--gmp-muted);
+  font-size: 14px !important;
+}
+#gmpMapPropertiesTabs.gmp-mapui-tabs a.nav-tab:not(.nav-tab-active):hover {
+  background: var(--gmp-line-soft) !important;
+  color: var(--gmp-ink) !important;
+}
+#gmpMapPropertiesTabs.gmp-mapui-tabs a.nav-tab.nav-tab-active {
+  background: var(--gmp-navy) !important;
+  color: #fff !important;
+}
+#gmpMapPropertiesTabs.gmp-mapui-tabs a.nav-tab.nav-tab-active p .fa {
+  color: #7ff8ef;
+}
+/* "New" inside the Markers and Figures tabs: a small chip */
+#gmpMapPropertiesTabs.gmp-mapui-tabs a.nav-tab p button.button {
+  height: 22px !important;
+  min-height: 22px !important;
+  margin: 0 0 0 2px !important;
+  padding: 0 8px !important;
+  border-radius: 6px !important;
+  font-size: 11px;
+  font-weight: 700;
+}
+#gmpMapPropertiesTabs.gmp-mapui-tabs a.nav-tab.nav-tab-active p button.button {
+  border-color: rgba(255, 255, 255, 0.25) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #fff !important;
+}
+
+/* ---------- Group tabs and search of the Map tab ---------- */
+#gmpMapForm.gmp-mapui .gmp-mapui-nav {
+  position: sticky;
+  top: var(--wp-admin--admin-bar--height, 32px);
+  z-index: 30;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  margin: 0 0 14px;
+  padding: 6px;
+  border: 1px solid var(--gmp-line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--gmp-shadow);
+  -webkit-backdrop-filter: saturate(1.4) blur(8px);
+  backdrop-filter: saturate(1.4) blur(8px);
+}
+#gmpMapForm.gmp-mapui .gmp-mapui-groups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+#gmpMapForm.gmp-mapui .gmp-mapui-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  margin: 0;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--gmp-text);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+#gmpMapForm.gmp-mapui .gmp-mapui-group .fa {
+  color: var(--gmp-muted);
+}
+#gmpMapForm.gmp-mapui .gmp-mapui-group:hover {
+  background: var(--gmp-line-soft);
+  color: var(--gmp-ink);
+}
+#gmpMapForm.gmp-mapui .gmp-mapui-group:focus-visible {
+  outline: 2px solid var(--gmp-accent);
+  outline-offset: 1px;
+}
+#gmpMapForm.gmp-mapui .gmp-mapui-group.is-active {
+  background: var(--gmp-navy);
+  color: #fff;
+}
+#gmpMapForm.gmp-mapui .gmp-mapui-group.is-active .fa {
+  color: #7ff8ef;
+}
+#gmpMapForm.gmp-mapui.is-searching .gmp-mapui-group.is-active {
+  background: none;
+  color: var(--gmp-text);
+}
+#gmpMapForm.gmp-mapui.is-searching .gmp-mapui-group.is-active .fa {
+  color: var(--gmp-muted);
+}
+#gmpMapForm.gmp-mapui .gmp-mapui-search {
+  position: relative;
+  flex: 1 1 160px;
+  max-width: 240px;
+  margin: 0;
+}
+#gmpMapForm.gmp-mapui .gmp-mapui-search .fa {
+  position: absolute;
+  top: 50%;
+  left: 11px;
+  transform: translateY(-50%);
+  color: var(--gmp-muted);
+  pointer-events: none;
+}
+.supsystic-plugin #gmpMapForm.gmp-mapui .gmp-mapui-search input[type='search'] {
+  width: 100%;
+  height: 32px;
+  min-height: 32px;
+  margin: 0;
+  padding: 0 10px 0 32px;
+  border: 1px solid var(--gmp-line);
+  border-radius: 10px;
+  background: var(--gmp-surface);
+  box-shadow: none;
+  color: var(--gmp-ink);
+  font-size: 13px;
+}
+.supsystic-plugin #gmpMapForm.gmp-mapui .gmp-mapui-search input[type='search']:focus {
+  border-color: var(--gmp-accent);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(14, 138, 147, 0.15);
+}
+
+/* ---------- Group tabs: one frame, no group alone in a row (as in Ultimate Maps) ----------
+   One row when all seven fit (the column is 714px+ inside), else even rows of 4 + 3, else (a narrow column, phones)
+   one row that scrolls sideways. The search has its own row under the tabs. Widths are of the inner box of the frame. */
+#gmpMapForm.gmp-mapui .gmp-mapui-nav {
+  container: gmpmapuinav / inline-size;
+}
+#gmpMapForm.gmp-mapui .gmp-mapui-groups {
+  flex: 1 1 100%;
+  min-width: 0;
+}
+#gmpMapForm.gmp-mapui .gmp-mapui-group {
+  justify-content: center;
+  white-space: nowrap;
+}
+#gmpMapForm.gmp-mapui .gmp-mapui-search {
+  flex: 1 1 100%;
+  max-width: none;
+}
+/* The search field inside the frame of the tabs: a soft field, not a second frame */
+.supsystic-plugin #gmpMapForm.gmp-mapui .gmp-mapui-search input[type='search'] {
+  border-color: transparent;
+}
+.supsystic-plugin #gmpMapForm.gmp-mapui .gmp-mapui-search input[type='search']:focus {
+  border-color: var(--gmp-accent);
+}
+@container gmpmapuinav (max-width: 399px) {
+  #gmpMapForm.gmp-mapui .gmp-mapui-groups {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+  #gmpMapForm.gmp-mapui .gmp-mapui-group {
+    flex: 0 0 auto;
+  }
+  /* More groups past the edge: that edge fades out */
+  #gmpMapForm.gmp-mapui .gmp-mapui-groups.is-more-right {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent);
+  }
+  #gmpMapForm.gmp-mapui .gmp-mapui-groups.is-more-left {
+    -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 36px), transparent);
+    mask-image: linear-gradient(to left, #000 calc(100% - 36px), transparent);
+  }
+  #gmpMapForm.gmp-mapui .gmp-mapui-groups.is-more-left.is-more-right {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 36px, #000 calc(100% - 36px), transparent);
+    mask-image: linear-gradient(to right, transparent, #000 36px, #000 calc(100% - 36px), transparent);
+  }
+}
+@container gmpmapuinav (min-width: 400px) and (max-width: 713px) {
+  #gmpMapForm.gmp-mapui .gmp-mapui-groups {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(max-content, 1fr));
+    gap: 4px 2px;
+  }
+  #gmpMapForm.gmp-mapui .gmp-mapui-group {
+    min-width: 0;
+    padding: 0 6px;
+  }
+}
+@container gmpmapuinav (min-width: 714px) {
+  #gmpMapForm.gmp-mapui .gmp-mapui-groups {
+    flex-wrap: nowrap;
+  }
+  #gmpMapForm.gmp-mapui .gmp-mapui-group {
+    flex: 1 1 auto;
+  }
+}
+#gmpMapForm.gmp-mapui .gmp-mapui-empty {
+  margin: 0 0 16px;
+  padding: 28px;
+  border: 1px dashed var(--gmp-line);
+  border-radius: 14px;
+  color: var(--gmp-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+/* Only the active group, or every match while searching */
+#gmpMapForm.gmp-mapui .gmp-mc.gmp-mc-off {
+  display: none;
+}
+#gmpMapForm.gmp-mapui.is-searching .gmp-mc.gmp-mc-off {
+  display: block;
+}
+#gmpMapForm.gmp-mapui.is-searching .gmp-mc.gmp-mc-miss,
+#gmpMapForm.gmp-mapui .gmp-mc.gmp-mc-empty,
+#gmpMapForm.gmp-mapui .gmp-row-miss,
+#gmpMapForm.gmp-mapui table.gmp-mc-emptied,
+#gmpMapForm.gmp-mapui .gmp-mc-oldhead {
+  display: none !important;
+}
+/* The old "Extended options" shell is empty now: no room left for it */
+#gmpMapForm.gmp-mapui #gmpExtendOptsShell {
+  margin: 0;
+  padding: 0;
+}
+
+/* ---------- Cards ---------- */
+.supsystic-plugin .gmp-mc {
+  box-sizing: border-box;
+  margin: 0 0 14px;
+  padding: 14px 18px 6px;
+  border: 1px solid var(--gmp-line);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: var(--gmp-shadow);
+  color: var(--gmp-text);
+}
+.supsystic-plugin .gmp-mc-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  margin: 0 0 4px;
+  padding: 0 0 12px;
+  border-bottom: 1px solid var(--gmp-line);
+}
+.supsystic-plugin .gmp-mc-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: var(--gmp-accent-soft);
+  color: var(--gmp-accent);
+  font-size: 14px;
+}
+.supsystic-plugin .gmp-mc-head h3 {
+  margin: 0;
+  padding: 0;
+  color: var(--gmp-ink);
+  font-size: 14.5px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.supsystic-plugin .gmp-mc-head p {
+  margin: 2px 0 0 !important;
+  color: var(--gmp-muted);
+  font-size: 12px;
+  line-height: 1.45;
+  white-space: normal !important;
+}
+.supsystic-plugin .gmp-mc table.gmp-mc-table {
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+}
+.supsystic-plugin .gmp-mc table.gmp-mc-table > tbody > tr {
+  border: 0 !important;
+}
+.supsystic-plugin .gmp-mc table.gmp-mc-table > tbody > tr + tr > th,
+.supsystic-plugin .gmp-mc table.gmp-mc-table > tbody > tr + tr > td {
+  border-top: 1px solid var(--gmp-line-soft);
+}
+.supsystic-plugin .gmp-mc .form-table th {
+  width: 168px;
+  padding: 11px 14px 11px 0 !important;
+  color: var(--gmp-text);
+  font-size: 13px;
+  font-weight: 600 !important;
+  line-height: 1.4;
+  vertical-align: top;
+}
+.supsystic-plugin .gmp-mc .form-table td {
+  padding: 8px 0 !important;
+  color: var(--gmp-text);
+  font-size: 13px;
+  line-height: 1.45;
+  vertical-align: top;
+}
+.supsystic-plugin .gmp-mc .form-table th label,
+.supsystic-plugin .gmp-mc .form-table th label.label-big {
+  color: inherit;
+  font-size: inherit !important;
+  font-weight: inherit;
+}
+/* Some labels of the old layout float with a fixed width: in a card the "?" follows the text and nothing flows
+   around the label */
+.supsystic-plugin .gmp-mc .form-table th > label {
+  float: none !important;
+  display: inline !important;
+  width: auto !important;
+}
+/* The "?" of a row sits right after its label, not at the far edge */
+.supsystic-plugin .gmp-mc .form-table th .fa-question.supsystic-tooltip {
+  float: none !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin: 0 0 0 5px;
+  border: 1px solid var(--gmp-line);
+  border-radius: 50%;
+  color: var(--gmp-muted);
+  font-size: 9px;
+  line-height: 1;
+  vertical-align: 1px;
+}
+/* Rows of two options (Draggable / Mouse wheel, Double click / Static) keep their nested table */
+.supsystic-plugin .gmp-mc .form-table td[colspan] .form-table {
+  margin: 0;
+}
+.supsystic-plugin .gmp-mc .form-table td[colspan] .form-table th {
+  width: 150px;
+}
+.supsystic-plugin .gmp-mc .form-table td[colspan] .form-table td {
+  vertical-align: top;
+}
+.supsystic-plugin .gmp-mc .form-table td[colspan] .form-table tr + tr > th,
+.supsystic-plugin .gmp-mc .form-table td[colspan] .form-table tr + tr > td {
+  border-top: 1px solid var(--gmp-line-soft);
+}
+.supsystic-plugin .gmp-mc .sup-col {
+  box-sizing: border-box;
+}
+.supsystic-plugin .gmp-mc .gmpMapPosChangeSelect {
+  max-width: calc(100% - 24px);
+}
+.supsystic-plugin .gmp-mc .fa-arrows {
+  color: var(--gmp-muted);
+}
+
+/* ---------- Switches instead of checkboxes (the input itself, so every script still sees a checkbox) ---------- */
+.supsystic-plugin .gmp-mc input[type='checkbox'].gmp-switch {
+  position: relative;
+  flex: none;
+  width: 36px;
+  min-width: 36px;
+  height: 20px;
+  margin: 0 8px 0 0;
+  border: 0;
+  border-radius: 999px;
+  background: #cbd5e1;
+  background-image: none;
+  vertical-align: middle;
+  transition: background-color 0.18s;
+}
+.supsystic-plugin .gmp-mc input[type='checkbox'].gmp-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.3);
+  transition: transform 0.18s cubic-bezier(0.3, 0.7, 0.4, 1);
+  pointer-events: none;
+}
+.supsystic-plugin .gmp-mc input[type='checkbox'].gmp-switch:hover {
+  background-color: #b6c2d1;
+}
+.supsystic-plugin .gmp-mc input[type='checkbox'].gmp-switch:checked {
+  background: var(--gmp-accent);
+}
+.supsystic-plugin .gmp-mc input[type='checkbox'].gmp-switch:checked::after {
+  transform: translateX(16px);
+}
+.supsystic-plugin .gmp-mc input[type='checkbox'].gmp-switch:focus-visible {
+  box-shadow: 0 0 0 3px rgba(14, 138, 147, 0.25);
+}
+.supsystic-plugin .gmp-mc input[type='checkbox'].gmp-switch:disabled {
+  opacity: 0.5;
+}
+@media (prefers-reduced-motion: reduce) {
+  .supsystic-plugin .gmp-mc input[type='checkbox'].gmp-switch,
+  .supsystic-plugin .gmp-mc input[type='checkbox'].gmp-switch::after {
+    transition: none;
+  }
+}
+
+/* ---------- Buttons inside the cards are plain: Save of the right column is the main action ---------- */
+#gmpMapPropertiesTabs .gmp-mc .button.button-primary {
+  border-color: var(--gmp-line) !important;
+  background: #fff !important;
+  color: var(--gmp-text) !important;
+}
+#gmpMapPropertiesTabs .gmp-mc .button.button-primary:hover,
+#gmpMapPropertiesTabs .gmp-mc .button.button-primary:focus {
+  border-color: var(--gmp-accent) !important;
+  color: var(--gmp-accent) !important;
+}
+
+/* ---------- Right column: preview, Save / Delete, lists ---------- */
+.supsystic-plugin #gmpMapRightStickyBar #gmpMapPreview {
+  overflow: hidden;
+  border: 1px solid var(--gmp-line);
+  border-radius: 14px;
+}
+.supsystic-plugin #gmpMapRightStickyBar .gmpControlBtns {
+  display: flex;
+  gap: 8px;
+  margin: 10px 0;
+}
+.supsystic-plugin #gmpMapRightStickyBar .gmpControlBtns[style*='display: none'] {
+  display: none !important;
+}
+.supsystic-plugin #gmpMapRightStickyBar .gmpControlBtns .sup-col {
+  float: none;
+  flex: 1 1 0;
+  width: auto;
+  padding: 0;
+}
+.supsystic-plugin #gmpMapRightStickyBar .gmpControlBtns > div[style*='clear'] {
+  display: none;
+}
+.supsystic-plugin #gmpMapRightStickyBar .gmpControlBtns .button {
+  width: 100%;
+  height: 38px;
+  min-height: 38px;
+}
+/* Save / Build: the main action of the editor; Delete: plain, red on hover */
+.supsystic-plugin #gmpMapRightStickyBar .gmpControlBtns .sup-col:first-child .button-primary {
+  border-color: transparent !important;
+  background: var(--gmp-navy) !important;
+  color: #fff !important;
+}
+.supsystic-plugin #gmpMapRightStickyBar .gmpControlBtns .sup-col:first-child .button-primary:hover,
+.supsystic-plugin #gmpMapRightStickyBar .gmpControlBtns .sup-col:first-child .button-primary:focus {
+  background: #17222e !important;
+  color: #fff !important;
+}
+.supsystic-plugin #gmpMapRightStickyBar .gmpControlBtns .sup-col + .sup-col .button-primary {
+  border-color: var(--gmp-line) !important;
+  background: #fff !important;
+  color: var(--gmp-text) !important;
+}
+.supsystic-plugin #gmpMapRightStickyBar .gmpControlBtns .sup-col + .sup-col .button-primary:hover,
+.supsystic-plugin #gmpMapRightStickyBar .gmpControlBtns .sup-col + .sup-col .button-primary:focus {
+  border-color: #dc2626 !important;
+  color: #dc2626 !important;
+}
+.supsystic-plugin #gmpMapRightStickyBar .gmpControlBtns #gmpRouteSaveBtn.button-primary {
+  border-color: transparent !important;
+  background: var(--gmp-navy) !important;
+  color: #fff !important;
+}
+.supsystic-plugin #gmpMapRightStickyBar #gmpMarkersSearchInput,
+.supsystic-plugin #gmpMapRightStickyBar #gmpShapesSearchInput {
+  margin: 0 0 8px !important;
+}
+.supsystic-plugin #gmpMapRightStickyBar .gmpMapListsTabs {
+  overflow: hidden;
+  border: 1px solid var(--gmp-line);
+  border-radius: 12px 12px 0 0;
+}
+
+/* ---------- Narrow screens: one column ---------- */
+@media screen and (max-width: 1180px) {
+  .supsystic-plugin .gmp-mc .form-table th {
+    width: 140px;
+  }
+}
+@media screen and (max-width: 782px) {
+  .supsystic-plugin .gmp-mc .form-table th,
+  .supsystic-plugin .gmp-mc .form-table td {
+    display: block;
+    width: auto;
+  }
+  .supsystic-plugin .gmp-mc .form-table td {
+    padding-top: 0 !important;
+  }
+}
+
+/* ---------- Path Router (PRO): its own buttons in the look of the other buttons ---------- */
+#gmpMapPropertiesTabs .gmpRouterAbout {
+  margin: 10px 0 6px;
+  color: var(--gmp-text);
+  font-size: 13px;
+  letter-spacing: 0;
+  line-height: 1.55;
+  white-space: normal;
+}
+#gmpMapPropertiesTabs .gmpRouterBtn,
+#gmpMapPropertiesTabs .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  min-height: 32px;
+  margin-top: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--gmp-line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--gmp-text);
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+#gmpMapPropertiesTabs .gmpRouterBtn:hover,
+#gmpMapPropertiesTabs .btn:hover {
+  border-color: var(--gmp-accent);
+  color: var(--gmp-accent);
+}
+#gmpMapPropertiesTabs .btn.btnAddOnMap .fa {
+  color: var(--gmp-accent);
+}
+#gmpMapPropertiesTabs .btn.btnDeleteAddress:hover {
+  border-color: #dc2626;
+  color: #dc2626;
+}
+#gmpMapPropertiesTabs .waypointRouterRow {
+  border-color: var(--gmp-line);
+  border-radius: 10px;
+}
+/* Save Route is the main action of the router; Build Route draws it on the preview */
+.supsystic-plugin #gmpMapRightStickyBar #gmpRouterMainBtns .sup-col:first-child .button-primary {
+  border-color: var(--gmp-line) !important;
+  background: #fff !important;
+  color: var(--gmp-text) !important;
+}
+.supsystic-plugin #gmpMapRightStickyBar #gmpRouterMainBtns .sup-col:first-child .button-primary:hover {
+  border-color: var(--gmp-accent) !important;
+  color: var(--gmp-accent) !important;
+}
+.supsystic-plugin #gmpMapRightStickyBar #gmpRouterMainBtns #gmpRouteSaveBtn.button-primary:hover {
+  border-color: transparent !important;
+  background: #17222e !important;
+  color: #fff !important;
+}
+/* KML layer boxes: the accent instead of the old blue edge */
+#gmpMapPropertiesTabs .gmpKmlFileRow {
+  border: 1px solid var(--gmp-line) !important;
+  border-radius: 10px;
+}
+
+/* ---------- Rows of a control and its position (Map type, Zoom, Street view): side by side while they fit, then one
+   under the other; the selects keep their text readable instead of shrinking to a letter ---------- */
+.supsystic-plugin .gmp-mc .form-table td > .sup-col.sup-w-50,
+.supsystic-plugin .gmp-mc .form-table td > div:not([class]) > .sup-col.sup-w-50 {
+  float: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: auto;
+  max-width: 100%;
+  min-height: 34px;
+  margin: 0 12px 6px 0;
+  padding: 0;
+  vertical-align: top;
+}
+.supsystic-plugin .gmp-mc .form-table td > .sup-col.sup-w-50 select,
+.supsystic-plugin .gmp-mc .form-table td > div:not([class]) > .sup-col.sup-w-50 select {
+  flex: 0 1 auto;
+  width: auto !important;
+  min-width: 0;
+  max-width: 100%;
+}
+.supsystic-plugin .gmp-mc .form-table td > .sup-col.sup-w-50 .gmpProOptMiniLabel,
+.supsystic-plugin .gmp-mc .form-table td > div:not([class]) > .sup-col.sup-w-50 .gmpProOptMiniLabel {
+  flex-basis: 100%;
+}
+.supsystic-plugin .gmp-mc .form-table td > .sup-col.sup-w-50:has(.gmpProOptMiniLabel),
+.supsystic-plugin .gmp-mc .form-table td > div:not([class]) > .sup-col.sup-w-50:has(.gmpProOptMiniLabel) {
+  flex-wrap: wrap;
+}
+
+/* A narrow card (the left column at 1024 px and below, phones): the label above its field, every row full width */
+.supsystic-plugin .gmp-mc {
+  container-type: inline-size;
+}
+@container (max-width: 470px) {
+  .supsystic-plugin .gmp-mc .form-table th,
+  .supsystic-plugin .gmp-mc .form-table td {
+    display: block;
+    width: auto !important;
+  }
+  .supsystic-plugin .gmp-mc .form-table th {
+    padding-bottom: 6px !important;
+  }
+  .supsystic-plugin .gmp-mc .form-table td {
+    padding-top: 0 !important;
+  }
+  .supsystic-plugin .gmp-mc table.gmp-mc-table > tbody > tr + tr > td,
+  .supsystic-plugin .gmp-mc .form-table td[colspan] .form-table tr > td {
+    border-top: 0;
+  }
+  .supsystic-plugin .gmp-mc .form-table td[colspan] .form-table th {
+    width: auto;
+  }
+}
+
+/* The shortcode field shrinks with the screen instead of running past it */
+.supsystic-plugin #containerWrapper > .supsistic-half-side-box:first-child {
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+.supsystic-plugin #containerWrapper input.gmpMapShortCodeShell {
+  min-width: 0;
+  max-width: 560px;
+}
+
+/* Rows of two options (Draggable / Mouse wheel, Double click / Static): the nested table becomes a grid of
+   label | field pairs, so every label lines up with the labels of the other rows and a PRO plaque has room */
+.supsystic-plugin .gmp-mc .form-table td[colspan] > .form-table > tbody > tr {
+  display: grid;
+  grid-template-columns: 182px minmax(0, 1fr);
+}
+.supsystic-plugin .gmp-mc .form-table td[colspan] > .form-table > tbody > tr > th {
+  width: auto;
+}
+.supsystic-plugin .gmp-mc .form-table td[colspan] > .form-table > tbody > tr > :nth-child(n + 3) {
+  border-top: 1px solid var(--gmp-line-soft);
+}
+@container (max-width: 470px) {
+  .supsystic-plugin .gmp-mc .form-table td[colspan] > .form-table > tbody > tr {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .supsystic-plugin .gmp-mc .form-table td[colspan] > .form-table > tbody > tr > td:nth-child(n + 3) {
+    border-top: 0;
+  }
+}
+/* The size rows (Map Width, Map Height): the number and its units on one line */
+.supsystic-plugin .gmp-mc .sup-col.sup-w-25,
+.supsystic-plugin .gmp-mc .sup-col.sup-w-75,
+.supsystic-plugin .gmp-mc .gmpMainHeightOpts,
+.supsystic-plugin .gmp-mc .gmpMainHeightOpts > .sup-col {
+  width: auto !important;
+  min-width: 0;
+  padding: 0 14px 0 0 !important;
+}
+.supsystic-plugin .gmp-mc .sup-col.sup-w-25 input[type='number'],
+.supsystic-plugin .gmp-mc .gmpMainHeightOpts input[type='number'] {
+  width: 96px !important;
+}
+.supsystic-plugin .gmp-mc .sup-col.sup-w-75 label,
+.supsystic-plugin .gmp-mc .gmpMainHeightOpts label {
+  display: inline-flex;
+  align-items: center;
+  top: 0 !important;
+  min-height: 34px;
+}
+/* "Get 300+ Themes with PRO" opens the window of the themes */
+.supsystic-plugin .gmp-mc a.gmp-themes-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+}

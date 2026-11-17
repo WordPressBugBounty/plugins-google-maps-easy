@@ -4,7 +4,7 @@
  * Plugin Name: Easy Google Maps
  * Plugin URI: https://supsystic.com/plugins/google-maps-plugin/
  * Description: Google Maps with unlimited markers, custom icons, marker categories, clustering and map themes. Gutenberg block, Elementor widget, no coding.
- * Version: 1.16.1
+ * Version: 1.17.0
  * Author: supsystic.com
  * Author URI: https://supsystic.com
  * Text Domain: google-maps-easy

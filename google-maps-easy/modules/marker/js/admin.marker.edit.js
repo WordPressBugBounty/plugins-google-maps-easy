@@ -3,6 +3,17 @@ var g_gmpCurrentEditMarker = null,
   g_gmpTinyMceMarkerEditorUpdateBinded = false,
   g_gmpGrid = jQuery('#gmpMarkersListGrid');
 jQuery(document).ready(function () {
+  // Marker categories as a tag picker, as in Ultimate Maps (PRO did it before, without a hint: made again here)
+  if (jQuery.fn.chosen) {
+    var $markerCats = jQuery('#marker_opts_marker_group_id');
+    if ($markerCats.data('chosen')) {
+      $markerCats.chosen('destroy');
+    }
+    $markerCats.attr('data-placeholder', typeof toeLangGmp === 'function' ? toeLangGmp('Select categories') : 'Select categories').chosen({
+      disable_search_threshold: 10,
+      width: '100%',
+    });
+  }
   // Marker Link checkbox - toggles the #link_options submenu.
   // Bound here (not inline onclick) because wp_kses strips onclick= from admin output.
   jQuery('#marker_link').on('click', gmpAddLinkOptions);
@@ -35,8 +46,9 @@ jQuery(document).ready(function () {
         if (res.rows.length) {
           g_gmpMap.applyZoomTypeAdmin(); // Apply zoom type fit_bounds after all markers load in admin area
         }
-        _gmpResizeRightSidebar(jQuery('#gmpMarkersListGrid'));
+        // The search shows first: sized before it, the column got taller than the screen
         jQuery('#gmpMarkersSearchInput').show();
+        _gmpResizeRightSidebar(jQuery('#gmpMarkersListGrid'));
         // A reload (marker saved or removed) keeps the search
         gmpFilterMarkersList();
       },
@@ -560,6 +572,9 @@ function gmpInitIconsWnd() {
     dialodClasses = gmpGetDialogClasses();
 
   jQuery('#gmpMarkerIconBtn').click(function () {
+    // The icon of the marker is marked in the window
+    var curIconId = jQuery('#gmpMarkerForm input[name="marker_opts[icon]"]').val();
+    $container.find('.previewIcon').removeClass('is-current').filter('[data-id="' + curIconId + '"]').addClass('is-current');
     $container.addClass(dialodClasses.markerIcon);
     $container.dialog('open');
     return false;

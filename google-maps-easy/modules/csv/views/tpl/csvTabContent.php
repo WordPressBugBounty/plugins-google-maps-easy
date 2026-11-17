@@ -1,6 +1,24 @@
 <section>
-  <div class="supsystic-item supsystic-panel">
+  <div class="supsystic-item supsystic-panel gmp-form-page gmp-csv-page">
     <div id="containerWrapper">
+      <div class="gmp-page-head">
+        <div class="gmp-page-title">
+          <span class="gmp-page-icon"><i class="fa fa-exchange" aria-hidden="true"></i></span>
+          <div>
+            <h2><?php esc_html_e('Import / Export', GMP_LANG_CODE); ?></h2>
+            <p><?php esc_html_e('Move maps, markers, figures and heatmaps between sites with CSV files.', GMP_LANG_CODE); ?></p>
+          </div>
+        </div>
+      </div>
+      <div class="gmp-cards">
+      <div class="gmp-form-card">
+        <div class="gmp-form-card-head">
+          <span class="gmp-form-card-icon"><i class="fa fa-file-excel-o" aria-hidden="true"></i></span>
+          <div>
+            <h3><?php esc_html_e('Import and export', GMP_LANG_CODE); ?></h3>
+            <p><?php esc_html_e('Export saves a CSV file; Import adds the rows of a CSV file.', GMP_LANG_CODE); ?></p>
+          </div>
+        </div>
       <table class="form-table">
         <tr>
           <th scope="row">
@@ -100,7 +118,15 @@
           </td>
         </tr>
       </table>
-      <h3><?php _e('CSV Options', GMP_LANG_CODE); ?></h3>
+      </div>
+      <div class="gmp-form-card">
+        <div class="gmp-form-card-head">
+          <span class="gmp-form-card-icon"><i class="fa fa-sliders" aria-hidden="true"></i></span>
+          <div>
+            <h3><?php _e('CSV Options', GMP_LANG_CODE); ?></h3>
+            <p><?php esc_html_e('How the values of a CSV file are separated.', GMP_LANG_CODE); ?></p>
+          </div>
+        </div>
       <form id="gmpCsvForm">
         <table class="form-table no-border">
           <tr>
@@ -122,10 +148,14 @@
         <?php echo htmlGmp::hidden('action', ['value' => 'saveCsvOptions']); ?>
         <?php echo htmlGmp::defaultNonceForAdminPanel(); ?>
       </form>
-      <button id="gmpCsvSaveBtn" class="button">
+      <p class="gmp-card-actions">
+      <button id="gmpCsvSaveBtn" class="button button-primary">
         <i class="fa fa-save"></i>
         <?php _e('Save', GMP_LANG_CODE); ?>
       </button>
+      </p>
+      </div>
+      </div>
     </div>
   </div>
 </section>

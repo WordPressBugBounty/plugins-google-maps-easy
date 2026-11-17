@@ -40,6 +40,72 @@
 .gmp_map_opts .gm-style-iw > div:first-child {
   overflow: auto !important;
 }
+/* Pictures of a description fit the info window and keep their proportions (the rules above let images of the map
+   grow past their box: they are for the tiles) */
+.gmp_map_opts .gm-style-iw img,
+#gmpMapPreview .gm-style-iw img {
+  max-width: 100% !important;
+  height: auto !important;
+}
+/* A compact info window: no empty 48px row of Google above the title. The close button sits in the top right corner
+   on a square of the window color (core.gmap.js gives the row the color of the window), and the title leaves room
+   for it, so a long title wraps instead of running under the button */
+.gmp_map_opts .gm-style-iw-c,
+#gmpMapPreview .gm-style-iw-c {
+  padding-top: 12px !important;
+  padding-right: 0 !important;
+}
+/* 12px on both sides of the content: on the right the gutter of the scrollbar is the margin (Google's own is 18px
+   and some windows added 12px more), with a 4px thumb when the content scrolls */
+.gmp_map_opts .gm-style-iw-d::-webkit-scrollbar,
+#gmpMapPreview .gm-style-iw-d::-webkit-scrollbar {
+  width: 12px !important;
+}
+.gmp_map_opts .gm-style-iw-d::-webkit-scrollbar-thumb,
+#gmpMapPreview .gm-style-iw-d::-webkit-scrollbar-thumb {
+  border-width: 4px !important;
+}
+.gmp_map_opts .gm-style-iw-chr,
+#gmpMapPreview .gm-style-iw-chr {
+  position: absolute;
+  top: 8px;
+  right: 12px; /* on the right edge of the content, left of its scrollbar */
+  z-index: 2;
+  display: block;
+  border-radius: 6px;
+  background-color: inherit;
+}
+.gmp_map_opts .gm-style-iw-chr .gm-style-iw-ch,
+#gmpMapPreview .gm-style-iw-chr .gm-style-iw-ch {
+  display: none;
+}
+.gmp_map_opts .gm-style-iw-chr button.gm-ui-hover-effect,
+#gmpMapPreview .gm-style-iw-chr button.gm-ui-hover-effect {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 6px;
+  background: inherit !important;
+  opacity: 0.7;
+}
+.gmp_map_opts .gm-style-iw-chr button.gm-ui-hover-effect:hover,
+.gmp_map_opts .gm-style-iw-chr button.gm-ui-hover-effect:focus-visible,
+#gmpMapPreview .gm-style-iw-chr button.gm-ui-hover-effect:hover,
+#gmpMapPreview .gm-style-iw-chr button.gm-ui-hover-effect:focus-visible {
+  opacity: 1;
+}
+.gmp_map_opts .gm-style-iw-chr button.gm-ui-hover-effect > span,
+#gmpMapPreview .gm-style-iw-chr button.gm-ui-hover-effect > span {
+  width: 18px !important;
+  height: 18px !important;
+  margin: 0 !important;
+}
+.gmp_map_opts .gm-style-iw-c:has(.gm-style-iw-chr) .gmpInfoWindowtitle,
+#gmpMapPreview .gm-style-iw-c:has(.gm-style-iw-chr) .gmpInfoWindowtitle {
+  padding-right: 32px;
+}
 .gmp_map_opts img,
 .gmp_map_opts img {
   -webkit-box-shadow: none !important;
